@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+}
+
+ul {
+  margin: 4px;
+  padding: 0;
+  & > li {
+    list-style: none;
+    font-size: 12px;
+  }
+}
