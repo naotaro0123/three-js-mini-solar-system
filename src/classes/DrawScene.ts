@@ -20,7 +20,7 @@ export class DrawScene {
     window.addEventListener('resize', this.resizeCanvas);
 
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
-    this.camera.position.set(0, 5, 8);
+    this.camera.position.set(0, 5, 50);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -54,7 +54,6 @@ export class DrawScene {
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync(gltfPath);
     this.scene.add(gltf.scene);
-    console.log('#', this.scene);
   }
 
   render(): void {
