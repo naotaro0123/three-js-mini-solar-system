@@ -115,6 +115,7 @@ export class DrawScene {
   render(): void {
     this.renderer.render(this.scene, this.camera);
     this.controls.update();
+    this.composer.render();
 
     this.renderer.setAnimationLoop(() => this.render());
   }
