@@ -336,10 +336,22 @@ export class DrawScene {
       const earth = this.scene.getObjectByName(EARTH_NAME) as THREE.Group;
       const planet = earth.getObjectByName(PLANET_NAME) as THREE.Mesh;
       const atmosphere = earth.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
+      const moon = earth.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
+      earth.rotateY(0.001 * settings.accelerationOrbit);
       planet.rotateY(0.005 * settings.acceleration);
       atmosphere.rotateY(0.001 * settings.acceleration);
-      earth.rotateY(0.001 * settings.accelerationOrbit);
+      const time = performance.now();
+      const tiltAngle = (5 * Math.PI) / 180;
+
+      const { orbitRadius, orbitSpeed } = earthMoon[0];
+      const moonX = planet.position.x + orbitRadius * Math.cos(time * orbitSpeed);
+      const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
+      const moonZ =
+        planet.position.z + orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
+
+      moon.position.set(moonX, moonY, moonZ);
+      moon.rotateY(0.01);
     }
   }
 }
