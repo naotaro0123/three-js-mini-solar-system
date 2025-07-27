@@ -8,7 +8,14 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
-const SUN_MESH_NAME = 'SUN';
+const SUN_NAME = 'Sun';
+const EARTH_NAME = 'Earth';
+const PLANET_NAME = 'Planet';
+const PLANET_ORBIT_NAME = 'PlanetOrbit';
+const PLANET_RING_NAME = 'PlanetRing';
+const PLANET_SYSTEM_NAME = 'PlanetSystem';
+const PLANET_ATMO_SPHERE_NAME = 'PlanetAtmosphere';
+const PLANET_MOONS_NAME = 'PlanetMoons';
 
 const loadTexture = new THREE.TextureLoader();
 const settings = {
@@ -44,7 +51,7 @@ const createSunMesh = (scene: THREE.Scene): void => {
   const sunSize = 697 / 40; // 40 times smaller scale than earth
   const sunGeom = new THREE.SphereGeometry(sunSize, 32, 20);
   const sun = new THREE.Mesh(sunGeom, sunMat);
-  sun.name = SUN_MESH_NAME;
+  sun.name = SUN_NAME;
   scene.add(sun);
 
   //point light in the sun
@@ -58,7 +65,7 @@ type Ring = {
   texture: string;
 };
 const createPlanet = (
-  platenetName: string,
+  planetName: string,
   size: number,
   position: number,
   tilt: number,
@@ -85,9 +92,12 @@ const createPlanet = (
 
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
+  planet.name = PLANET_NAME;
   planet.position.x = position;
   planet.position.z = (tilt * Math.PI) / 180;
+
   const planetSystem = new THREE.Group();
+  planetSystem.name = PLANET_SYSTEM_NAME;
   planetSystem.add(planet);
 
   const orbitPath = new THREE.EllipseCurve(
@@ -108,6 +118,7 @@ const createPlanet = (
     opacity: 0.03,
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+  orbit.name = PLANET_ORBIT_NAME;
   orbit.rotation.x = Math.PI / 2;
   planetSystem.add(orbit);
 
@@ -118,6 +129,7 @@ const createPlanet = (
       side: THREE.DoubleSide,
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+    ringMesh.name = PLANET_RING_NAME;
     planetSystem.add(ringMesh);
     ringMesh.position.x = position;
     ringMesh.position.x = 0.5 * Math.PI;
@@ -134,10 +146,12 @@ const createPlanet = (
       depthWrite: false,
     });
     const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    atmosphereMesh.name = PLANET_ATMO_SPHERE_NAME;
     atmosphereMesh.rotation.z = 0.41;
     planet.add(atmosphereMesh);
   }
 
+  let moonIndex = 0;
   for (const moon of moons) {
     let moonMaterial: THREE.MeshStandardMaterial;
 
@@ -154,6 +168,8 @@ const createPlanet = (
     }
     const moonGeometry = new THREE.SphereGeometry(moon.size, 32, 20);
     const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+    moonMesh.name = `${PLANET_MOONS_NAME}_${moonIndex}`;
+    moonIndex++;
     const moonOrbitDistance = size * 1.5;
     moonMesh.position.set(moonOrbitDistance, 0, 0);
     planetSystem.add(moonMesh);
@@ -162,12 +178,12 @@ const createPlanet = (
 
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
-  planet3d.name = platenetName;
+  planet3d.name = planetName;
   return planet3d;
 };
 
 const createEarthMesh = (scene: THREE.Scene): void => {
-  const sun = scene.getObjectByName(SUN_MESH_NAME) as THREE.Mesh;
+  const sun = scene.getObjectByName(SUN_NAME) as THREE.Mesh;
   // Earth day/night effect shader material
   const earthMaterial = new THREE.ShaderMaterial({
     uniforms: {
@@ -207,7 +223,7 @@ const createEarthMesh = (scene: THREE.Scene): void => {
     `,
   });
   const earth = createPlanet(
-    'Earth',
+    EARTH_NAME,
     6.4,
     90,
     23,
@@ -308,5 +324,22 @@ export class DrawScene {
     this.composer.render();
 
     this.renderer.setAnimationLoop(() => this.render());
+    this.animate();
+  }
+
+  animate(): void {
+    const sun = this.scene.getObjectByName(SUN_NAME) as THREE.Mesh;
+    sun.rotateY(0.001 * settings.acceleration);
+
+    {
+      // planet3dがearth。コードコピーする時間違えないように
+      const earth = this.scene.getObjectByName(EARTH_NAME) as THREE.Group;
+      const planet = earth.getObjectByName(PLANET_NAME) as THREE.Mesh;
+      const atmosphere = earth.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
+
+      planet.rotateY(0.005 * settings.acceleration);
+      atmosphere.rotateY(0.001 * settings.acceleration);
+      earth.rotateY(0.001 * settings.accelerationOrbit);
+    }
   }
 }
