@@ -92,6 +92,7 @@ export class DrawScene {
       gui.add(settings, 'sunIntensity', 1, 10).onChange((value) => {
         (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
       });
+      gui.add(settings, 'getCurrentPosition').name('現在の地球の位置を取得');
     }
 
     const lightAmbient = new THREE.AmbientLight(0x222222, 6);
