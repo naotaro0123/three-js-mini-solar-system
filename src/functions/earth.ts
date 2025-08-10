@@ -1,16 +1,17 @@
 import * as THREE from 'three';
 import { createPlanet, earthMoon } from './planet-common';
+import { EARTH_SIZE } from './settings';
 
 const EARTH_NAME = 'Earth';
 
-export const createEarthMesh = (sunMesh: THREE.Mesh): THREE.Group => {
+export const createEarthMesh = (sunPosition: THREE.Vector3): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   // Earth day/night effect shader material
   const earthMaterial = new THREE.ShaderMaterial({
     uniforms: {
       dayTexture: { value: loadTexture.load('/images/earth_daymap.jpg') },
       nightTexture: { value: loadTexture.load('/images/earth_nightmap.jpg') },
-      sunPosition: { value: sunMesh.position },
+      sunPosition: { value: sunPosition },
     },
     vertexShader: `
         varying vec3 vNormal;
@@ -45,7 +46,7 @@ export const createEarthMesh = (sunMesh: THREE.Mesh): THREE.Group => {
   });
   const earthMesh = createPlanet(
     EARTH_NAME,
-    6.4,
+    EARTH_SIZE,
     90,
     23,
     earthMaterial,

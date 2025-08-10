@@ -28,10 +28,11 @@ export class DrawScene {
 
   constructor() {
     this.initEnvironment();
+    // 太陽のメッシュを作成
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
-
-    this.earthGroup = createEarthMesh(this.sunMesh);
+    // 地球と月のメッシュを作成
+    this.earthGroup = createEarthMesh(this.sunMesh.position);
     this.scene.add(this.earthGroup);
 
     window.addEventListener('resize', this.resizeCanvas);

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { settings } from './settings';
+import { MOON_SIZE, settings } from './settings';
 
 export const PLANET_NAME = 'Planet';
 const PLANET_ORBIT_NAME = 'PlanetOrbit';
@@ -23,7 +23,7 @@ export type EarthMoon = {
 };
 export const earthMoon: EarthMoon[] = [
   {
-    size: 1.6,
+    size: MOON_SIZE,
     texture: '/images/moonmap.jpg',
     bump: '/images/moonbump.jpg',
     orbitSpeed: 0.001 * settings.accelerationOrbit,
