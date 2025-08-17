@@ -9,8 +9,9 @@ type ResponseData = {
 // https://gemini.google.com/app/61be90ce2865bec9
 // TODO: ブラウザで実行時は返ってくるがFetchでエラーになる
 export const getCurrentPosition = async () => {
+  // https://ssd-api.jpl.nasa.gov/doc/horizons.html
   const url =
-    "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&CENTER='@sun'&START_TIME='2025-08-10'&STOP_TIME='2025-08-11'&STEP_SIZE='1 h'&VEC_TABLE='1'";
+    "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&CENTER='@sun'&START_TIME='2025-08-16'&STOP_TIME='2025-08-17'&STEP_SIZE='1 h'&VEC_TABLE='1'";
 
   try {
     const response = await fetch(url);
