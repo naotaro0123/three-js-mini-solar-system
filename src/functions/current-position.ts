@@ -7,6 +7,7 @@ type ResponseData = {
 };
 
 export const getCurrentPosition = async () => {
+  // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url =
     'http://localhost:3000/api/v1/earth-current-position?START_TIME=2025-08-17&STOP_TIME=2025-08-18';
 
