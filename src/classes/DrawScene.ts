@@ -25,6 +25,7 @@ export class DrawScene {
   composer!: EffectComposer;
   sunMesh!: THREE.Mesh;
   earthGroup!: THREE.Group;
+  isAnimating = settings.isAnimating;
 
   constructor() {
     this.initEnvironment();
@@ -92,6 +93,13 @@ export class DrawScene {
       gui.add(settings, 'sunIntensity', 1, 10).onChange((value) => {
         (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
       });
+      // アニメーションを再生/定時する
+      gui
+        .add(settings, 'isAnimating')
+        .name('アニメーション再生')
+        .onChange((value) => {
+          this.isAnimating = value;
+        });
       gui.add(settings, 'getCurrentPosition').name('現在の地球の位置を取得');
     }
 
@@ -112,7 +120,9 @@ export class DrawScene {
     this.composer.render();
 
     this.renderer.setAnimationLoop(() => this.render());
-    this.animate();
+    if (this.isAnimating) {
+      this.animate();
+    }
   }
 
   animate(): void {
@@ -138,6 +148,14 @@ export class DrawScene {
 
       moon.position.set(moonX, moonY, moonZ);
       moon.rotateY(0.01);
+
+      // ワールドマトリックスを更新
+      this.earthGroup.updateWorldMatrix(true, false);
+      // earthのワールド座標を取得
+      const earthWorldPosition = new THREE.Vector3();
+      planet.getWorldPosition(earthWorldPosition);
+      // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
+      console.log('# earth position:', earthWorldPosition);
     }
   }
 }
