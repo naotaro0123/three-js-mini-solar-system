@@ -155,7 +155,8 @@ export class DrawScene {
       const earthWorldPosition = new THREE.Vector3();
       planet.getWorldPosition(earthWorldPosition);
       // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
-      console.log('# earth position:', earthWorldPosition);
+      // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
+      // console.log('# earth position:', earthWorldPosition);
     }
   }
 }
