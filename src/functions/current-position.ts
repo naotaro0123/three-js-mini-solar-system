@@ -9,11 +9,11 @@ type ResponseData = {
 };
 
 export const getCurrentPosition = async () => {
-  const today = new Date();
-  const tomorrow = addDays(today, 1);
+  const today = new Date('2025-01-01');
+  const tomorrow = addDays(today, 365);
   const startDate = format(today, 'yyyy-MM-dd');
   const stopDate = format(tomorrow, 'yyyy-MM-dd');
-  const StepSize = '1 d';
+  const StepSize = '1 mo';
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `http://localhost:3000/api/v1/earth-current-position?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}`;
 
