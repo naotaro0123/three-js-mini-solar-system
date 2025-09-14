@@ -63,8 +63,9 @@ export const createPlanet = (
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
   planet.name = PLANET_NAME;
-  planet.position.x = position;
-  planet.position.z = (tilt * Math.PI) / 180;
+  // APIから取得した現在位置に惑星を配置
+  const planetPosition = currentPosition.pathPoints[currentPosition.todayRow - 1];
+  planet.position.set(planetPosition.x, 0, planetPosition.y);
 
   const planetSystem = new THREE.Group();
   planetSystem.name = PLANET_SYSTEM_NAME;
@@ -120,7 +121,7 @@ export const createPlanet = (
     moonIndex++;
     const moonOrbitDistance = size * 1.5;
     moonMesh.position.set(moonOrbitDistance, 0, 0);
-    planetSystem.add(moonMesh);
+    planet.add(moonMesh);
     moon.mesh = moonMesh;
   }
 

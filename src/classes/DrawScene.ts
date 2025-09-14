@@ -7,7 +7,6 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import type { ResponseResults } from '../functions/current-position';
 import { createEarthMesh } from '../functions/earth';
 import {
   earthMoon,
@@ -45,13 +44,15 @@ export class DrawScene {
     // Debug: 地球の現在位置を表示
     {
       // 現在位置に球体を表示
-      const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-      const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      const currentPositionSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      const { pathPoints, todayRow } = this.earthGroup.userData.currentPosition as ResponseResults;
-      const position = pathPoints[todayRow - 1];
-      currentPositionSphere.position.set(position.x, 0, position.y);
-      this.scene.add(currentPositionSphere);
+      // const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+      // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      // const currentPositionSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      // const { pathPoints, todayRow } = this.earthGroup.userData.currentPosition as ResponseResults;
+      // const position = pathPoints[todayRow - 1];
+      // currentPositionSphere.position.set(position.x, 0, position.y);
+      // this.scene.add(currentPositionSphere);
+      // const earth = this.earthGroup.getObjectByName(PLANET_NAME) as THREE.Mesh;
+      // earth.position.set(position.x, 0, position.y);
     }
 
     window.addEventListener('resize', this.resizeCanvas);
@@ -158,10 +159,9 @@ export class DrawScene {
       const tiltAngle = (5 * Math.PI) / 180;
 
       const { orbitRadius, orbitSpeed } = earthMoon[0];
-      const moonX = planet.position.x + orbitRadius * Math.cos(time * orbitSpeed);
+      const moonX = orbitRadius * Math.cos(time * orbitSpeed);
       const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
-      const moonZ =
-        planet.position.z + orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
+      const moonZ = orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
 
       moon.position.set(moonX, moonY, moonZ);
       moon.rotateY(0.01);
@@ -173,7 +173,7 @@ export class DrawScene {
       planet.getWorldPosition(earthWorldPosition);
       // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
       // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
-      console.log('# earth position:', earthWorldPosition);
+      // console.log('# earth position:', earthWorldPosition);
     }
   }
 }

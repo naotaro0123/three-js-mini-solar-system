@@ -79,7 +79,6 @@ export const getCurrentPosition = async (): Promise<ResponseResults> => {
   } catch (error) {
     console.error('API呼び出し中にエラーが発生しました:', error);
   } finally {
-    console.log('result:', result);
     return result;
   }
 };
