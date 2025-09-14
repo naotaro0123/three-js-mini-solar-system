@@ -46,7 +46,7 @@ export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE
       `,
   });
 
-  const { todayRow, pathPoints } = await getCurrentPosition();
+  const currentPosition = await getCurrentPosition();
 
   const earthMesh = createPlanet(
     EARTH_NAME,
@@ -58,7 +58,7 @@ export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE
     null,
     '/images/earth_atmosphere.jpg',
     earthMoon,
-    pathPoints,
+    currentPosition,
   );
   return earthMesh;
 };

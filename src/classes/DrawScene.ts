@@ -7,6 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import type { ResponseResults } from '../functions/current-position';
 import { createEarthMesh } from '../functions/earth';
 import {
   earthMoon,
@@ -39,6 +40,19 @@ export class DrawScene {
     // 地球と月のメッシュを作成
     this.earthGroup = await createEarthMesh(this.sunMesh.position);
     this.scene.add(this.earthGroup);
+    console.log('# this.earthGroup:', this.earthGroup);
+
+    // Debug: 地球の現在位置を表示
+    {
+      // 現在位置に球体を表示
+      const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+      const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const currentPositionSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      const { pathPoints, todayRow } = this.earthGroup.userData.currentPosition as ResponseResults;
+      const position = pathPoints[todayRow - 1];
+      currentPositionSphere.position.set(position.x, 0, position.y);
+      this.scene.add(currentPositionSphere);
+    }
 
     window.addEventListener('resize', this.resizeCanvas);
     this.render();

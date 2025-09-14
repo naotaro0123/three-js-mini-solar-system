@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { ResponseResults } from './current-position';
 import { MOON_SIZE, settings } from './settings';
 
 export const PLANET_NAME = 'Planet';
@@ -41,7 +42,7 @@ export const createPlanet = (
   ring: Ring | null,
   atmosphere: string | null,
   moons: EarthMoon[],
-  pathPoints: THREE.Vector2[] = [],
+  currentPosition: ResponseResults,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -68,29 +69,6 @@ export const createPlanet = (
   const planetSystem = new THREE.Group();
   planetSystem.name = PLANET_SYSTEM_NAME;
   planetSystem.add(planet);
-
-  // TODO: 他の惑星を追加時に外部から渡すように修正する
-  const orbitPath = new THREE.EllipseCurve(
-    0,
-    0, // ax, aY
-    position,
-    position, // xRadius, yRadius
-    0,
-    2 * Math.PI, // aStartAngle, aEndAngle
-    false, // aClockwise
-    0, // aRotation
-  );
-  const _pathPoints = orbitPath.getPoints(100);
-  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(pathPoints ?? _pathPoints);
-  const orbitMaterial = new THREE.LineBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.1,
-  });
-  const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
-  orbit.name = PLANET_ORBIT_NAME;
-  orbit.rotation.x = Math.PI / 2;
-  planetSystem.add(orbit);
 
   if (ring) {
     const ringGeometry = new THREE.RingGeometry(ring.innerRadius, ring.outerRadius, 30);
@@ -149,5 +127,32 @@ export const createPlanet = (
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
   planet3d.name = planetName;
+  planet3d.userData = { currentPosition };
+
+  // TODO: 他の惑星を追加時に外部から渡すように修正する
+  const orbitPath = new THREE.EllipseCurve(
+    0,
+    0, // ax, aY
+    position,
+    position, // xRadius, yRadius
+    0,
+    2 * Math.PI, // aStartAngle, aEndAngle
+    false, // aClockwise
+    0, // aRotation
+  );
+  const _pathPoints = orbitPath.getPoints(100);
+  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
+    currentPosition.pathPoints ?? _pathPoints,
+  );
+  const orbitMaterial = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.1,
+  });
+  const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+  orbit.name = PLANET_ORBIT_NAME;
+  orbit.rotation.x = Math.PI / 2;
+  planet3d.add(orbit);
+
   return planet3d;
 };
