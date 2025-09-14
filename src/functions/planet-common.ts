@@ -41,6 +41,7 @@ export const createPlanet = (
   ring: Ring | null,
   atmosphere: string | null,
   moons: EarthMoon[],
+  pathPoints: THREE.Vector2[] = [],
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -68,6 +69,7 @@ export const createPlanet = (
   planetSystem.name = PLANET_SYSTEM_NAME;
   planetSystem.add(planet);
 
+  // TODO: 他の惑星を追加時に外部から渡すように修正する
   const orbitPath = new THREE.EllipseCurve(
     0,
     0, // ax, aY
@@ -78,12 +80,12 @@ export const createPlanet = (
     false, // aClockwise
     0, // aRotation
   );
-  const pathPoints = orbitPath.getPoints(100);
-  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+  const _pathPoints = orbitPath.getPoints(100);
+  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(pathPoints ?? _pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.03,
+    opacity: 0.1,
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
   orbit.name = PLANET_ORBIT_NAME;

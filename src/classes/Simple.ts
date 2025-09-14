@@ -44,7 +44,8 @@ export class Simple {
   }
 
   async init() {
-    const dataList = await getCurrentPosition();
+    const { pathPoints } = await getCurrentPosition();
+    const dataList = pathPoints.map((p) => ({ x: p.x, y: 0, z: p.y }));
     // 最大絶対値を計算
     const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));
     const maxAbsY = Math.max(...dataList.map((p) => Math.abs(p.y)));

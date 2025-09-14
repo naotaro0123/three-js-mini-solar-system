@@ -1,11 +1,8 @@
-import { getCurrentPosition } from './current-position';
-
 export const settings = {
   accelerationOrbit: 1, // 公転スピード
   acceleration: 1, // 自転スピード
   sunIntensity: 1.9, // 太陽の明るさ
-  isAnimating: true, // アニメーションの再生/停止
-  getCurrentPosition: getCurrentPosition,
+  isAnimating: false, // アニメーションの再生/停止
 };
 
 export const EARTH_SIZE = 6.4;

@@ -29,11 +29,15 @@ export class DrawScene {
 
   constructor() {
     this.initEnvironment();
+    this.initPlanets();
+  }
+
+  async initPlanets(): Promise<void> {
     // 太陽のメッシュを作成
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成
-    this.earthGroup = createEarthMesh(this.sunMesh.position);
+    this.earthGroup = await createEarthMesh(this.sunMesh.position);
     this.scene.add(this.earthGroup);
 
     window.addEventListener('resize', this.resizeCanvas);
@@ -100,7 +104,6 @@ export class DrawScene {
         .onChange((value) => {
           this.isAnimating = value;
         });
-      gui.add(settings, 'getCurrentPosition').name('現在の地球の位置を取得');
     }
 
     const lightAmbient = new THREE.AmbientLight(0x222222, 6);
@@ -156,7 +159,7 @@ export class DrawScene {
       planet.getWorldPosition(earthWorldPosition);
       // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
       // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
-      // console.log('# earth position:', earthWorldPosition);
+      console.log('# earth position:', earthWorldPosition);
     }
   }
 }

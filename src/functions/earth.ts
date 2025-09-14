@@ -1,10 +1,11 @@
 import * as THREE from 'three';
+import { getCurrentPosition } from './current-position';
 import { createPlanet, earthMoon } from './planet-common';
 import { EARTH_SIZE } from './settings';
 
 const EARTH_NAME = 'Earth';
 
-export const createEarthMesh = (sunPosition: THREE.Vector3): THREE.Group => {
+export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE.Group> => {
   const loadTexture = new THREE.TextureLoader();
   // Earth day/night effect shader material
   const earthMaterial = new THREE.ShaderMaterial({
@@ -44,6 +45,9 @@ export const createEarthMesh = (sunPosition: THREE.Vector3): THREE.Group => {
         }
       `,
   });
+
+  const { todayRow, pathPoints } = await getCurrentPosition();
+
   const earthMesh = createPlanet(
     EARTH_NAME,
     EARTH_SIZE,
@@ -54,6 +58,7 @@ export const createEarthMesh = (sunPosition: THREE.Vector3): THREE.Group => {
     null,
     '/images/earth_atmosphere.jpg',
     earthMoon,
+    pathPoints,
   );
   return earthMesh;
 };
