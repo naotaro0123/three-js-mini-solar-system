@@ -25,7 +25,7 @@ export class Simple {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
-    this.camera.position.set(0, 5, 8);
+    this.camera.position.set(0, 100, 160);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enablePan = true;
@@ -37,7 +37,7 @@ export class Simple {
     const light = new THREE.AmbientLight(0xffffff, 1);
     this.scene.add(light);
 
-    const grid = new THREE.GridHelper(10, 5);
+    const grid = new THREE.GridHelper(100, 50);
     this.scene.add(grid);
 
     this.init();
