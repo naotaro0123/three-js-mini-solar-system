@@ -7,6 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import type { ResponseResults } from '../functions/current-position';
 import { createEarthMesh } from '../functions/earth';
 import {
   earthMoon,
@@ -26,6 +27,7 @@ export class DrawScene {
   sunMesh!: THREE.Mesh;
   earthGroup!: THREE.Group;
   isAnimating = settings.isAnimating;
+  timerOrbit = 0; // 公転のタイマー
 
   constructor() {
     this.initEnvironment();
@@ -152,9 +154,22 @@ export class DrawScene {
       const atmosphere = this.earthGroup.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
       const moon = this.earthGroup.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
-      this.earthGroup.rotateY(0.001 * settings.accelerationOrbit);
-      planet.rotateY(0.005 * settings.acceleration);
-      atmosphere.rotateY(0.001 * settings.acceleration);
+      // 地球の公転
+      // this.earthGroup.rotateY(0.001 * settings.accelerationOrbit);
+
+      // APIから取得した現在位置に惑星を配置
+      const currentPosition = this.earthGroup.userData.currentPosition as ResponseResults;
+      const currentDayIndex = Math.ceil(currentPosition.todayRow + this.timerOrbit) % 365;
+      const earthPosition = currentPosition.pathPoints[currentDayIndex];
+      planet.position.set(earthPosition.x, 0, earthPosition.y);
+      this.timerOrbit += (1 / 24) * settings.accelerationOrbit; // 1時間ずつ進む + 加速分
+
+      // 地球の自転
+      // planet.rotateY(0.005 * settings.acceleration);
+      // atmosphere.rotateY(0.001 * settings.acceleration);
+      planet.rotateY((1 / 24) * settings.acceleration);
+      atmosphere.rotateY((1 / 24) * settings.acceleration);
+
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;
 

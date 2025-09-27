@@ -67,7 +67,7 @@ export const getCurrentPosition = async (): Promise<ResponseResults> => {
             (point.y / maxAbsY) * newRangeZ,
           );
         });
-        result.pathPoints = transformedData;
+        result.pathPoints = transformedData.reverse(); // 日付順にするため反転
       }
 
       const today = new Date();
