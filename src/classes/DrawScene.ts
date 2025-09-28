@@ -161,6 +161,7 @@ export class DrawScene {
       const currentPosition = this.earthGroup.userData.currentPosition as ResponseResults;
       const currentDayIndex = Math.ceil(currentPosition.todayRow + this.timerOrbit) % 365;
       const earthPosition = currentPosition.pathPoints[currentDayIndex];
+      // TODO: カクカクするので補間したい（365日でなく24hでデータ取得してもよいかも）
       planet.position.set(earthPosition.x, 0, earthPosition.y);
       this.timerOrbit += (1 / 24) * settings.accelerationOrbit; // 1時間ずつ進む + 加速分
 
