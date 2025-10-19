@@ -7,8 +7,8 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import type { ResponseResults } from '../functions/current-position';
 import { createEarthMesh } from '../functions/earth';
+import type { EarthPositionRes } from '../functions/get-planet-position';
 import {
   earthMoon,
   PLANET_ATMO_SPHERE_NAME,
@@ -17,6 +17,9 @@ import {
 } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
+
+const isDebug = false;
+const lerpSteps = 10; // 1日を10フレームで移動させる
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -28,10 +31,16 @@ export class DrawScene {
   earthGroup!: THREE.Group;
   isAnimating = settings.isAnimating;
   timerOrbit = 0; // 公転のタイマー
+  lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
+  currentIndex = 0; // 現在のインデックス（0から364まで）
 
   constructor() {
     this.initEnvironment();
     this.initPlanets();
+  }
+
+  get userDataEarthPositionRes(): EarthPositionRes {
+    return this.earthGroup.userData.earthPositionRes as EarthPositionRes;
   }
 
   async initPlanets(): Promise<void> {
@@ -39,23 +48,9 @@ export class DrawScene {
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成
-    this.earthGroup = await createEarthMesh(this.sunMesh.position);
+    this.earthGroup = await createEarthMesh(this.sunMesh.position, isDebug);
+    this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
-    console.log('# this.earthGroup:', this.earthGroup);
-
-    // Debug: 地球の現在位置を表示
-    {
-      // 現在位置に球体を表示
-      // const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-      // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-      // const currentPositionSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      // const { pathPoints, todayRow } = this.earthGroup.userData.currentPosition as ResponseResults;
-      // const position = pathPoints[todayRow - 1];
-      // currentPositionSphere.position.set(position.x, 0, position.y);
-      // this.scene.add(currentPositionSphere);
-      // const earth = this.earthGroup.getObjectByName(PLANET_NAME) as THREE.Mesh;
-      // earth.position.set(position.x, 0, position.y);
-    }
 
     window.addEventListener('resize', this.resizeCanvas);
     this.render();
@@ -158,18 +153,33 @@ export class DrawScene {
       // this.earthGroup.rotateY(0.001 * settings.accelerationOrbit);
 
       // APIから取得した現在位置に惑星を配置
-      const currentPosition = this.earthGroup.userData.currentPosition as ResponseResults;
-      const currentDayIndex = Math.ceil(currentPosition.todayRow + this.timerOrbit) % 365;
-      const earthPosition = currentPosition.pathPoints[currentDayIndex];
-      // TODO: カクカクするので補間したい（365日でなく24hでデータ取得してもよいかも）
-      planet.position.set(earthPosition.x, 0, earthPosition.y);
-      this.timerOrbit += (1 / 24) * settings.accelerationOrbit; // 1時間ずつ進む + 加速分
+      const earthPosition = this.userDataEarthPositionRes;
+      const currentPosition = earthPosition.pathPoints[this.currentIndex];
+      // 次の日（nextDayIndex）の座標を取得
+      const nextDayIndex = this.currentIndex + 1;
+      const nextPosition = earthPosition.pathPoints[nextDayIndex];
+
+      // TODO: https://gemini.google.com/app/a34a7df2f2983d4c
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+      planet.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+
+      // 小数点の誤差を防ぐため、toFixedで丸める
+      this.lerpFactor = Number((this.lerpFactor + 1 / lerpSteps).toFixed(1));
+      // 次の日に到達したらインデックスを更新し、進捗をリセット
+      if (this.lerpFactor >= 1) {
+        this.currentIndex = nextDayIndex;
+        this.lerpFactor = 0;
+      }
+
+      this.timerOrbit += (1 / lerpSteps) * settings.accelerationOrbit; // 加速分
 
       // 地球の自転
       // planet.rotateY(0.005 * settings.acceleration);
       // atmosphere.rotateY(0.001 * settings.acceleration);
-      planet.rotateY((1 / 24) * settings.acceleration);
-      atmosphere.rotateY((1 / 24) * settings.acceleration);
+      planet.rotateY((1 / lerpSteps) * settings.acceleration);
+      atmosphere.rotateY((1 / lerpSteps) * settings.acceleration);
 
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { ResponseResults } from './current-position';
+import type { EarthPositionRes } from './get-planet-position';
 import { MOON_SIZE, settings } from './settings';
 
 export const PLANET_NAME = 'Planet';
@@ -42,7 +42,7 @@ export const createPlanet = (
   ring: Ring | null,
   atmosphere: string | null,
   moons: EarthMoon[],
-  currentPosition: ResponseResults,
+  earthPositionRes: EarthPositionRes,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -64,8 +64,8 @@ export const createPlanet = (
   const planet = new THREE.Mesh(geometry, material);
   planet.name = PLANET_NAME;
   // APIから取得した現在位置に惑星を配置
-  const planetPosition = currentPosition.pathPoints[currentPosition.todayRow - 1];
-  planet.position.set(planetPosition.x, 0, planetPosition.y);
+  const earthPosition = earthPositionRes.pathPoints[earthPositionRes.todayRow - 1];
+  planet.position.set(earthPosition.x, 0, earthPosition.y);
 
   const planetSystem = new THREE.Group();
   planetSystem.name = PLANET_SYSTEM_NAME;
@@ -128,7 +128,7 @@ export const createPlanet = (
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
   planet3d.name = planetName;
-  planet3d.userData = { currentPosition };
+  planet3d.userData = { earthPositionRes };
 
   // TODO: 他の惑星を追加時に外部から渡すように修正する
   const orbitPath = new THREE.EllipseCurve(
@@ -143,7 +143,7 @@ export const createPlanet = (
   );
   const _pathPoints = orbitPath.getPoints(100);
   const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
-    currentPosition.pathPoints ?? _pathPoints,
+    earthPositionRes.pathPoints ?? _pathPoints,
   );
   const orbitMaterial = new THREE.LineBasicMaterial({
     color: 0xffffff,

@@ -9,12 +9,12 @@ type ResponseData = {
   };
 };
 
-export type ResponseResults = {
+export type EarthPositionRes = {
   todayRow: number;
-  pathPoints: THREE.Vector2[];
+  pathPoints: THREE.Vector3[];
 };
 
-export const getCurrentPosition = async (): Promise<ResponseResults> => {
+export const getEarthPosition = async (): Promise<EarthPositionRes> => {
   const currentYear = new Date().getFullYear();
   const startDate = format(new Date(`${currentYear}-01-01`), 'yyyy-MM-dd');
   const stopDate = format(new Date(`${currentYear}-12-31`), 'yyyy-MM-dd');
@@ -22,7 +22,7 @@ export const getCurrentPosition = async (): Promise<ResponseResults> => {
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `http://localhost:3000/api/v1/earth-current-position?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}`;
 
-  const result: ResponseResults = { todayRow: 0, pathPoints: [] };
+  const result: EarthPositionRes = { todayRow: 0, pathPoints: [] };
 
   try {
     const response = await fetch(url);
@@ -59,7 +59,7 @@ export const getCurrentPosition = async (): Promise<ResponseResults> => {
         const maxAbsX = Math.max(...pathPoints.map((p) => Math.abs(p.x)));
         const maxAbsY = Math.max(...pathPoints.map((p) => Math.abs(p.y)));
         const transformedData = pathPoints.map((point) => {
-          return new THREE.Vector2(
+          return new THREE.Vector3(
             // X軸は-90から90の範囲に変換
             (point.x / maxAbsX) * newRangeX,
             // Z軸は-90から90の範囲に変換

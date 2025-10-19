@@ -1,11 +1,14 @@
 import * as THREE from 'three';
-import { getCurrentPosition } from './current-position';
+import { getEarthPosition } from './get-planet-position';
 import { createPlanet, earthMoon } from './planet-common';
 import { EARTH_SIZE } from './settings';
 
 const EARTH_NAME = 'Earth';
 
-export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE.Group> => {
+export const createEarthMesh = async (
+  sunPosition: THREE.Vector3,
+  isDebug: boolean,
+): Promise<THREE.Group> => {
   const loadTexture = new THREE.TextureLoader();
   // Earth day/night effect shader material
   const earthMaterial = new THREE.ShaderMaterial({
@@ -46,7 +49,7 @@ export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE
       `,
   });
 
-  const currentPosition = await getCurrentPosition();
+  const earthPosition = await getEarthPosition();
 
   const earthMesh = createPlanet(
     EARTH_NAME,
@@ -58,7 +61,19 @@ export const createEarthMesh = async (sunPosition: THREE.Vector3): Promise<THREE
     null,
     '/images/earth_atmosphere.jpg',
     earthMoon,
-    currentPosition,
+    earthPosition,
   );
+
+  if (isDebug) {
+    // 地球の現在位置を表示
+    const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentEarthPoint = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    const { pathPoints, todayRow } = earthPosition;
+    const position = pathPoints[todayRow - 1];
+    currentEarthPoint.position.set(position.x, 0, position.y);
+    earthMesh.add(currentEarthPoint);
+  }
+
   return earthMesh;
 };
