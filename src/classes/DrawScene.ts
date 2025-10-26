@@ -18,7 +18,7 @@ import {
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 
-const lerpSteps = 10; // 1日を10フレームで移動させる
+const lerpFrame = 60; // 1日を何フレームで補間するか
 const isDebug = false;
 
 export class DrawScene {
@@ -187,7 +187,7 @@ export class DrawScene {
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
-        ((this.lerpFactor + 1 / lerpSteps) * settings.accelerationOrbit).toFixed(1),
+        ((this.lerpFactor + 1 / lerpFrame) * settings.accelerationOrbit).toFixed(3),
       );
       // 次の日に到達したらインデックスを更新し、進捗をリセット
       if (this.lerpFactor >= 1) {
@@ -203,8 +203,11 @@ export class DrawScene {
       // planet.rotateY(0.005 * settings.acceleration);
       // atmosphere.rotateY(0.001 * settings.acceleration);
       if (!isDebug) {
-        planet.rotateY((1 / lerpSteps) * settings.acceleration);
-        atmosphere.rotateY((1 / lerpSteps) * settings.acceleration);
+        // 地球は1日で360度するので1フレームあたりの回転量を計算
+        const earthRotation = (360 / lerpFrame) * settings.acceleration;
+        const earthAngle = (earthRotation * Math.PI) / 180;
+        planet.rotateY(earthAngle);
+        atmosphere.rotateY(earthAngle);
       }
 
       const time = performance.now();
