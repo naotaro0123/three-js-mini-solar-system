@@ -103,6 +103,11 @@ export class DrawScene {
       const gui = new GUI();
       gui.domElement.style.top = '6px';
       gui.domElement.style.right = '6px';
+      gui
+        .add(settings, 'frameLabel')
+        .name('1日のフレーム数')
+        .disable()
+        .setValue(`${lerpFrame}フレーム`);
       gui.add(settings, 'accelerationOrbit', 1, 10).name('公転スピード');
       gui.add(settings, 'acceleration', 1, 10).name('自転スピード');
       gui
@@ -213,6 +218,7 @@ export class DrawScene {
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;
 
+      // TODO: 月の公転、自転。月が地球の周りを一周するのに約27.3日
       const { orbitRadius, orbitSpeed } = earthMoon[0];
       const moonX = orbitRadius * Math.cos(time * orbitSpeed);
       const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
