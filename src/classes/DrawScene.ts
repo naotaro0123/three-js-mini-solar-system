@@ -169,7 +169,11 @@ export class DrawScene {
       this.lerpFactor = Number((this.lerpFactor + 1 / lerpSteps).toFixed(1));
       // 次の日に到達したらインデックスを更新し、進捗をリセット
       if (this.lerpFactor >= 1) {
-        this.currentIndex = nextDayIndex;
+        if (nextDayIndex < earthPosition.pathPoints.length - 1) {
+          this.currentIndex = nextDayIndex;
+        } else {
+          this.currentIndex = 0;
+        }
         this.lerpFactor = 0;
       }
 
