@@ -30,7 +30,6 @@ export class DrawScene {
   sunMesh!: THREE.Mesh;
   earthGroup!: THREE.Group;
   isAnimating = settings.isAnimating;
-  timerOrbit = 0; // 公転のタイマー
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
 
@@ -104,11 +103,14 @@ export class DrawScene {
       const gui = new GUI();
       gui.domElement.style.top = '6px';
       gui.domElement.style.right = '6px';
-      gui.add(settings, 'accelerationOrbit', 0, 10);
-      gui.add(settings, 'acceleration', 0, 10);
-      gui.add(settings, 'sunIntensity', 1, 10).onChange((value) => {
-        (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
-      });
+      gui.add(settings, 'accelerationOrbit', 1, 10).name('公転スピード');
+      gui.add(settings, 'acceleration', 1, 10).name('自転スピード');
+      gui
+        .add(settings, 'sunIntensity', 1, 10)
+        .name('太陽光強度')
+        .onChange((value) => {
+          (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
+        });
       // アニメーションを再生/停止する
       gui
         .add(settings, 'isAnimating')
@@ -181,7 +183,9 @@ export class DrawScene {
       planet.position.set(interpolatedPos.x, 0, interpolatedPos.y);
 
       // 小数点の誤差を防ぐため、toFixedで丸める
-      this.lerpFactor = Number((this.lerpFactor + 1 / lerpSteps).toFixed(1));
+      this.lerpFactor = Number(
+        ((this.lerpFactor + 1 / lerpSteps) * settings.accelerationOrbit).toFixed(1),
+      );
       // 次の日に到達したらインデックスを更新し、進捗をリセット
       if (this.lerpFactor >= 1) {
         if (nextDayIndex < earthPosition.pathPoints.length - 1) {
@@ -191,8 +195,6 @@ export class DrawScene {
         }
         this.lerpFactor = 0;
       }
-
-      this.timerOrbit += (1 / lerpSteps) * settings.accelerationOrbit; // 加速分
 
       // 地球の自転
       // planet.rotateY(0.005 * settings.acceleration);
