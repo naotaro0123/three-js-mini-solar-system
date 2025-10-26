@@ -70,7 +70,7 @@ export class DrawScene {
     document.body.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
-    this.camera.position.set(0, 5, 50);
+    this.camera.position.set(0, 20, 122);
 
     {
       this.composer = new EffectComposer(this.renderer);
@@ -109,13 +109,28 @@ export class DrawScene {
       gui.add(settings, 'sunIntensity', 1, 10).onChange((value) => {
         (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
       });
-      // アニメーションを再生/定時する
+      // アニメーションを再生/停止する
       gui
         .add(settings, 'isAnimating')
         .name('アニメーション再生')
         .onChange((value) => {
           this.isAnimating = value;
         });
+      // Top View
+      gui
+        .add(
+          {
+            topView: () => {
+              this.camera.position.set(0, 190, 0.01);
+              this.controls.target.set(0, 0, 0);
+              this.controls.update();
+            },
+          },
+          'topView',
+        )
+        .name('トップビュー');
+      // 視点をリセット
+      gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
     }
 
     const lightAmbient = new THREE.AmbientLight(0x222222, 6);
