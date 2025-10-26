@@ -18,8 +18,8 @@ import {
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 
-const isDebug = false;
 const lerpSteps = 10; // 1日を10フレームで移動させる
+const isDebug = false;
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -180,7 +180,10 @@ export class DrawScene {
       const interpolatedPos = new THREE.Vector3()
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
-      planet.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+
+      if (!isDebug) {
+        planet.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+      }
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
@@ -199,8 +202,10 @@ export class DrawScene {
       // 地球の自転
       // planet.rotateY(0.005 * settings.acceleration);
       // atmosphere.rotateY(0.001 * settings.acceleration);
-      planet.rotateY((1 / lerpSteps) * settings.acceleration);
-      atmosphere.rotateY((1 / lerpSteps) * settings.acceleration);
+      if (!isDebug) {
+        planet.rotateY((1 / lerpSteps) * settings.acceleration);
+        atmosphere.rotateY((1 / lerpSteps) * settings.acceleration);
+      }
 
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;
