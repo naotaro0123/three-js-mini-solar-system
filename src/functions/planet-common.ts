@@ -5,7 +5,7 @@ import { MOON_SIZE, settings } from './settings';
 export const PLANET_NAME = 'Planet';
 const PLANET_ORBIT_NAME = 'PlanetOrbit';
 const PLANET_RING_NAME = 'PlanetRing';
-const PLANET_SYSTEM_NAME = 'PlanetSystem';
+export const PLANET_SYSTEM_NAME = 'PlanetSystem';
 export const PLANET_ATMO_SPHERE_NAME = 'PlanetAtmosphere';
 export const PLANET_MOONS_NAME = 'PlanetMoons';
 
@@ -63,12 +63,12 @@ export const createPlanet = (
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
   planet.name = PLANET_NAME;
-  // APIから取得した現在位置に惑星を配置
-  const earthPosition = earthPositionRes.pathPoints[earthPositionRes.todayRow - 1];
-  planet.position.set(earthPosition.x, 0, earthPosition.y);
 
   const planetSystem = new THREE.Group();
   planetSystem.name = PLANET_SYSTEM_NAME;
+  // APIから取得した現在位置に惑星を配置
+  const earthPosition = earthPositionRes.pathPoints[earthPositionRes.todayRow - 1];
+  planetSystem.position.set(earthPosition.x, 0, earthPosition.y);
   planetSystem.add(planet);
 
   if (ring) {
@@ -121,7 +121,7 @@ export const createPlanet = (
     moonIndex++;
     const moonOrbitDistance = size * 1.5;
     moonMesh.position.set(moonOrbitDistance, 0, 0);
-    planet.add(moonMesh);
+    planetSystem.add(moonMesh);
     moon.mesh = moonMesh;
   }
 

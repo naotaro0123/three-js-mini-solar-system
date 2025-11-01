@@ -14,6 +14,7 @@ import {
   PLANET_ATMO_SPHERE_NAME,
   PLANET_MOONS_NAME,
   PLANET_NAME,
+  PLANET_SYSTEM_NAME,
 } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
@@ -168,6 +169,7 @@ export class DrawScene {
 
     {
       // planet3dがearth。コードコピーする時間違えないように
+      const planetSystem = this.earthGroup.getObjectByName(PLANET_SYSTEM_NAME) as THREE.Group;
       const planet = this.earthGroup.getObjectByName(PLANET_NAME) as THREE.Mesh;
       const atmosphere = this.earthGroup.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
       const moon = this.earthGroup.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
@@ -188,7 +190,8 @@ export class DrawScene {
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
       if (!isDebug) {
-        planet.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+        planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+        console.log('planetSystem position:', planetSystem.position);
       }
 
       // 小数点の誤差を防ぐため、toFixedで丸める
