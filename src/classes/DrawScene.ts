@@ -21,6 +21,20 @@ import { createSunMesh } from '../functions/sun';
 
 const lerpFrame = 60; // 1日を何フレームで補間するか
 const isDebug = false;
+const currentIndexLabelSuffix = '365日目';
+
+const createCurrentIndexLabel = (index: number): HTMLDivElement => {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.top = '10px';
+  div.style.left = '10px';
+  div.style.padding = '2px 8px';
+  div.style.borderRadius = '4px';
+  div.style.backgroundColor = 'white';
+  div.style.color = 'black';
+  div.innerText = `${index}/${currentIndexLabelSuffix}`;
+  return div;
+};
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -33,6 +47,7 @@ export class DrawScene {
   isAnimating = settings.isAnimating;
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
+  labelElement!: HTMLDivElement;
 
   constructor() {
     this.initEnvironment();
@@ -52,6 +67,9 @@ export class DrawScene {
     console.log('# earthGroup:', this.earthGroup);
     this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
+
+    this.labelElement = createCurrentIndexLabel(this.currentIndex);
+    document.body.appendChild(this.labelElement);
 
     window.addEventListener('resize', this.resizeCanvas);
     this.render();
@@ -187,12 +205,15 @@ export class DrawScene {
       const atmosphere = this.earthGroup.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
       const moon = this.earthGroup.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
-      // 地球の公転
+      // 地球の公転（反時計回り）
       // this.earthGroup.rotateY(0.001 * settings.accelerationOrbit);
 
       // APIから取得した現在位置に惑星を配置
       const earthPosition = this.userDataEarthPositionRes;
       const currentPosition = earthPosition.pathPoints[this.currentIndex];
+
+      this.labelElement.innerText = `${this.currentIndex}/${currentIndexLabelSuffix}`;
+
       // 次の日（nextDayIndex）の座標を取得
       const nextDayIndex = this.currentIndex + 1;
       const nextPosition = earthPosition.pathPoints[nextDayIndex];
@@ -202,10 +223,7 @@ export class DrawScene {
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
-      if (!isDebug) {
-        planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
-        console.log('planetSystem position:', planetSystem.position);
-      }
+      planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
@@ -221,27 +239,28 @@ export class DrawScene {
         this.lerpFactor = 0;
       }
 
-      // 地球の自転
+      // 地球の自転（反時計回り）
       // planet.rotateY(0.005 * settings.acceleration);
       // atmosphere.rotateY(0.001 * settings.acceleration);
-      if (!isDebug) {
-        // 地球は1日で360度するので1フレームあたりの回転量を計算
-        const earthRotation = (360 / lerpFrame) * settings.acceleration;
-        const earthAngle = (earthRotation * Math.PI) / 180;
-        planet.rotateY(earthAngle);
-        atmosphere.rotateY(earthAngle);
-      }
+
+      // 地球は1日で360度するので1フレームあたりの回転量を計算
+      const earthRotation = (360 / lerpFrame) * settings.acceleration;
+      const earthAngle = (earthRotation * Math.PI) / 180;
+      planet.rotateY(earthAngle);
+      atmosphere.rotateY(earthAngle);
 
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;
 
-      // TODO: 月の公転、自転。月が地球の周りを一周するのに約27.3日
+      // 月の公転（反時計回り）
       const { orbitRadius, orbitSpeed } = earthMoon[0];
       const moonX = orbitRadius * Math.cos(time * orbitSpeed);
       const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
       const moonZ = orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
 
-      moon.position.set(moonX, moonY, moonZ);
+      // TODO: 月の公転：月が地球の周りを一周するのに約27.3日
+      moon.position.set(-moonX, moonY, moonZ);
+      // TODO: 月の自転：月は常に同じ面を地球に向けているので、自転速度を公転速度と同じにする
       moon.rotateY(0.01);
 
       // ワールドマトリックスを更新
