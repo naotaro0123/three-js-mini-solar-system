@@ -138,6 +138,19 @@ export class DrawScene {
           'topView',
         )
         .name('トップビュー');
+      // Side View
+      gui
+        .add(
+          {
+            sideView: () => {
+              this.camera.position.set(190, 0, 0.01);
+              this.controls.target.set(0, 0, 0);
+              this.controls.update();
+            },
+          },
+          'sideView',
+        )
+        .name('サイドビュー');
       // 視点をリセット
       gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
     }
