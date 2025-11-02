@@ -256,7 +256,7 @@ export class DrawScene {
       const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
       // 公転周期をフレーム数に変換
       const periodFrames = periodDays * lerpFrame;
-      // 1フレームあたりに進む角度 (ラジアン) を計算
+      // 1フレームあたりに進む公転の角度 (ラジアン) を計算
       const orbitSpeedFrame = ((2 * Math.PI) / periodFrames) * settings.accelerationOrbit;
 
       // 月の公転（反時計回り）
@@ -268,8 +268,9 @@ export class DrawScene {
       const moonY = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.sin(tiltAngle);
       const moonZ = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.cos(tiltAngle);
       moon.position.set(-moonX, moonY, moonZ);
-      // TODO: 月の自転：月は常に同じ面を地球に向けているので、自転速度を公転速度と同じにする
-      moon.rotateY(0.01);
+      // 月の自転は公転と同じ角速度で回転させる（地球から常に同じ面が見える同期自転のため）
+      const rotationSpeedFrame = orbitSpeedFrame;
+      moon.rotateY(rotationSpeedFrame);
 
       // ワールドマトリックスを更新
       this.earthGroup.updateWorldMatrix(true, false);
