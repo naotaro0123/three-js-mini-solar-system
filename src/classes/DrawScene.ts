@@ -218,7 +218,7 @@ export class DrawScene {
       const nextDayIndex = this.currentIndex + 1;
       const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
-      // TODO: https://gemini.google.com/app/a34a7df2f2983d4c
+      // ref: https://gemini.google.com/app/a34a7df2f2983d4c
       const interpolatedPos = new THREE.Vector3()
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
@@ -249,16 +249,24 @@ export class DrawScene {
       planet.rotateY(earthAngle);
       atmosphere.rotateY(earthAngle);
 
+      // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
       const time = performance.now();
       const tiltAngle = (5 * Math.PI) / 180;
 
-      // 月の公転（反時計回り）
-      const { orbitRadius, orbitSpeed } = earthMoon[0];
-      const moonX = orbitRadius * Math.cos(time * orbitSpeed);
-      const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
-      const moonZ = orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
+      const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
+      // 公転周期をフレーム数に変換
+      const periodFrames = periodDays * lerpFrame;
+      // 1フレームあたりに進む角度 (ラジアン) を計算
+      const orbitSpeedFrame = ((2 * Math.PI) / periodFrames) * settings.accelerationOrbit;
 
-      // TODO: 月の公転：月が地球の周りを一周するのに約27.3日
+      // 月の公転（反時計回り）
+      const { orbitRadius, orbitSpeed } = earthMoon[0]; // orbitRadius: 10, orbitSpeed: 0.001
+      // const moonX = orbitRadius * Math.cos(time * orbitSpeed);
+      // const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
+      // const moonZ = orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
+      const moonX = orbitRadius * Math.cos(time * orbitSpeedFrame);
+      const moonY = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.sin(tiltAngle);
+      const moonZ = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.cos(tiltAngle);
       moon.position.set(-moonX, moonY, moonZ);
       // TODO: 月の自転：月は常に同じ面を地球に向けているので、自転速度を公転速度と同じにする
       moon.rotateY(0.01);
