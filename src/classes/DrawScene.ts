@@ -19,7 +19,6 @@ import {
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 
-const lerpFrame = 60; // 1日を何フレームで補間するか
 const isDebug = false;
 const currentIndexLabelSuffix = '365日目';
 
@@ -44,7 +43,6 @@ export class DrawScene {
   composer!: EffectComposer;
   sunMesh!: THREE.Mesh;
   earthGroup!: THREE.Group;
-  isAnimating = settings.isAnimating;
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -56,6 +54,12 @@ export class DrawScene {
 
   get userDataEarthPositionRes(): EarthPositionRes {
     return this.earthGroup.userData.earthPositionRes as EarthPositionRes;
+  }
+  get width(): number {
+    return window.innerWidth;
+  }
+  get height(): number {
+    return window.innerHeight;
   }
 
   async initPlanets(): Promise<void> {
@@ -75,14 +79,6 @@ export class DrawScene {
     this.render();
   }
 
-  get width(): number {
-    return window.innerWidth;
-  }
-
-  get height(): number {
-    return window.innerHeight;
-  }
-
   initEnvironment(): void {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0x00000, 1.0);
@@ -91,99 +87,87 @@ export class DrawScene {
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
     this.camera.position.set(0, 20, 122);
 
-    {
-      this.composer = new EffectComposer(this.renderer);
-      this.composer.addPass(new RenderPass(this.scene, this.camera));
-      // outline Pass
-      const outLinePass = new OutlinePass(
-        new THREE.Vector2(this.width, this.height),
-        this.scene,
-        this.camera,
-      );
-      outLinePass.edgeStrength = 3;
-      outLinePass.edgeGlow = 1;
-      outLinePass.visibleEdgeColor.set(0xffffff);
-      outLinePass.hiddenEdgeColor.set(0x190a05);
-      this.composer.addPass(outLinePass);
-      // Bloom Pass
-      const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(this.width, this.height),
-        1,
-        0.4,
-        0.85,
-      );
-      bloomPass.threshold = 1;
-      bloomPass.radius = 0.9;
-      this.composer.addPass(bloomPass);
-    }
-
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-    {
-      const gui = new GUI();
-      gui.domElement.style.top = '6px';
-      gui.domElement.style.right = '6px';
-      const frameLabelController = gui
-        .add(settings, 'frameLabel')
-        .name('1日のフレーム数')
-        .disable();
-      frameLabelController.setValue(`${lerpFrame}フレーム`);
-      gui.add(settings, 'accelerationOrbit', 0, 10).name('公転スピード');
-      gui.add(settings, 'acceleration', 0, 10).name('自転スピード');
-      gui
-        .add(settings, 'sunIntensity', 0, 10)
-        .name('太陽光強度')
-        .onChange((value) => {
-          (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
-        });
-      // アニメーションを再生/停止する
-      gui
-        .add(settings, 'isAnimating')
-        .name('アニメーション再生')
-        .onChange((value) => {
-          this.isAnimating = value;
-        });
-      // Top View
-      gui
-        .add(
-          {
-            topView: () => {
-              this.camera.position.set(0, 190, 0.01);
-              this.controls.target.set(0, 0, 0);
-              this.controls.update();
-            },
-          },
-          'topView',
-        )
-        .name('トップビュー');
-      // Side View
-      gui
-        .add(
-          {
-            sideView: () => {
-              this.camera.position.set(190, 0, 0.01);
-              this.controls.target.set(0, 0, 0);
-              this.controls.update();
-            },
-          },
-          'sideView',
-        )
-        .name('サイドビュー');
-      gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
-      gui
-        .add(
-          {
-            resetValues: () => {
-              gui.reset();
-              frameLabelController.setValue(`${lerpFrame}フレーム`);
-            },
-          },
-          'resetValues',
-        )
-        .name('GUI値リセット');
-    }
+    this.initComposer();
+    this.initGUI();
+    this.initLighting();
+  }
+
+  initLighting(): void {
     const lightAmbient = new THREE.AmbientLight(0x222222, 6);
     this.scene.add(lightAmbient);
+  }
+
+  initComposer(): void {
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    // outline Pass
+    const outLinePass = new OutlinePass(
+      new THREE.Vector2(this.width, this.height),
+      this.scene,
+      this.camera,
+    );
+    outLinePass.edgeStrength = 3;
+    outLinePass.edgeGlow = 1;
+    outLinePass.visibleEdgeColor.set(0xffffff);
+    outLinePass.hiddenEdgeColor.set(0x190a05);
+    this.composer.addPass(outLinePass);
+    // Bloom Pass
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.width, this.height), 1, 0.4, 0.85);
+    bloomPass.threshold = 1;
+    bloomPass.radius = 0.9;
+    this.composer.addPass(bloomPass);
+  }
+
+  initGUI(): void {
+    const gui = new GUI();
+    gui.domElement.style.top = '6px';
+    gui.domElement.style.right = '6px';
+    gui.add(settings, 'lerpFrame', 30, 600, settings.lerpFrame).name('1日のフレーム数').step(30);
+    gui.add(settings, 'accelerationOrbit', 0, 10).name('公転スピード');
+    gui.add(settings, 'acceleration', 0, 10).name('自転スピード');
+    gui
+      .add(settings, 'sunIntensity', 0, 10)
+      .name('太陽光強度')
+      .onChange((value) => {
+        (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
+      });
+    // アニメーションを再生/停止する
+    gui
+      .add(settings, 'isAnimating')
+      .name('アニメーション再生')
+      .onChange((value) => {
+        settings.isAnimating = value;
+      });
+    // Top View
+    gui
+      .add(
+        {
+          topView: () => {
+            this.camera.position.set(0, 190, 0.01);
+            this.controls.target.set(0, 0, 0);
+            this.controls.update();
+          },
+        },
+        'topView',
+      )
+      .name('トップビュー');
+    // Side View
+    gui
+      .add(
+        {
+          sideView: () => {
+            this.camera.position.set(190, 0, 0.01);
+            this.controls.target.set(0, 0, 0);
+            this.controls.update();
+          },
+        },
+        'sideView',
+      )
+      .name('サイドビュー');
+    gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
+    gui.add({ resetValues: () => gui.reset() }, 'resetValues').name('GUI値リセット');
   }
 
   resizeCanvas = () => {
@@ -199,7 +183,7 @@ export class DrawScene {
     this.composer.render();
 
     this.renderer.setAnimationLoop(() => this.render());
-    if (this.isAnimating) {
+    if (settings.isAnimating) {
       this.animate();
     }
   }
@@ -236,7 +220,7 @@ export class DrawScene {
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
-        ((this.lerpFactor + 1 / lerpFrame) * settings.accelerationOrbit).toFixed(3),
+        ((this.lerpFactor + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
       );
       // 次の日に到達したらインデックスを更新し、進捗をリセット
       if (this.lerpFactor >= 1) {
@@ -253,10 +237,10 @@ export class DrawScene {
       // atmosphere.rotateY(0.001 * settings.acceleration);
 
       // 地球は1日で360度するので1フレームあたりの回転量を計算
-      const earthRotation = (360 / lerpFrame) * settings.acceleration;
+      const earthRotation = (360 / settings.lerpFrame) * settings.acceleration;
       const earthAngle = (earthRotation * Math.PI) / 180;
       planet.rotateY(earthAngle);
-      atmosphere.rotateY(earthAngle);
+      atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
 
       // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
       const time = performance.now();
@@ -265,7 +249,7 @@ export class DrawScene {
       // ref: https://gemini.google.com/share/8c51c478712d
       const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
       // 公転周期をフレーム数に変換
-      const periodFrames = periodDays * lerpFrame;
+      const periodFrames = periodDays * settings.lerpFrame;
       // 1フレームあたりに進む公転の角度 (ラジアン) を計算
       const orbitSpeedFrame = ((2 * Math.PI) / periodFrames) * settings.accelerationOrbit;
 
