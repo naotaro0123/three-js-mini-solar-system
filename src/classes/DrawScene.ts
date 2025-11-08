@@ -123,15 +123,15 @@ export class DrawScene {
       const gui = new GUI();
       gui.domElement.style.top = '6px';
       gui.domElement.style.right = '6px';
-      gui
+      const frameLabelController = gui
         .add(settings, 'frameLabel')
         .name('1日のフレーム数')
-        .disable()
-        .setValue(`${lerpFrame}フレーム`);
-      gui.add(settings, 'accelerationOrbit', 1, 10).name('公転スピード');
-      gui.add(settings, 'acceleration', 1, 10).name('自転スピード');
+        .disable();
+      frameLabelController.setValue(`${lerpFrame}フレーム`);
+      gui.add(settings, 'accelerationOrbit', 0, 10).name('公転スピード');
+      gui.add(settings, 'acceleration', 0, 10).name('自転スピード');
       gui
-        .add(settings, 'sunIntensity', 1, 10)
+        .add(settings, 'sunIntensity', 0, 10)
         .name('太陽光強度')
         .onChange((value) => {
           (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
@@ -169,10 +169,19 @@ export class DrawScene {
           'sideView',
         )
         .name('サイドビュー');
-      // 視点をリセット
       gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
+      gui
+        .add(
+          {
+            resetValues: () => {
+              gui.reset();
+              frameLabelController.setValue(`${lerpFrame}フレーム`);
+            },
+          },
+          'resetValues',
+        )
+        .name('GUI値リセット');
     }
-
     const lightAmbient = new THREE.AmbientLight(0x222222, 6);
     this.scene.add(lightAmbient);
   }
