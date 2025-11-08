@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { EarthPositionRes } from './get-planet-position';
 import { MOON_SIZE, settings } from './settings';
+import { degToRad } from './utils';
 
 export const PLANET_NAME = 'Planet';
 const PLANET_ORBIT_NAME = 'PlanetOrbit';
@@ -82,7 +83,7 @@ export const createPlanet = (
     planetSystem.add(ringMesh);
     ringMesh.position.x = position;
     ringMesh.position.x = 0.5 * Math.PI;
-    ringMesh.rotation.y = (-tilt * Math.PI) / 180;
+    ringMesh.rotation.y = degToRad(-tilt);
   }
 
   if (atmosphere) {

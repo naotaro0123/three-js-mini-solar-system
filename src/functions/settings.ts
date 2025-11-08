@@ -1,7 +1,7 @@
 export const settings = {
   lerpFrame: 60, // 1日を何フレームで補間するか
   accelerationOrbit: 1, // 公転スピード
-  acceleration: 1, // 自転スピード
+  accelerationRotation: 1, // 自転スピード
   sunIntensity: 2.1, // 太陽の明るさ
   isAnimating: false, // アニメーションの再生/停止
 };

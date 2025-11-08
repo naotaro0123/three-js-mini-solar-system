@@ -18,6 +18,7 @@ import {
 } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
+import { degToRad } from '../functions/utils';
 
 const isDebug = false;
 const currentIndexLabelSuffix = '365日目';
@@ -126,7 +127,7 @@ export class DrawScene {
     gui.domElement.style.right = '6px';
     gui.add(settings, 'lerpFrame', 30, 600, settings.lerpFrame).name('1日のフレーム数').step(30);
     gui.add(settings, 'accelerationOrbit', 0, 10).name('公転スピード');
-    gui.add(settings, 'acceleration', 0, 10).name('自転スピード');
+    gui.add(settings, 'accelerationRotation', 0, 10).name('自転スピード');
     gui
       .add(settings, 'sunIntensity', 0, 10)
       .name('太陽光強度')
@@ -189,7 +190,7 @@ export class DrawScene {
   }
 
   animate(): void {
-    this.sunMesh.rotateY(0.001 * settings.acceleration);
+    this.sunMesh.rotateY(0.001 * settings.accelerationRotation);
 
     {
       // planet3dがearth。コードコピーする時間違えないように
@@ -216,7 +217,7 @@ export class DrawScene {
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
-      planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+      // planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
@@ -237,14 +238,14 @@ export class DrawScene {
       // atmosphere.rotateY(0.001 * settings.acceleration);
 
       // 地球は1日で360度するので1フレームあたりの回転量を計算
-      const earthRotation = (360 / settings.lerpFrame) * settings.acceleration;
-      const earthAngle = (earthRotation * Math.PI) / 180;
-      planet.rotateY(earthAngle);
-      atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
+      const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
+      const earthAngle = degToRad(earthRotation);
+      // planet.rotateY(earthAngle);
+      // atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
 
       // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
       const time = performance.now();
-      const tiltAngle = (5 * Math.PI) / 180;
+      const tiltAngle = degToRad(5);
 
       // ref: https://gemini.google.com/share/8c51c478712d
       const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
