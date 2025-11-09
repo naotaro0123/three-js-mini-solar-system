@@ -248,6 +248,7 @@ export class DrawScene {
       const tiltAngle = degToRad(5);
 
       // ref: https://gemini.google.com/share/8c51c478712d
+      // FIXME: 月の公転速度が早すぎる
       const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
       // 公転周期をフレーム数に変換
       const periodFrames = periodDays * settings.lerpFrame;
