@@ -29,7 +29,7 @@ export const earthMoon: EarthMoon[] = [
     texture: '/images/moonmap.jpg',
     bump: '/images/moonbump.jpg',
     orbitSpeed: 0.001 * settings.accelerationOrbit,
-    orbitRadius: 10,
+    orbitRadius: 10, // 月の軌道半径
   },
 ];
 

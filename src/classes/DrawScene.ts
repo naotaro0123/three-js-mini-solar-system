@@ -47,6 +47,8 @@ export class DrawScene {
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
+  clock = new THREE.Clock();
+  frameCount = 0;
 
   constructor() {
     this.initEnvironment();
@@ -190,6 +192,7 @@ export class DrawScene {
   }
 
   animate(): void {
+    this.frameCount++;
     this.sunMesh.rotateY(0.001 * settings.accelerationRotation);
 
     {
@@ -217,7 +220,7 @@ export class DrawScene {
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
-      // planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+      planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
 
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.lerpFactor = Number(
@@ -240,29 +243,23 @@ export class DrawScene {
       // 地球は1日で360度するので1フレームあたりの回転量を計算
       const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
       const earthAngle = degToRad(earthRotation);
-      // planet.rotateY(earthAngle);
-      // atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
+      planet.rotateY(earthAngle);
+      atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
 
       // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
-      const time = performance.now();
       const tiltAngle = degToRad(5);
-
-      // ref: https://gemini.google.com/share/8c51c478712d
-      // FIXME: 月の公転速度が早すぎる
+      // ref: https://gemini.google.com/app/f3c2d09549481c68
       const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
       // 公転周期をフレーム数に変換
       const periodFrames = periodDays * settings.lerpFrame;
-      // 1フレームあたりに進む公転の角度 (ラジアン) を計算
-      const orbitSpeedFrame = ((2 * Math.PI) / periodFrames) * settings.accelerationOrbit;
-
+      // 月は27.3日で360度公転するので1フレームあたりの回転量を計算
+      const orbitSpeedFrame = degToRad((360 / periodFrames) * settings.accelerationOrbit);
+      const currentAngle = this.frameCount * orbitSpeedFrame;
       // 月の公転（反時計回り）
-      const { orbitRadius, orbitSpeed } = earthMoon[0]; // orbitRadius: 10, orbitSpeed: 0.001
-      // const moonX = orbitRadius * Math.cos(time * orbitSpeed);
-      // const moonY = orbitRadius * Math.sin(time * orbitSpeed) * Math.sin(tiltAngle);
-      // const moonZ = orbitRadius * Math.sin(time * orbitSpeed) * Math.cos(tiltAngle);
-      const moonX = orbitRadius * Math.cos(time * orbitSpeedFrame);
-      const moonY = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.sin(tiltAngle);
-      const moonZ = orbitRadius * Math.sin(time * orbitSpeedFrame) * Math.cos(tiltAngle);
+      const { orbitRadius } = earthMoon[0]; // orbitRadius: 10
+      const moonX = orbitRadius * Math.cos(currentAngle);
+      const moonY = orbitRadius * Math.sin(currentAngle) * Math.sin(tiltAngle);
+      const moonZ = orbitRadius * Math.sin(currentAngle) * Math.cos(tiltAngle);
       moon.position.set(-moonX, moonY, moonZ);
       // 月の自転は公転と同じ角速度で回転させる（地球から常に同じ面が見える同期自転のため）
       const rotationSpeedFrame = orbitSpeedFrame;
