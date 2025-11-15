@@ -37,7 +37,7 @@ export const createPlanet = (
   planetName: string,
   size: number,
   position: number,
-  tilt: number,
+  tilt: number, // 自転軸の傾き
   texture: THREE.Material | string,
   bump: string | null,
   ring: Ring | null,
@@ -71,6 +71,17 @@ export const createPlanet = (
   const earthPosition = earthPositionRes.pathPoints[earthPositionRes.todayRow - 1];
   planetSystem.position.set(earthPosition.x, 0, earthPosition.y);
   planetSystem.add(planet);
+
+  // 自転軸を追加する
+  {
+    const axisRadius = 0.2;
+    const axisHeight = 20;
+    const axisGeometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisHeight, 32);
+    const axisMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const earthAxis = new THREE.Mesh(axisGeometry, axisMaterial);
+    earthAxis.rotation.z = degToRad(tilt); // 自転軸の傾き
+    planetSystem.add(earthAxis);
+  }
 
   if (ring) {
     const ringGeometry = new THREE.RingGeometry(ring.innerRadius, ring.outerRadius, 30);

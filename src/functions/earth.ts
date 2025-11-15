@@ -55,7 +55,7 @@ export const createEarthMesh = async (
     EARTH_NAME,
     EARTH_SIZE,
     90,
-    23,
+    23.4,
     earthMaterial,
     null,
     null,
