@@ -9,6 +9,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { createEarthMesh } from '../functions/earth';
 import type { EarthPositionRes } from '../functions/get-planet-position';
+import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
 import {
   earthMoon,
   PLANET_ATMO_SPHERE_NAME,
@@ -21,20 +22,6 @@ import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 
 const isDebug = false;
-const currentIndexLabelSuffix = '365日目';
-
-const createCurrentIndexLabel = (index: number): HTMLDivElement => {
-  const div = document.createElement('div');
-  div.style.position = 'absolute';
-  div.style.top = '10px';
-  div.style.left = '10px';
-  div.style.padding = '2px 8px';
-  div.style.borderRadius = '4px';
-  div.style.backgroundColor = 'white';
-  div.style.color = 'black';
-  div.innerText = `${index}/${currentIndexLabelSuffix}`;
-  return div;
-};
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -195,6 +182,8 @@ export class DrawScene {
     this.frameCount++;
     this.sunMesh.rotateY(0.001 * settings.accelerationRotation);
 
+    this.labelElement.innerText = `${this.currentIndex}/${currentIndexLabelSuffix}`;
+
     {
       // planet3dがearth。コードコピーする時間違えないように
       const planetSystem = this.earthGroup.getObjectByName(PLANET_SYSTEM_NAME) as THREE.Group;
@@ -202,77 +191,77 @@ export class DrawScene {
       const atmosphere = this.earthGroup.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
       const moon = this.earthGroup.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
-      // 地球の公転（反時計回り）
-      // this.earthGroup.rotateY(0.001 * settings.accelerationOrbit);
+      /* 地球の自転（反時計回り） */
+      {
+        // APIから取得した現在位置に惑星を配置
+        const earthPosition = this.userDataEarthPositionRes;
+        const currentPosition = earthPosition.pathPoints[this.currentIndex];
 
-      // APIから取得した現在位置に惑星を配置
-      const earthPosition = this.userDataEarthPositionRes;
-      const currentPosition = earthPosition.pathPoints[this.currentIndex];
+        // 次の日（nextDayIndex）の座標を取得
+        const nextDayIndex = this.currentIndex + 1;
+        const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
-      this.labelElement.innerText = `${this.currentIndex}/${currentIndexLabelSuffix}`;
+        // ref: https://gemini.google.com/app/a34a7df2f2983d4c
+        const interpolatedPos = new THREE.Vector3()
+          .fromArray(currentPosition.toArray())
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
-      // 次の日（nextDayIndex）の座標を取得
-      const nextDayIndex = this.currentIndex + 1;
-      const nextPosition = earthPosition.pathPoints[nextDayIndex];
+        /* 地球の公転（反時計回り）*/
+        planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
 
-      // ref: https://gemini.google.com/app/a34a7df2f2983d4c
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
-
-      planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
-
-      // 小数点の誤差を防ぐため、toFixedで丸める
-      this.lerpFactor = Number(
-        ((this.lerpFactor + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
-      );
-      // 次の日に到達したらインデックスを更新し、進捗をリセット
-      if (this.lerpFactor >= 1) {
-        if (nextDayIndex < earthPosition.pathPoints.length - 1) {
-          this.currentIndex = nextDayIndex;
-        } else {
-          this.currentIndex = 0;
+        // 小数点の誤差を防ぐため、toFixedで丸める
+        this.lerpFactor = Number(
+          ((this.lerpFactor + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
+        );
+        // 次の日に到達したらインデックスを更新し、進捗をリセット
+        if (this.lerpFactor >= 1) {
+          if (nextDayIndex < earthPosition.pathPoints.length - 1) {
+            this.currentIndex = nextDayIndex;
+          } else {
+            this.currentIndex = 0;
+          }
+          this.lerpFactor = 0;
         }
-        this.lerpFactor = 0;
+
+        // 地球は1日で360度するので1フレームあたりの回転量を計算
+        const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
+        const earthAngle = degToRad(earthRotation);
+        planet.rotateY(earthAngle);
+        atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
       }
 
-      // 地球の自転（反時計回り）
-      // planet.rotateY(0.005 * settings.acceleration);
-      // atmosphere.rotateY(0.001 * settings.acceleration);
+      /* 月の公転と自転 */
+      {
+        // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
+        const tiltAngle = degToRad(5);
+        // ref: https://gemini.google.com/app/f3c2d09549481c68
+        const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
+        // 公転周期をフレーム数に変換
+        const periodFrames = periodDays * settings.lerpFrame;
+        // 月は27.3日で360度公転するので1フレームあたりの回転量を計算
+        const orbitSpeedFrame = degToRad((360 / periodFrames) * settings.accelerationOrbit);
+        const currentAngle = this.frameCount * orbitSpeedFrame;
+        // 月の公転（反時計回り）
+        const { orbitRadius } = earthMoon[0]; // orbitRadius: 10
+        const moonX = orbitRadius * Math.cos(currentAngle);
+        const moonY = orbitRadius * Math.sin(currentAngle) * Math.sin(tiltAngle);
+        const moonZ = orbitRadius * Math.sin(currentAngle) * Math.cos(tiltAngle);
+        moon.position.set(-moonX, moonY, moonZ);
+        // 月の自転は公転と同じ角速度で回転させる（地球から常に同じ面が見える同期自転のため）
+        const rotationSpeedFrame = orbitSpeedFrame;
+        moon.rotateY(rotationSpeedFrame);
+      }
 
-      // 地球は1日で360度するので1フレームあたりの回転量を計算
-      const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
-      const earthAngle = degToRad(earthRotation);
-      planet.rotateY(earthAngle);
-      atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
-
-      // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
-      const tiltAngle = degToRad(5);
-      // ref: https://gemini.google.com/app/f3c2d09549481c68
-      const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
-      // 公転周期をフレーム数に変換
-      const periodFrames = periodDays * settings.lerpFrame;
-      // 月は27.3日で360度公転するので1フレームあたりの回転量を計算
-      const orbitSpeedFrame = degToRad((360 / periodFrames) * settings.accelerationOrbit);
-      const currentAngle = this.frameCount * orbitSpeedFrame;
-      // 月の公転（反時計回り）
-      const { orbitRadius } = earthMoon[0]; // orbitRadius: 10
-      const moonX = orbitRadius * Math.cos(currentAngle);
-      const moonY = orbitRadius * Math.sin(currentAngle) * Math.sin(tiltAngle);
-      const moonZ = orbitRadius * Math.sin(currentAngle) * Math.cos(tiltAngle);
-      moon.position.set(-moonX, moonY, moonZ);
-      // 月の自転は公転と同じ角速度で回転させる（地球から常に同じ面が見える同期自転のため）
-      const rotationSpeedFrame = orbitSpeedFrame;
-      moon.rotateY(rotationSpeedFrame);
-
-      // ワールドマトリックスを更新
-      this.earthGroup.updateWorldMatrix(true, false);
-      // earthのワールド座標を取得
-      const earthWorldPosition = new THREE.Vector3();
-      planet.getWorldPosition(earthWorldPosition);
-      // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
-      // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
-      // console.log('# earth position:', earthWorldPosition);
+      if (isDebug) {
+        // ワールドマトリックスを更新
+        this.earthGroup.updateWorldMatrix(true, false);
+        // earthのワールド座標を取得
+        const earthWorldPosition = new THREE.Vector3();
+        planet.getWorldPosition(earthWorldPosition);
+        // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
+        // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
+        // console.log('# earth position:', earthWorldPosition);
+      }
     }
   }
 }

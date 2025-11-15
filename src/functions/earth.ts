@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { getEarthPosition } from './get-planet-position';
 import { createPlanet, earthMoon } from './planet-common';
-import { EARTH_SIZE } from './settings';
+import { EARTH_SIZE, EARTH_TILT } from './settings';
 
 const EARTH_NAME = 'Earth';
 
@@ -55,7 +55,7 @@ export const createEarthMesh = async (
     EARTH_NAME,
     EARTH_SIZE,
     90,
-    23.4,
+    EARTH_TILT,
     earthMaterial,
     null,
     null,
