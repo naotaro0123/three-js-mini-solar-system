@@ -63,6 +63,7 @@ export const createPlanet = (
 
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
+  planet.rotation.z = degToRad(tilt);
   planet.name = PLANET_NAME;
 
   const planetSystem = new THREE.Group();
