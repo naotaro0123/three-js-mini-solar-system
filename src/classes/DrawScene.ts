@@ -58,7 +58,6 @@ export class DrawScene {
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成
     this.earthGroup = await createEarthMesh(this.sunMesh.position, isDebug);
-    console.log('# earthGroup:', this.earthGroup);
     this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
 
