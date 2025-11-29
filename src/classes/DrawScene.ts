@@ -156,7 +156,20 @@ export class DrawScene {
       )
       .name('サイドビュー');
     gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
-    gui.add({ resetValues: () => gui.reset() }, 'resetValues').name('GUI値リセット');
+    gui
+      .add(
+        {
+          resetValues: () => {
+            this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
+            this.lerpFactor = 0;
+            this.frameCount = 0;
+            // 惑星の位置を最新化してからリセット
+            setTimeout(() => gui.reset(), 100);
+          },
+        },
+        'resetValues',
+      )
+      .name('GUI値リセット');
   }
 
   resizeCanvas = () => {
