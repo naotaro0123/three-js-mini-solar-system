@@ -65,6 +65,7 @@ export class DrawScene {
     document.body.appendChild(this.labelElement);
 
     window.addEventListener('resize', this.resizeCanvas);
+    this.resizeCanvas();
     this.render();
   }
 
@@ -173,8 +174,18 @@ export class DrawScene {
   }
 
   resizeCanvas = () => {
+    // ざっくりとしたレスポンシブ対応
+    if (window.matchMedia('(max-width: 500px)').matches) {
+      this.camera.zoom = 0.2;
+    } else if (window.matchMedia('(max-width: 1024px)').matches) {
+      this.camera.zoom = 0.4;
+    } else {
+      this.camera.zoom = 1;
+    }
+
     this.renderer.setSize(this.width, this.height);
     this.camera.aspect = this.width / this.height;
+
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(window.devicePixelRatio);
   };
