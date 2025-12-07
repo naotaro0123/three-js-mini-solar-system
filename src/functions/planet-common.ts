@@ -75,8 +75,8 @@ export const createPlanet = (
 
   // 自転軸を追加する
   {
-    const axisRadius = 0.2;
-    const axisHeight = 20;
+    const axisRadius = 0.1;
+    const axisHeight = 16;
     const axisGeometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisHeight, 32);
     const axisMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const earthAxis = new THREE.Mesh(axisGeometry, axisMaterial);
