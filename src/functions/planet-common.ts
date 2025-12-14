@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { EarthPositionRes } from './get-planet-position';
+import type { PlanetPositionRes } from './get-planet-position';
 import { MOON_SIZE, settings } from './settings';
 import { degToRad } from './utils';
 
@@ -43,7 +43,7 @@ export const createPlanet = (
   ring: Ring | null,
   atmosphere: string | null,
   moons: EarthMoon[],
-  earthPositionRes: EarthPositionRes,
+  earthPositionRes: PlanetPositionRes,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;

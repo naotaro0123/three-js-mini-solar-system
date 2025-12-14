@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { getEarthPosition } from '../functions/get-planet-position';
+import { getPlanetPosition } from '../functions/get-planet-position';
 
 // 新しい座標範囲を設定
 const newRangeX = 90;
@@ -44,7 +44,7 @@ export class Simple {
   }
 
   async init() {
-    const { pathPoints } = await getEarthPosition();
+    const { pathPoints } = await getPlanetPosition('EARTH');
     const dataList = pathPoints.map((p) => ({ x: p.x, y: 0, z: p.y }));
     // 最大絶対値を計算
     const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));

@@ -1,30 +1,25 @@
 import { format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
+import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from './common';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
-type ResponseData = {
-  result: string;
-  signature: {
-    version: string;
-    source: string;
-  };
-};
-
-export type EarthPositionRes = {
+export type PlanetPositionRes = {
   todayRow: number;
   pathPoints: THREE.Vector3[];
 };
 
-export const getEarthPosition = async (): Promise<EarthPositionRes> => {
+export const getPlanetPosition = async (
+  commandKey: RequestQueryBody['COMMAND'],
+): Promise<PlanetPositionRes> => {
   const currentYear = new Date().getFullYear();
   const startDate = format(new Date(`${currentYear}-01-01`), 'yyyy-MM-dd');
   const stopDate = format(new Date(`${currentYear}-12-31`), 'yyyy-MM-dd');
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
-  const url = `${API_HOST}/api/v1/earth-current-position?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}`;
+  const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}&COMMAND=${commandKey}`;
 
-  const result: EarthPositionRes = { todayRow: 0, pathPoints: [] };
+  const result: PlanetPositionRes = { todayRow: 0, pathPoints: [] };
 
   try {
     const response = await fetch(url);

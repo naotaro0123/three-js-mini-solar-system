@@ -8,7 +8,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { createEarthMesh } from '../functions/earth';
-import type { EarthPositionRes } from '../functions/get-planet-position';
+import type { PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
 import {
   earthMoon,
@@ -42,8 +42,8 @@ export class DrawScene {
     this.initPlanets();
   }
 
-  get userDataEarthPositionRes(): EarthPositionRes {
-    return this.earthGroup.userData.earthPositionRes as EarthPositionRes;
+  get userDataEarthPositionRes(): PlanetPositionRes {
+    return this.earthGroup.userData.earthPositionRes as PlanetPositionRes;
   }
   get width(): number {
     return window.innerWidth;
