@@ -73,6 +73,8 @@ export class Simple {
         transformedData[0].y,
         transformedData[0].z,
       ]);
+      console.log('positions:', positions);
+      // TODO: three.core.js:1854 THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values.
       lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
       const line = new THREE.Line(lineGeometry, lineMaterial);
