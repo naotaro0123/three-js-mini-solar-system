@@ -45,6 +45,7 @@ export class Simple {
 
   async init() {
     const { pathPoints } = await getPlanetPosition('EARTH');
+    // const { pathPoints } = await getPlanetPosition('MERCURY');
     const dataList = pathPoints.map((p) => ({ x: p.x, y: p.y, z: p.y }));
     // 最大絶対値を計算
     const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));
@@ -69,9 +70,10 @@ export class Simple {
       });
       const positions = new Float32Array([
         ...transformedData.flatMap((d) => [d.x, d.y, d.z]),
-        transformedData[0].x,
-        transformedData[0].y,
-        transformedData[0].z,
+        // 最後はつなげる
+        // transformedData[0].x,
+        // transformedData[0].y,
+        // transformedData[0].z,
       ]);
       lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });

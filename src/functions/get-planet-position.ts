@@ -1,4 +1,4 @@
-import { format, getDayOfYear } from 'date-fns';
+import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
 import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from './common';
 
@@ -13,8 +13,24 @@ export const getPlanetPosition = async (
   commandKey: RequestQueryBody['COMMAND'],
 ): Promise<PlanetPositionRes> => {
   const currentYear = new Date().getFullYear();
-  const startDate = format(new Date(`${currentYear}-01-01`), 'yyyy-MM-dd');
-  const stopDate = format(new Date(`${currentYear}-12-31`), 'yyyy-MM-dd');
+  const _startDate = new Date(`${currentYear}-01-01`);
+  const startDate = format(_startDate, 'yyyy-MM-dd');
+
+  // 公転日数
+  const orbitalPeriod = () => {
+    switch (commandKey) {
+      case 'EARTH':
+        return 365;
+      case 'MERCURY':
+        return 88;
+      default:
+        return 364;
+    }
+  };
+
+  const _endDate = addDays(_startDate, orbitalPeriod());
+  console.log(_endDate);
+  const stopDate = format(_endDate, 'yyyy-MM-dd');
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}&COMMAND=${commandKey}`;
