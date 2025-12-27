@@ -21,8 +21,12 @@ export const getPlanetPosition = async (
     switch (commandKey) {
       case 'EARTH':
         return 365;
-      case 'MERCURY':
+      case 'MERCURY': // 水星
         return 88;
+      case 'VENUS': // 金星
+        return 225;
+      case 'MARS': // 火星
+        return 687;
       default:
         return 364;
     }

@@ -41,8 +41,17 @@ export class Simple {
     const grid = new THREE.GridHelper(100, 50);
     this.scene.add(grid);
 
-    this.drawOrbitLine('EARTH', new THREE.Color().setHex(0x0000ff));
-    this.drawOrbitLine('MERCURY', new THREE.Color().setHex(0x0099ff));
+    const planetList: { commandKey: RequestQueryBody['COMMAND']; color: number }[] = [
+      // { commandKey: 'EARTH', color: 0x0000ff },
+      // { commandKey: 'MERCURY', color: 0x0099ff },
+      // { commandKey: 'VENUS', color: 0xffd700 },
+      { commandKey: 'MARS', color: 0xff0000 },
+    ];
+
+    for (const planet of planetList) {
+      const color = new THREE.Color().setHex(planet.color);
+      this.drawOrbitLine(planet.commandKey, color);
+    }
   }
 
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
