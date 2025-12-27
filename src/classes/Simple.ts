@@ -42,16 +42,23 @@ export class Simple {
     this.scene.add(grid);
 
     const planetList: { commandKey: RequestQueryBody['COMMAND']; color: number }[] = [
-      // { commandKey: 'EARTH', color: 0x0000ff },
-      // { commandKey: 'MERCURY', color: 0x0099ff },
-      // { commandKey: 'VENUS', color: 0xffd700 },
+      { commandKey: 'EARTH', color: 0x0000ff },
+      { commandKey: 'MERCURY', color: 0x0099ff },
+      { commandKey: 'VENUS', color: 0xffd700 },
       { commandKey: 'MARS', color: 0xff0000 },
     ];
 
-    for (const planet of planetList) {
-      const color = new THREE.Color().setHex(planet.color);
-      this.drawOrbitLine(planet.commandKey, color);
-    }
+    const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    (async () => {
+      for (const planet of planetList) {
+        const color = new THREE.Color().setHex(planet.color);
+        // TODO: 各惑星の軌道が近い。直径の指定などあったっけ？
+        this.drawOrbitLine(planet.commandKey, color);
+        // 3つ以上同時にAPIを叩くと503エラーになるので少し待機する
+        await sleep(100);
+      }
+      this.render();
+    })();
   }
 
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
@@ -91,8 +98,6 @@ export class Simple {
       line.name = commandKey;
       this.scene.add(line);
     }
-
-    this.render();
   }
 
   render() {
