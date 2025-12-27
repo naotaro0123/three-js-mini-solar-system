@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { RequestQueryBody } from '../functions/common';
 import { getPlanetPosition } from '../functions/get-planet-position';
 
 // 新しい座標範囲を設定
@@ -40,18 +41,18 @@ export class Simple {
     const grid = new THREE.GridHelper(100, 50);
     this.scene.add(grid);
 
-    this.init();
+    this.drawOrbitLine('EARTH', new THREE.Color().setHex(0x0000ff));
+    this.drawOrbitLine('MERCURY', new THREE.Color().setHex(0x0099ff));
   }
 
-  async init() {
-    const { pathPoints } = await getPlanetPosition('EARTH');
-    // const { pathPoints } = await getPlanetPosition('MERCURY');
+  async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
+    const { pathPoints } = await getPlanetPosition(commandKey);
     const dataList = pathPoints.map((p) => ({ x: p.x, y: p.y, z: p.y }));
     // 最大絶対値を計算
     const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));
     const maxAbsY = Math.max(...dataList.map((p) => Math.abs(p.y)));
     const maxAbsZ = Math.max(...dataList.map((p) => Math.abs(p.z)));
-    console.log('maxAbsX, maxAbsY, maxAbsZ:', maxAbsX, maxAbsY, maxAbsZ);
+    console.log(commandKey, 'maxAbsX, maxAbsY, maxAbsZ:', maxAbsX, maxAbsY, maxAbsZ);
 
     {
       const lineGeometry = new THREE.BufferGeometry();
@@ -71,13 +72,14 @@ export class Simple {
       const positions = new Float32Array([
         ...transformedData.flatMap((d) => [d.x, d.y, d.z]),
         // 最後はつなげる
-        // transformedData[0].x,
-        // transformedData[0].y,
-        // transformedData[0].z,
+        transformedData[0].x,
+        transformedData[0].y,
+        transformedData[0].z,
       ]);
       lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+      const lineMaterial = new THREE.LineBasicMaterial({ color });
       const line = new THREE.Line(lineGeometry, lineMaterial);
+      line.name = commandKey;
       this.scene.add(line);
     }
 
