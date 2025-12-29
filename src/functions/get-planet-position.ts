@@ -33,7 +33,6 @@ export const getPlanetPosition = async (
   };
 
   const _endDate = addDays(_startDate, orbitalPeriod());
-  console.log(_endDate);
   const stopDate = format(_endDate, 'yyyy-MM-dd');
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
@@ -52,8 +51,8 @@ export const getPlanetPosition = async (
     if (data.result) {
       // 'result' キーの下にデータが含まれています
       const ephemerisData = data.result;
-      console.log('JPL Horizons APIから取得した地球の位置データ:');
-      console.log(ephemerisData);
+      // console.log('JPL Horizons APIから取得した地球の位置データ:');
+      // console.log(ephemerisData);
 
       // ここでデータを解析・利用
       // 例: 'x'、'y'、'z' 座標を抽出

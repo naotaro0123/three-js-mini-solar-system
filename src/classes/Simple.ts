@@ -43,8 +43,8 @@ export class Simple {
 
     const planetList: { commandKey: RequestQueryBody['COMMAND']; color: number }[] = [
       { commandKey: 'EARTH', color: 0x0000ff },
-      { commandKey: 'MERCURY', color: 0x0099ff },
-      { commandKey: 'VENUS', color: 0xffd700 },
+      // { commandKey: 'MERCURY', color: 0x0099ff },
+      // { commandKey: 'VENUS', color: 0xffd700 },
       { commandKey: 'MARS', color: 0xff0000 },
     ];
 
@@ -64,6 +64,7 @@ export class Simple {
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
     const { pathPoints } = await getPlanetPosition(commandKey);
     const dataList = pathPoints.map((p) => ({ x: p.x, y: p.y, z: p.y }));
+    console.log(commandKey, 'dataList:', dataList);
     // 最大絶対値を計算
     const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));
     const maxAbsY = Math.max(...dataList.map((p) => Math.abs(p.y)));
@@ -85,6 +86,8 @@ export class Simple {
           z: (point.y / maxAbsY) * newRangeZ,
         };
       });
+      console.log(commandKey, 'transformedData:', transformedData);
+      // TODO: planet-common.tsの軌道線を同様にTHREE.EllipseCurveを使用
       const positions = new Float32Array([
         ...transformedData.flatMap((d) => [d.x, d.y, d.z]),
         // 最後はつなげる
