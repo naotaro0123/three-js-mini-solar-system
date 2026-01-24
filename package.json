@@ -22,7 +22,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-unused-imports": "^4.3.0",
     "lil-gui": "^0.21.0",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "three": "^0.182.0"
   }
 }
