@@ -41,11 +41,15 @@ export class Simple {
     const grid = new THREE.GridHelper(100, 50);
     this.scene.add(grid);
 
-    const planetList: { commandKey: RequestQueryBody['COMMAND']; color: number }[] = [
-      { commandKey: 'EARTH', color: 0x0000ff },
+    const planetList: {
+      commandKey: RequestQueryBody['COMMAND'];
+      color: number;
+      position: number;
+    }[] = [
+      { commandKey: 'EARTH', color: 0x0000ff, position: 90 },
       // { commandKey: 'MERCURY', color: 0x0099ff },
       // { commandKey: 'VENUS', color: 0xffd700 },
-      { commandKey: 'MARS', color: 0xff0000 },
+      { commandKey: 'MARS', color: 0xff0000, position: 115 },
     ];
 
     const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -53,7 +57,7 @@ export class Simple {
       for (const planet of planetList) {
         const color = new THREE.Color().setHex(planet.color);
         // TODO: 各惑星の軌道が近い。直径の指定などあったっけ？
-        this.drawOrbitLine(planet.commandKey, color);
+        this.drawOrbitLine(planet.commandKey, planet.position, color);
         // 3つ以上同時にAPIを叩くと503エラーになるので少し待機する
         await sleep(100);
       }
@@ -61,46 +65,32 @@ export class Simple {
     })();
   }
 
-  async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
-    const { pathPoints } = await getPlanetPosition(commandKey);
-    const dataList = pathPoints.map((p) => ({ x: p.x, y: p.y, z: p.y }));
-    console.log(commandKey, 'dataList:', dataList);
-    // 最大絶対値を計算
-    const maxAbsX = Math.max(...dataList.map((p) => Math.abs(p.x)));
-    const maxAbsY = Math.max(...dataList.map((p) => Math.abs(p.y)));
-    const maxAbsZ = Math.max(...dataList.map((p) => Math.abs(p.z)));
-    console.log(commandKey, 'maxAbsX, maxAbsY, maxAbsZ:', maxAbsX, maxAbsY, maxAbsZ);
-
-    {
-      const lineGeometry = new THREE.BufferGeometry();
-      const transformedData = dataList.map((point) => {
-        return {
-          // X軸は-90から90の範囲に変換
-          x: (point.x / maxAbsX) * newRangeX,
-          // Y軸は0に固定
-          y: newRangeY,
-          // y: (point.y / maxAbsY) * newRangeY,
-          // Z軸は-90から90の範囲に変換
-          // Three.jsはY軸が上方向なので、Z軸とY軸を入れ替える
-          // z: (point.z / maxAbsZ) * newRangeZ,
-          z: (point.y / maxAbsY) * newRangeZ,
-        };
-      });
-      console.log(commandKey, 'transformedData:', transformedData);
-      // TODO: planet-common.tsの軌道線を同様にTHREE.EllipseCurveを使用
-      const positions = new Float32Array([
-        ...transformedData.flatMap((d) => [d.x, d.y, d.z]),
-        // 最後はつなげる
-        transformedData[0].x,
-        transformedData[0].y,
-        transformedData[0].z,
-      ]);
-      lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const lineMaterial = new THREE.LineBasicMaterial({ color });
-      const line = new THREE.Line(lineGeometry, lineMaterial);
-      line.name = commandKey;
-      this.scene.add(line);
-    }
+  async drawOrbitLine(
+    commandKey: RequestQueryBody['COMMAND'],
+    position: number,
+    color: THREE.Color,
+  ) {
+    const planetPositionRes = await getPlanetPosition(commandKey);
+    const orbitPath = new THREE.EllipseCurve(
+      0,
+      0, // ax, aY
+      position,
+      position, // xRadius, yRadius
+      0,
+      2 * Math.PI, // aStartAngle, aEndAngle
+      false, // aClockwise
+      0, // aRotation
+    );
+    const _pathPoints = orbitPath.getPoints(100);
+    // TODO: APIから取得したpathPointsだと直径が近すぎる
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(
+      planetPositionRes.pathPoints ?? _pathPoints,
+    );
+    const lineMaterial = new THREE.LineBasicMaterial({ color });
+    const line = new THREE.LineLoop(lineGeometry, lineMaterial);
+    line.rotation.x = Math.PI / 2;
+    line.name = commandKey;
+    this.scene.add(line);
   }
 
   render() {
