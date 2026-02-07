@@ -82,10 +82,11 @@ export class Simple {
       0, // aRotation
     );
     const _pathPoints = orbitPath.getPoints(100);
+    console.log('planetPositionRes.pathPoints:', planetPositionRes.pathPoints);
+    console.log('_pathPoints', _pathPoints);
+
     // TODO: APIから取得したpathPointsだと直径が近すぎる
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints(
-      planetPositionRes.pathPoints ?? _pathPoints,
-    );
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
     const lineMaterial = new THREE.LineBasicMaterial({ color });
     const line = new THREE.LineLoop(lineGeometry, lineMaterial);
     line.rotation.x = Math.PI / 2;

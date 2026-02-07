@@ -155,6 +155,7 @@ export const createPlanet = (
     0, // aRotation
   );
   const _pathPoints = orbitPath.getPoints(100);
+  // console.log('planetPositionRes.pathPoints:', planetPositionRes.pathPoints);
   const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
     planetPositionRes.pathPoints ?? _pathPoints,
   );
