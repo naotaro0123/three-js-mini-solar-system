@@ -34,6 +34,7 @@ export const getPlanetPosition = async (
 
   const _endDate = addDays(_startDate, orbitalPeriod());
   const stopDate = format(_endDate, 'yyyy-MM-dd');
+  // TODO: 木星などの場合は30dなどに変更する
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}&COMMAND=${commandKey}`;
@@ -66,25 +67,17 @@ export const getPlanetPosition = async (
         pathPoints.push({ x, y, z, day: i + 1 });
       });
 
-      // 座標を正規化する（太陽から地球の距離を90とする）
-      {
-        // 座標範囲を設定
-        const newRangeX = 90;
-        const newRangeZ = 90;
-        // 最大絶対値を計算
-        const maxAbsX = Math.max(...pathPoints.map((p) => Math.abs(p.x)));
-        const maxAbsY = Math.max(...pathPoints.map((p) => Math.abs(p.y)));
-        const transformedData = pathPoints.map((point) => {
-          return new THREE.Vector3(
-            // X軸は-90から90の範囲に変換
-            (point.x / maxAbsX) * newRangeX,
-            // Z軸は-90から90の範囲に変換
-            // Three.jsはY軸が上方向なので、Z軸とY軸を入れ替える
-            (point.y / maxAbsY) * newRangeZ,
-          );
-        });
-        result.pathPoints = transformedData.reverse(); // 日付順にするため反転
-      }
+      // 座標を正規化する
+      const AU_IN_UNITS = 90; // 1AUを90に設定
+      const transformedData = pathPoints.map((point) => {
+        return new THREE.Vector3(
+          point.x * AU_IN_UNITS,
+          point.z * AU_IN_UNITS,
+          // Three.jsはY軸が上方向なので、Z軸とY軸を入れ替える
+          point.y * AU_IN_UNITS,
+        );
+      });
+      result.pathPoints = transformedData.reverse(); // 日付順にするため反転
 
       const today = new Date();
       const dayOfYearWithDfs = getDayOfYear(today);

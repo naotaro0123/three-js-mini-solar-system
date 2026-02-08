@@ -224,7 +224,6 @@ export class DrawScene {
         const nextDayIndex = this.currentIndex + 1;
         const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
-        // ref: https://gemini.google.com/app/a34a7df2f2983d4c
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
@@ -257,7 +256,6 @@ export class DrawScene {
       {
         // TODO: リファクタ。settings.tsに移せるものは移す。orbitSpeedも削除
         const tiltAngle = degToRad(5);
-        // ref: https://gemini.google.com/app/f3c2d09549481c68
         const periodDays = 27.322; // 月の公転周期は約27.3日 (27.322日 = 恒星月)
         // 公転周期をフレーム数に変換
         const periodFrames = periodDays * settings.lerpFrame;

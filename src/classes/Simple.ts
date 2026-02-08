@@ -44,20 +44,18 @@ export class Simple {
     const planetList: {
       commandKey: RequestQueryBody['COMMAND'];
       color: number;
-      position: number;
     }[] = [
-      { commandKey: 'EARTH', color: 0x0000ff, position: 90 },
+      { commandKey: 'EARTH', color: 0x0000ff },
       // { commandKey: 'MERCURY', color: 0x0099ff },
       // { commandKey: 'VENUS', color: 0xffd700 },
-      { commandKey: 'MARS', color: 0xff0000, position: 115 },
+      // { commandKey: 'MARS', color: 0xff0000 },
     ];
 
     const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
     (async () => {
       for (const planet of planetList) {
         const color = new THREE.Color().setHex(planet.color);
-        // TODO: 各惑星の軌道が近い。直径の指定などあったっけ？
-        this.drawOrbitLine(planet.commandKey, planet.position, color);
+        this.drawOrbitLine(planet.commandKey, color);
         // 3つ以上同時にAPIを叩くと503エラーになるので少し待機する
         await sleep(100);
       }
@@ -65,31 +63,11 @@ export class Simple {
     })();
   }
 
-  async drawOrbitLine(
-    commandKey: RequestQueryBody['COMMAND'],
-    position: number,
-    color: THREE.Color,
-  ) {
+  async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
     const planetPositionRes = await getPlanetPosition(commandKey);
-    const orbitPath = new THREE.EllipseCurve(
-      0,
-      0, // ax, aY
-      position,
-      position, // xRadius, yRadius
-      0,
-      2 * Math.PI, // aStartAngle, aEndAngle
-      false, // aClockwise
-      0, // aRotation
-    );
-    const _pathPoints = orbitPath.getPoints(100);
-    console.log('planetPositionRes.pathPoints:', planetPositionRes.pathPoints);
-    console.log('_pathPoints', _pathPoints);
-
-    // TODO: APIから取得したpathPointsだと直径が近すぎる
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
     const lineMaterial = new THREE.LineBasicMaterial({ color });
     const line = new THREE.LineLoop(lineGeometry, lineMaterial);
-    line.rotation.x = Math.PI / 2;
     line.name = commandKey;
     this.scene.add(line);
   }
