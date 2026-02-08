@@ -22,7 +22,7 @@ import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 
-const isDebug = true;
+const isDebug = false;
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -214,7 +214,7 @@ export class DrawScene {
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
         /* 地球の公転（反時計回り）*/
-        planetSystem.position.set(interpolatedPos.x, 0, interpolatedPos.y);
+        planetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
         // 小数点の誤差を防ぐため、toFixedで丸める
         this.lerpFactor = Number(

@@ -70,9 +70,8 @@ export const createPlanet = (
   planetSystem.name = PLANET_SYSTEM_NAME;
   // APIから取得した現在位置に惑星を配置
   const earthPosition = planetPositionRes.pathPoints[planetPositionRes.todayRow - 1];
-  planetSystem.position.set(earthPosition.x, 0, earthPosition.y);
-  // TODO: 地球を表示を元に戻す
-  // planetSystem.add(planet);
+  planetSystem.position.copy(earthPosition);
+  planetSystem.add(planet);
 
   // 自転軸を追加する
   {

@@ -49,7 +49,7 @@ export const createEarthMesh = async (
       `,
   });
 
-  const earthPosition = await getPlanetPosition('EARTH');
+  const planetPositionRes = await getPlanetPosition('EARTH');
 
   const earthMesh = createPlanet(
     EARTH_NAME,
@@ -61,18 +61,17 @@ export const createEarthMesh = async (
     null,
     '/images/earth_atmosphere.jpg',
     earthMoon,
-    earthPosition,
+    planetPositionRes,
   );
 
   if (isDebug) {
-    // FIXME: なぜ公転軌道の位置とずれるのか？
     // 地球の現在位置を表示
     const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const currentEarthPoint = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    const { pathPoints, todayRow } = earthPosition;
+    const { pathPoints, todayRow } = planetPositionRes;
     const position = pathPoints[todayRow - 1];
-    currentEarthPoint.position.set(position.x, 0, position.y);
+    currentEarthPoint.position.copy(position);
     earthMesh.add(currentEarthPoint);
   }
 
