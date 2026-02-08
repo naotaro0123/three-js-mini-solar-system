@@ -71,7 +71,8 @@ export const createPlanet = (
   // APIから取得した現在位置に惑星を配置
   const earthPosition = planetPositionRes.pathPoints[planetPositionRes.todayRow - 1];
   planetSystem.position.set(earthPosition.x, 0, earthPosition.y);
-  planetSystem.add(planet);
+  // TODO: 地球を表示を元に戻す
+  // planetSystem.add(planet);
 
   // 自転軸を追加する
   {
@@ -143,22 +144,7 @@ export const createPlanet = (
   planet3d.name = planetName;
   planet3d.userData = { earthPositionRes: planetPositionRes };
 
-  // TODO: 他の惑星を追加時に外部から渡すように修正する
-  const orbitPath = new THREE.EllipseCurve(
-    0,
-    0, // ax, aY
-    position,
-    position, // xRadius, yRadius
-    0,
-    2 * Math.PI, // aStartAngle, aEndAngle
-    false, // aClockwise
-    0, // aRotation
-  );
-  const _pathPoints = orbitPath.getPoints(100);
-  // console.log('planetPositionRes.pathPoints:', planetPositionRes.pathPoints);
-  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(
-    planetPositionRes.pathPoints ?? _pathPoints,
-  );
+  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -166,7 +152,6 @@ export const createPlanet = (
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
   orbit.name = PLANET_ORBIT_NAME;
-  orbit.rotation.x = Math.PI / 2;
   planet3d.add(orbit);
 
   return planet3d;

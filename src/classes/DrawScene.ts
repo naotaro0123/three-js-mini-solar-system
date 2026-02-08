@@ -17,11 +17,12 @@ import {
   PLANET_NAME,
   PLANET_SYSTEM_NAME,
 } from '../functions/planet-common';
+import { handleResize } from '../functions/resize';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 
-const isDebug = false;
+const isDebug = true;
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -64,8 +65,6 @@ export class DrawScene {
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
     document.body.appendChild(this.labelElement);
 
-    window.addEventListener('resize', this.resizeCanvas);
-    this.resizeCanvas();
     this.render();
   }
 
@@ -76,6 +75,9 @@ export class DrawScene {
 
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
     this.camera.position.set(0, 20, 122);
+
+    handleResize(this.camera, this.renderer);
+    window.addEventListener('resize', () => handleResize(this.camera, this.renderer));
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -173,23 +175,6 @@ export class DrawScene {
       .name('GUI値リセット');
   }
 
-  resizeCanvas = () => {
-    // ざっくりとしたレスポンシブ対応
-    if (window.matchMedia('(max-width: 500px)').matches) {
-      this.camera.zoom = 0.2;
-    } else if (window.matchMedia('(max-width: 1024px)').matches) {
-      this.camera.zoom = 0.4;
-    } else {
-      this.camera.zoom = 1;
-    }
-
-    this.renderer.setSize(this.width, this.height);
-    this.camera.aspect = this.width / this.height;
-
-    this.camera.updateProjectionMatrix();
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-  };
-
   render(): void {
     this.renderer.render(this.scene, this.camera);
     this.controls.update();
@@ -281,7 +266,7 @@ export class DrawScene {
         planet.getWorldPosition(earthWorldPosition);
         // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
         // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
-        // console.log('# earth position:', earthWorldPosition);
+        console.log('# earth position:', earthWorldPosition);
       }
     }
   }

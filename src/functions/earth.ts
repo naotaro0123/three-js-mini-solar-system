@@ -3,7 +3,7 @@ import { getPlanetPosition } from './get-planet-position';
 import { createPlanet, earthMoon } from './planet-common';
 import { EARTH_SIZE, EARTH_TILT } from './settings';
 
-const EARTH_NAME = 'Earth';
+export const EARTH_NAME = 'Earth';
 
 export const createEarthMesh = async (
   sunPosition: THREE.Vector3,
@@ -65,6 +65,7 @@ export const createEarthMesh = async (
   );
 
   if (isDebug) {
+    // FIXME: なぜ公転軌道の位置とずれるのか？
     // 地球の現在位置を表示
     const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
