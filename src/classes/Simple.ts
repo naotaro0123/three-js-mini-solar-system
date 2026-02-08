@@ -2,11 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { RequestQueryBody } from '../functions/common';
 import { getPlanetPosition } from '../functions/get-planet-position';
-
-// 新しい座標範囲を設定
-const newRangeX = 90;
-const newRangeY = 0; // Y座標は0に固定
-const newRangeZ = 90;
+import { handleResize } from '../functions/resize';
 
 export class Simple {
   private width: number;
@@ -28,6 +24,9 @@ export class Simple {
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
     this.camera.position.set(0, 100, 160);
 
+    handleResize(this.camera, this.renderer);
+    window.addEventListener('resize', () => handleResize(this.camera, this.renderer));
+
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enablePan = true;
     this.controls.enableZoom = true;
@@ -46,9 +45,9 @@ export class Simple {
       color: number;
     }[] = [
       { commandKey: 'EARTH', color: 0x0000ff },
-      // { commandKey: 'MERCURY', color: 0x0099ff },
-      // { commandKey: 'VENUS', color: 0xffd700 },
-      // { commandKey: 'MARS', color: 0xff0000 },
+      { commandKey: 'MERCURY', color: 0x0099ff },
+      { commandKey: 'VENUS', color: 0xffd700 },
+      { commandKey: 'MARS', color: 0xff0000 },
     ];
 
     const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
