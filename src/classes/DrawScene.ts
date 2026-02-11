@@ -1,17 +1,11 @@
 import * as THREE from 'three';
-import {
-  EffectComposer,
-  OutlinePass,
-  RenderPass,
-  UnrealBloomPass,
-} from 'three/examples/jsm/Addons.js';
+import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { createEarthMesh } from '../functions/earth';
+import { initEnvironment, initGUI } from '../functions/environment';
 import type { PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
 import { earthMoon, Names } from '../functions/planet-common';
-import { handleResize } from '../functions/resize';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
@@ -33,7 +27,15 @@ export class DrawScene {
   frameCount = 0;
 
   constructor() {
-    this.initEnvironment();
+    const { camera, controls, composer } = initEnvironment(
+      this.renderer,
+      this.scene,
+      this.width,
+      this.height,
+    );
+    this.camera = camera;
+    this.controls = controls;
+    this.composer = composer;
     this.initPlanets();
   }
 
@@ -59,114 +61,24 @@ export class DrawScene {
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
     document.body.appendChild(this.labelElement);
 
+    initGUI({
+      sunMesh: this.sunMesh,
+      camera: this.camera,
+      controls: this.controls,
+      getCurrentIndex: () => this.currentIndex,
+      setCurrentIndex: (value: number) => {
+        this.currentIndex = value;
+      },
+      setLerpFactor: (value: number) => {
+        this.lerpFactor = value;
+      },
+      setFrameCount: (value: number) => {
+        this.frameCount = value;
+      },
+      userDataEarthPositionRes: this.userDataEarthPositionRes,
+    });
+
     this.render();
-  }
-
-  initEnvironment(): void {
-    this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0x00000, 1.0);
-    document.body.appendChild(this.renderer.domElement);
-
-    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
-    this.camera.position.set(0, 20, 122);
-
-    handleResize(this.camera, this.renderer);
-    window.addEventListener('resize', () => handleResize(this.camera, this.renderer));
-
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    this.initComposer();
-    this.initGUI();
-    this.initLighting();
-  }
-
-  initLighting(): void {
-    const lightAmbient = new THREE.AmbientLight(0x222222, 6);
-    this.scene.add(lightAmbient);
-  }
-
-  initComposer(): void {
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-    // outline Pass
-    const outLinePass = new OutlinePass(
-      new THREE.Vector2(this.width, this.height),
-      this.scene,
-      this.camera,
-    );
-    outLinePass.edgeStrength = 3;
-    outLinePass.edgeGlow = 1;
-    outLinePass.visibleEdgeColor.set(0xffffff);
-    outLinePass.hiddenEdgeColor.set(0x190a05);
-    this.composer.addPass(outLinePass);
-    // Bloom Pass
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.width, this.height), 1, 0.4, 0.85);
-    bloomPass.threshold = 1;
-    bloomPass.radius = 0.9;
-    this.composer.addPass(bloomPass);
-  }
-
-  initGUI(): void {
-    const gui = new GUI();
-    gui.domElement.style.top = '6px';
-    gui.domElement.style.right = '6px';
-    gui.add(settings, 'lerpFrame', 30, 600, settings.lerpFrame).name('1日のフレーム数').step(30);
-    gui.add(settings, 'accelerationOrbit', 0, 10).name('公転スピード');
-    gui.add(settings, 'accelerationRotation', 0, 10).name('自転スピード');
-    gui
-      .add(settings, 'sunIntensity', 0, 10)
-      .name('太陽光強度')
-      .onChange((value) => {
-        (this.sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = value;
-      });
-    // アニメーションを再生/停止する
-    gui
-      .add(settings, 'isAnimating')
-      .name('アニメーション再生')
-      .onChange((value) => {
-        settings.isAnimating = value;
-      });
-    // Top View
-    gui
-      .add(
-        {
-          topView: () => {
-            this.camera.position.set(0, 190, 0.01);
-            this.controls.target.set(0, 0, 0);
-            this.controls.update();
-          },
-        },
-        'topView',
-      )
-      .name('トップビュー');
-    // Side View
-    gui
-      .add(
-        {
-          sideView: () => {
-            this.camera.position.set(190, 0, 0.01);
-            this.controls.target.set(0, 0, 0);
-            this.controls.update();
-          },
-        },
-        'sideView',
-      )
-      .name('サイドビュー');
-    gui.add({ resetView: () => this.controls.reset() }, 'resetView').name('視点リセット');
-    gui
-      .add(
-        {
-          resetValues: () => {
-            this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
-            this.lerpFactor = 0;
-            this.frameCount = 0;
-            // 惑星の位置を最新化してからリセット
-            setTimeout(() => gui.reset(), 100);
-          },
-        },
-        'resetValues',
-      )
-      .name('GUI値リセット');
   }
 
   render(): void {
