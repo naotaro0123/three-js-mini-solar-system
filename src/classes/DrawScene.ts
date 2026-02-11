@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createEarthMesh } from '../functions/earth';
+import { createEarthMesh as createEarthGroup } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
-import type { PlanetPositionRes } from '../functions/get-planet-position';
+import { type PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
+import { createMercuryGroup } from '../functions/mercury';
 import { earthMoon, Names } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
@@ -18,8 +19,9 @@ export class DrawScene {
   camera!: THREE.PerspectiveCamera;
   controls!: OrbitControls;
   composer!: EffectComposer;
-  sunMesh!: THREE.Mesh;
-  earthGroup!: THREE.Group;
+  sunMesh!: THREE.Mesh; // 太陽のメッシュ
+  earthGroup!: THREE.Group; // 地球と月のグループ
+  mercuryGroup!: THREE.Group; // 水星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -37,10 +39,11 @@ export class DrawScene {
     this.controls = controls;
     this.composer = composer;
     this.initPlanets();
+    this.render();
   }
 
   get userDataEarthPositionRes(): PlanetPositionRes {
-    return this.earthGroup.userData.earthPositionRes as PlanetPositionRes;
+    return this.earthGroup.userData.planetPositionRes as PlanetPositionRes;
   }
   get width(): number {
     return window.innerWidth;
@@ -54,9 +57,12 @@ export class DrawScene {
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成
-    this.earthGroup = await createEarthMesh(this.sunMesh.position, isDebug);
+    this.earthGroup = await createEarthGroup(this.sunMesh.position, isDebug);
     this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
+    // 水星のメッシュを作成
+    this.mercuryGroup = await createMercuryGroup();
+    this.scene.add(this.mercuryGroup);
 
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
     document.body.appendChild(this.labelElement);
@@ -77,8 +83,6 @@ export class DrawScene {
       },
       userDataEarthPositionRes: this.userDataEarthPositionRes,
     });
-
-    this.render();
   }
 
   render(): void {
@@ -100,14 +104,16 @@ export class DrawScene {
 
     {
       // planet3dがearth。コードコピーする時間違えないように
-      const planetSystem = this.earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
-      const planet = this.earthGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
-      const atmosphere = this.earthGroup.getObjectByName(
+      const earthPlanetSystem = this.earthGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+      const earthPlanet = this.earthGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      const earthAtmosphere = this.earthGroup.getObjectByName(
         Names.PLANET_ATMO_SPHERE_NAME,
       ) as THREE.Mesh;
       const moon = this.earthGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
-      /* 地球の自転（反時計回り） */
+      /* 地球の公転と自転（反時計回り） */
       {
         // APIから取得した現在位置に惑星を配置
         const earthPosition = this.userDataEarthPositionRes;
@@ -122,7 +128,7 @@ export class DrawScene {
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
         /* 地球の公転（反時計回り）*/
-        planetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+        earthPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
         // 小数点の誤差を防ぐため、toFixedで丸める
         this.lerpFactor = Number(
@@ -141,8 +147,8 @@ export class DrawScene {
         // 地球は1日で360度するので1フレームあたりの回転量を計算
         const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
         const earthAngle = degToRad(earthRotation);
-        planet.rotateY(earthAngle);
-        atmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
+        earthPlanet.rotateY(earthAngle);
+        earthAtmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
       }
 
       /* 月の公転と自転 */
@@ -166,15 +172,35 @@ export class DrawScene {
         moon.rotateY(rotationSpeedFrame);
       }
 
-      if (isDebug) {
-        // ワールドマトリックスを更新
-        this.earthGroup.updateWorldMatrix(true, false);
-        // earthのワールド座標を取得
-        const earthWorldPosition = new THREE.Vector3();
-        planet.getWorldPosition(earthWorldPosition);
-        // MEMO: earthGroupはposition(0, 0, 0)でplanetはxが90ずれてる。earthGroupを回転させることで公転させてる
-        // xは90 〜 -90, yは0, zは-90 〜 90で奥行きが変わる
-        console.log('# earth position:', earthWorldPosition);
+      /* 水星の公転と自転（反時計回り） */
+      {
+        const mercuryPlanetSystem = this.mercuryGroup.getObjectByName(
+          Names.PLANET_SYSTEM_NAME,
+        ) as THREE.Group;
+
+        // APIから取得した現在位置に惑星を配置
+        const mercuryPosition = this.mercuryGroup.userData.planetPositionRes as PlanetPositionRes;
+        const mercuryCurrentIndex =
+          this.currentIndex < mercuryPosition.pathPoints.length - 1
+            ? this.currentIndex
+            : this.currentIndex % (mercuryPosition.pathPoints.length - 1);
+        const currentPosition = mercuryPosition.pathPoints[mercuryCurrentIndex];
+
+        // 次の日（nextDayIndex）の座標を取得
+        const nextDayIndex = mercuryCurrentIndex + 1;
+        const nextPosition = mercuryPosition.pathPoints[nextDayIndex];
+        const interpolatedPos = new THREE.Vector3()
+          .fromArray(currentPosition.toArray())
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+        /* 水星の公転（反時計回り）*/
+        mercuryPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+
+        const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+        // 水星は88日で360度するので1フレームあたりの回転量を計算
+        const mercuryRotation = (360 / (settings.lerpFrame * 88)) * settings.accelerationRotation;
+        const mercuryAngle = degToRad(mercuryRotation);
+        mercuryPlanet.rotateY(mercuryAngle);
+        // TODO: ちゃんと自転してるかチェック？
       }
     }
   }

@@ -7,6 +7,7 @@ export const Names = {
   PLANET_NAME: 'Planet',
   PLANET_ORBIT_NAME: 'PlanetOrbit',
   PLANET_RING_NAME: 'PlanetRing',
+  PLANET_AXIS_NAME: 'PlanetAxis',
   PLANET_SYSTEM_NAME: 'PlanetSystem',
   PLANET_ATMO_SPHERE_NAME: 'PlanetAtmosphere',
   PLANET_MOONS_NAME: 'PlanetMoons',
@@ -38,7 +39,7 @@ export const earthMoon: EarthMoon[] = [
 export const createPlanet = (
   planetName: string,
   size: number,
-  position: number,
+  // position: number,
   tilt: number, // 自転軸の傾き
   texture: THREE.Material | string,
   bump: string | null,
@@ -81,9 +82,10 @@ export const createPlanet = (
     const axisHeight = 16;
     const axisGeometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisHeight, 32);
     const axisMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const earthAxis = new THREE.Mesh(axisGeometry, axisMaterial);
-    earthAxis.rotation.z = degToRad(tilt); // 自転軸の傾き
-    planetSystem.add(earthAxis);
+    const AxisMesh = new THREE.Mesh(axisGeometry, axisMaterial);
+    AxisMesh.name = Names.PLANET_AXIS_NAME;
+    AxisMesh.rotation.z = degToRad(tilt); // 自転軸の傾き
+    planetSystem.add(AxisMesh);
   }
 
   if (ring) {
@@ -95,7 +97,7 @@ export const createPlanet = (
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
     ringMesh.name = Names.PLANET_RING_NAME;
     planetSystem.add(ringMesh);
-    ringMesh.position.x = position;
+    // ringMesh.position.x = position;
     ringMesh.position.x = 0.5 * Math.PI;
     ringMesh.rotation.y = degToRad(-tilt);
   }
@@ -143,7 +145,7 @@ export const createPlanet = (
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
   planet3d.name = planetName;
-  planet3d.userData = { earthPositionRes: planetPositionRes };
+  planet3d.userData = { planetPositionRes };
 
   const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
