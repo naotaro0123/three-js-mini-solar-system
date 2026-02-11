@@ -10,13 +10,7 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { createEarthMesh } from '../functions/earth';
 import type { PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
-import {
-  earthMoon,
-  PLANET_ATMO_SPHERE_NAME,
-  PLANET_MOONS_NAME,
-  PLANET_NAME,
-  PLANET_SYSTEM_NAME,
-} from '../functions/planet-common';
+import { earthMoon, Names } from '../functions/planet-common';
 import { handleResize } from '../functions/resize';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
@@ -194,10 +188,12 @@ export class DrawScene {
 
     {
       // planet3dがearth。コードコピーする時間違えないように
-      const planetSystem = this.earthGroup.getObjectByName(PLANET_SYSTEM_NAME) as THREE.Group;
-      const planet = this.earthGroup.getObjectByName(PLANET_NAME) as THREE.Mesh;
-      const atmosphere = this.earthGroup.getObjectByName(PLANET_ATMO_SPHERE_NAME) as THREE.Mesh;
-      const moon = this.earthGroup.getObjectByName(`${PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+      const planetSystem = this.earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
+      const planet = this.earthGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      const atmosphere = this.earthGroup.getObjectByName(
+        Names.PLANET_ATMO_SPHERE_NAME,
+      ) as THREE.Mesh;
+      const moon = this.earthGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
 
       /* 地球の自転（反時計回り） */
       {

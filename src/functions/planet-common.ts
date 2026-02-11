@@ -3,12 +3,14 @@ import type { PlanetPositionRes } from './get-planet-position';
 import { MOON_SIZE, settings } from './settings';
 import { degToRad } from './utils';
 
-export const PLANET_NAME = 'Planet';
-const PLANET_ORBIT_NAME = 'PlanetOrbit';
-const PLANET_RING_NAME = 'PlanetRing';
-export const PLANET_SYSTEM_NAME = 'PlanetSystem';
-export const PLANET_ATMO_SPHERE_NAME = 'PlanetAtmosphere';
-export const PLANET_MOONS_NAME = 'PlanetMoons';
+export const Names = {
+  PLANET_NAME: 'Planet',
+  PLANET_ORBIT_NAME: 'PlanetOrbit',
+  PLANET_RING_NAME: 'PlanetRing',
+  PLANET_SYSTEM_NAME: 'PlanetSystem',
+  PLANET_ATMO_SPHERE_NAME: 'PlanetAtmosphere',
+  PLANET_MOONS_NAME: 'PlanetMoons',
+} as const;
 
 type Ring = {
   innerRadius: number;
@@ -64,10 +66,10 @@ export const createPlanet = (
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
   planet.rotation.z = degToRad(tilt);
-  planet.name = PLANET_NAME;
+  planet.name = Names.PLANET_NAME;
 
   const planetSystem = new THREE.Group();
-  planetSystem.name = PLANET_SYSTEM_NAME;
+  planetSystem.name = Names.PLANET_SYSTEM_NAME;
   // APIから取得した現在位置に惑星を配置
   const earthPosition = planetPositionRes.pathPoints[planetPositionRes.todayRow - 1];
   planetSystem.position.copy(earthPosition);
@@ -91,7 +93,7 @@ export const createPlanet = (
       side: THREE.DoubleSide,
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-    ringMesh.name = PLANET_RING_NAME;
+    ringMesh.name = Names.PLANET_RING_NAME;
     planetSystem.add(ringMesh);
     ringMesh.position.x = position;
     ringMesh.position.x = 0.5 * Math.PI;
@@ -108,7 +110,7 @@ export const createPlanet = (
       depthWrite: false,
     });
     const atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-    atmosphereMesh.name = PLANET_ATMO_SPHERE_NAME;
+    atmosphereMesh.name = Names.PLANET_ATMO_SPHERE_NAME;
     atmosphereMesh.rotation.z = 0.41;
     planet.add(atmosphereMesh);
   }
@@ -130,7 +132,7 @@ export const createPlanet = (
     }
     const moonGeometry = new THREE.SphereGeometry(moon.size, 32, 20);
     const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
-    moonMesh.name = `${PLANET_MOONS_NAME}_${moonIndex}`;
+    moonMesh.name = `${Names.PLANET_MOONS_NAME}_${moonIndex}`;
     moonIndex++;
     const moonOrbitDistance = size * 1.5;
     moonMesh.position.set(moonOrbitDistance, 0, 0);
@@ -150,7 +152,7 @@ export const createPlanet = (
     opacity: 0.1,
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
-  orbit.name = PLANET_ORBIT_NAME;
+  orbit.name = Names.PLANET_ORBIT_NAME;
   planet3d.add(orbit);
 
   return planet3d;
