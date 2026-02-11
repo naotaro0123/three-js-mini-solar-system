@@ -194,6 +194,7 @@ export class DrawScene {
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
         /* 水星の公転（反時計回り）*/
         mercuryPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+        // TODO: なんか途中で飛ぶ？
 
         const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
         // 水星は88日で360度するので1フレームあたりの回転量を計算
