@@ -22,3 +22,9 @@ export const MERCURY_SIZE = 2.4;
 export const MERCURY_TILT = 40;
 export const MERCURY_NAME = 'Mercury';
 export const MERCURY_ORBIT_COLOR = 0x0099ff;
+
+// 金星のサイズと自転軸の傾き
+export const VENUS_SIZE = 6.1;
+export const VENUS_TILT = 177.4;
+export const VENUS_NAME = 'Venus';
+export const VENUS_ORBIT_COLOR = 0xffd700;

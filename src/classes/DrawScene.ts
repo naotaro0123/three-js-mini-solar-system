@@ -10,6 +10,7 @@ import { earthMoon, Names } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
+import { createVenusGroup } from '../functions/venus';
 
 const isDebug = false;
 
@@ -22,6 +23,7 @@ export class DrawScene {
   sunMesh!: THREE.Mesh; // 太陽のメッシュ
   earthGroup!: THREE.Group; // 地球と月のグループ
   mercuryGroup!: THREE.Group; // 水星のグループ
+  venusGroup!: THREE.Group; // 金星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -63,7 +65,11 @@ export class DrawScene {
     // 水星のメッシュを作成
     this.mercuryGroup = await createMercuryGroup();
     this.scene.add(this.mercuryGroup);
+    // 金星のメッシュを作成
+    this.venusGroup = await createVenusGroup();
+    this.scene.add(this.venusGroup);
 
+    // 現在のインデックスを表示するラベルを作成
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
     document.body.appendChild(this.labelElement);
 
@@ -148,7 +154,8 @@ export class DrawScene {
         const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
         const earthAngle = degToRad(earthRotation);
         earthPlanet.rotateY(earthAngle);
-        earthAtmosphere.rotateY(earthAngle / 5); // 大気はゆっくり回転させる
+        // 大気は少し早めに回転させる
+        earthAtmosphere.rotateY(earthAngle + 0.00002);
       }
 
       /* 月の公転と自転 */
@@ -200,6 +207,42 @@ export class DrawScene {
         const mercuryRotation = (360 / (settings.lerpFrame * 88)) * settings.accelerationRotation;
         const mercuryAngle = degToRad(mercuryRotation);
         mercuryPlanet.rotateY(mercuryAngle);
+      }
+
+      /* 金星の公転と自転（反時計回り） */
+      {
+        const venusPlanetSystem = this.venusGroup.getObjectByName(
+          Names.PLANET_SYSTEM_NAME,
+        ) as THREE.Group;
+        const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+        const venusAtmosphere = this.venusGroup.getObjectByName(
+          Names.PLANET_ATMO_SPHERE_NAME,
+        ) as THREE.Mesh;
+
+        // APIから取得した現在位置に惑星を配置
+        const venusPosition = this.venusGroup.userData.planetPositionRes as PlanetPositionRes;
+        const venusCurrentIndex =
+          this.currentIndex < venusPosition.pathPoints.length - 1
+            ? this.currentIndex
+            : this.currentIndex % (venusPosition.pathPoints.length - 1);
+        const currentPosition = venusPosition.pathPoints[venusCurrentIndex];
+
+        // 次の日（nextDayIndex）の座標を取得
+        const nextDayIndex = venusCurrentIndex + 1;
+        const nextPosition = venusPosition.pathPoints[nextDayIndex];
+        const interpolatedPos = new THREE.Vector3()
+          .fromArray(currentPosition.toArray())
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+        /* 金星の公転（反時計回り）*/
+        venusPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+
+        // 金星は243日で360度するので1フレームあたりの回転量を計算
+        const venusRotation = (360 / (settings.lerpFrame * 243)) * settings.accelerationRotation;
+        const venusAngle = degToRad(venusRotation);
+        venusPlanet.rotateY(venusAngle);
+        // 大気はスーパーローテーションさせる（自転速度の約60倍で回転させる）
+        venusAtmosphere.rotateY(venusAngle * 60);
+        console.log(venusAtmosphere.rotation.y);
       }
     }
   }

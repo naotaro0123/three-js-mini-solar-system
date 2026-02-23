@@ -1,6 +1,7 @@
 import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
 import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from './common';
+import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -12,6 +13,8 @@ export type PlanetPositionRes = {
 export const getPlanetPosition = async (
   commandKey: RequestQueryBody['COMMAND'],
 ): Promise<PlanetPositionRes> => {
+  // 複数回同時にAPIを叩くと503エラーになるので少し待機する
+  await sleep(50);
   const currentYear = new Date().getFullYear();
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
