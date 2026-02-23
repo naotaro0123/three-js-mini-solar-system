@@ -79,7 +79,7 @@ export const createPlanet = (
   // 自転軸を追加する
   {
     const axisRadius = 0.1;
-    const axisHeight = 16;
+    const axisHeight = 2.8 * size; // 惑星の大きさに応じて軸の長さを調整
     const axisGeometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisHeight, 32);
     const axisMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const AxisMesh = new THREE.Mesh(axisGeometry, axisMaterial);
@@ -97,7 +97,6 @@ export const createPlanet = (
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
     ringMesh.name = Names.PLANET_RING_NAME;
     planetSystem.add(ringMesh);
-    // ringMesh.position.x = position;
     ringMesh.position.x = 0.5 * Math.PI;
     ringMesh.rotation.y = degToRad(-tilt);
   }
@@ -151,7 +150,7 @@ export const createPlanet = (
   const orbitMaterial = new THREE.LineBasicMaterial({
     color: orbitColor,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.2,
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
   orbit.name = Names.PLANET_ORBIT_NAME;
