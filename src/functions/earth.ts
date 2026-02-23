@@ -1,7 +1,24 @@
 import * as THREE from 'three';
 import { getPlanetPosition } from './get-planet-position';
-import { createPlanet, earthMoon } from './planet-common';
-import { EARTH_NAME, EARTH_ORBIT_COLOR, EARTH_SIZE, EARTH_TILT } from './settings';
+import { createPlanet, type PlanetMoon } from './planet-common';
+import {
+  EARTH_MOON_SIZE,
+  EARTH_NAME,
+  EARTH_ORBIT_COLOR,
+  EARTH_SIZE,
+  EARTH_TILT,
+  settings,
+} from './settings';
+
+export const earthMoons: PlanetMoon[] = [
+  {
+    size: EARTH_MOON_SIZE,
+    texture: '/images/moonmap.jpg',
+    bump: '/images/moonbump.jpg',
+    orbitSpeed: 0.001 * settings.accelerationOrbit,
+    orbitRadius: 10, // 月の軌道半径
+  },
+];
 
 export const createEarthMesh = async (
   sunPosition: THREE.Vector3,
@@ -58,7 +75,7 @@ export const createEarthMesh = async (
     null,
     null,
     '/images/earth_atmosphere.jpg',
-    earthMoon,
+    earthMoons,
     planetPositionRes,
   );
 

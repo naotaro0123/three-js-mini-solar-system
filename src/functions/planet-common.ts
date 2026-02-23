@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import type { PlanetPositionRes } from './get-planet-position';
-import { MOON_SIZE, settings } from './settings';
 import { degToRad } from './utils';
 
 export const Names = {
@@ -18,23 +17,16 @@ type Ring = {
   outerRadius: number;
   texture: string;
 };
-export type EarthMoon = {
+export type PlanetMoon = {
   size: number;
-  texture: string;
-  bump: string;
   orbitSpeed: number;
   orbitRadius: number;
+  texture?: string;
+  bump?: string;
   mesh?: THREE.Mesh;
+  modelPath?: string;
+  xPosition?: number;
 };
-export const earthMoon: EarthMoon[] = [
-  {
-    size: MOON_SIZE,
-    texture: '/images/moonmap.jpg',
-    bump: '/images/moonbump.jpg',
-    orbitSpeed: 0.001 * settings.accelerationOrbit,
-    orbitRadius: 10, // 月の軌道半径
-  },
-];
 
 export const createPlanet = (
   planetName: string,
@@ -45,7 +37,7 @@ export const createPlanet = (
   bump: string | null,
   ring: Ring | null,
   atmosphere: string | null,
-  moons: EarthMoon[],
+  moons: PlanetMoon[],
   planetPositionRes: PlanetPositionRes,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
@@ -116,10 +108,12 @@ export const createPlanet = (
     planet.add(atmosphereMesh);
   }
 
+  // TODO: 地球の月のみで火星は使ってないので分離する
   let moonIndex = 0;
   for (const moon of moons) {
     let moonMaterial: THREE.MeshStandardMaterial;
 
+    if (moon.texture === undefined) continue;
     if (moon.bump) {
       moonMaterial = new THREE.MeshStandardMaterial({
         map: loadTexture.load(moon.texture),

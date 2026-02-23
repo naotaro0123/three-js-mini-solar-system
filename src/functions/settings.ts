@@ -11,9 +11,9 @@ export const EARTH_SIZE = 6.4;
 export const EARTH_TILT = 23.4;
 export const EARTH_NAME = 'Earth';
 export const EARTH_ORBIT_COLOR = 0xffffff;
-
 // 月は地球の約1/4（1/3.7）の大きさ
-export const MOON_SIZE = EARTH_SIZE / 3.7;
+export const EARTH_MOON_SIZE = EARTH_SIZE / 3.7;
+
 // 太陽は地球の約109倍の大きさ（他の惑星が豆粒になるため、1/40縮小版で表示）
 export const SUN_SIZE = (EARTH_SIZE * 109) / 40;
 

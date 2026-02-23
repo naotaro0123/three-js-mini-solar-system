@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createEarthMesh as createEarthGroup } from '../functions/earth';
+import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
 import { orbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
-import { createMarsGroup } from '../functions/mars';
+import { createMarsGroup, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
-import { earthMoon, Names } from '../functions/planet-common';
+import { Names } from '../functions/planet-common';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
@@ -174,7 +174,7 @@ export class DrawScene {
         const orbitSpeedFrame = degToRad((360 / periodFrames) * settings.accelerationOrbit);
         const currentAngle = this.frameCount * orbitSpeedFrame;
         // 月の公転（反時計回り）
-        const { orbitRadius } = earthMoon[0]; // orbitRadius: 10
+        const { orbitRadius } = earthMoons[0]; // orbitRadius: 10
         const moonX = orbitRadius * Math.cos(currentAngle);
         const moonY = orbitRadius * Math.sin(currentAngle) * Math.sin(tiltAngle);
         const moonZ = orbitRadius * Math.sin(currentAngle) * Math.cos(tiltAngle);
@@ -281,6 +281,25 @@ export class DrawScene {
         (360 / (settings.lerpFrame * orbitalPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
+      // TODO: 公転スピードが合ってるか確認。フォボスは約0.3日で公転してるはず
+      // フォボスとダイモスの公転（反時計回り）
+      const phobos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+      const deimos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_1`) as THREE.Mesh;
+      const tiltAngle = degToRad(5);
+      const phobosOrbitRadius = marsMoons[0].orbitRadius;
+      const deimosOrbitRadius = marsMoons[1].orbitRadius;
+      const phobosCurrentAngle = this.frameCount * settings.accelerationOrbit;
+      const deimosCurrentAngle = this.frameCount * settings.accelerationOrbit;
+      // フォボスの公転
+      const phobosX = phobosOrbitRadius * Math.cos(phobosCurrentAngle);
+      const phobosY = phobosOrbitRadius * Math.sin(phobosCurrentAngle) * Math.sin(tiltAngle);
+      const phobosZ = phobosOrbitRadius * Math.sin(phobosCurrentAngle) * Math.cos(tiltAngle);
+      phobos.position.set(-phobosX, phobosY, phobosZ);
+      // ダイモスの公転
+      const deimosX = deimosOrbitRadius * Math.cos(deimosCurrentAngle);
+      const deimosY = deimosOrbitRadius * Math.sin(deimosCurrentAngle) * Math.sin(tiltAngle);
+      const deimosZ = deimosOrbitRadius * Math.sin(deimosCurrentAngle) * Math.cos(tiltAngle);
+      deimos.position.set(-deimosX, deimosY, deimosZ);
     }
   }
 }
