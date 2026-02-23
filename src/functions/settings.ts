@@ -10,6 +10,7 @@ export const settings = {
 export const EARTH_SIZE = 6.4;
 export const EARTH_TILT = 23.4;
 export const EARTH_NAME = 'Earth';
+export const EARTH_ORBIT_COLOR = 0xffffff;
 
 // 月は地球の約1/4（1/3.7）の大きさ
 export const MOON_SIZE = EARTH_SIZE / 3.7;
@@ -20,3 +21,4 @@ export const SUN_SIZE = (EARTH_SIZE * 109) / 40;
 export const MERCURY_SIZE = 2.4;
 export const MERCURY_TILT = 40;
 export const MERCURY_NAME = 'Mercury';
+export const MERCURY_ORBIT_COLOR = 0x0099ff;

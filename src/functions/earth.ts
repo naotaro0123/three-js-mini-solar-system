@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { getPlanetPosition } from './get-planet-position';
 import { createPlanet, earthMoon } from './planet-common';
-import { EARTH_NAME, EARTH_SIZE, EARTH_TILT } from './settings';
+import { EARTH_NAME, EARTH_ORBIT_COLOR, EARTH_SIZE, EARTH_TILT } from './settings';
 
 export const createEarthMesh = async (
   sunPosition: THREE.Vector3,
@@ -52,8 +52,8 @@ export const createEarthMesh = async (
   const earthMesh = createPlanet(
     EARTH_NAME,
     EARTH_SIZE,
-    // 90,
     EARTH_TILT,
+    EARTH_ORBIT_COLOR,
     earthMaterial,
     null,
     null,

@@ -39,8 +39,8 @@ export const earthMoon: EarthMoon[] = [
 export const createPlanet = (
   planetName: string,
   size: number,
-  // position: number,
   tilt: number, // 自転軸の傾き
+  orbitColor: number, // 軌道の色
   texture: THREE.Material | string,
   bump: string | null,
   ring: Ring | null,
@@ -149,9 +149,9 @@ export const createPlanet = (
 
   const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
-    color: 0xffffff,
+    color: orbitColor,
     transparent: true,
-    opacity: 0.1,
+    opacity: 0.5,
   });
   const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
   orbit.name = Names.PLANET_ORBIT_NAME;
