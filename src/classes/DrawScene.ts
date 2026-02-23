@@ -5,6 +5,7 @@ import { createEarthMesh as createEarthGroup } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
 import { type PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
+import { createMarsGroup } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
 import { earthMoon, Names } from '../functions/planet-common';
 import { settings } from '../functions/settings';
@@ -24,6 +25,7 @@ export class DrawScene {
   earthGroup!: THREE.Group; // 地球と月のグループ
   mercuryGroup!: THREE.Group; // 水星のグループ
   venusGroup!: THREE.Group; // 金星のグループ
+  marsGroup!: THREE.Group; // 火星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -68,6 +70,9 @@ export class DrawScene {
     // 金星のメッシュを作成
     this.venusGroup = await createVenusGroup();
     this.scene.add(this.venusGroup);
+    // 火星のメッシュを作成
+    this.marsGroup = await createMarsGroup();
+    this.scene.add(this.marsGroup);
 
     // 現在のインデックスを表示するラベルを作成
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
@@ -242,8 +247,37 @@ export class DrawScene {
         venusPlanet.rotateY(venusAngle);
         // 大気はスーパーローテーションさせる（自転速度の約60倍で回転させる）
         venusAtmosphere.rotateY(venusAngle * 60);
-        console.log(venusAtmosphere.rotation.y);
       }
+    }
+
+    /* 火星の公転と自転（反時計回り） */
+    {
+      const marsPlanetSystem = this.marsGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+
+      // APIから取得した現在位置に惑星を配置
+      const marsPosition = this.marsGroup.userData.planetPositionRes as PlanetPositionRes;
+      const marsCurrentIndex =
+        this.currentIndex < marsPosition.pathPoints.length - 1
+          ? this.currentIndex
+          : this.currentIndex % (marsPosition.pathPoints.length - 1);
+      const currentPosition = marsPosition.pathPoints[marsCurrentIndex];
+
+      // 次の日（nextDayIndex）の座標を取得
+      const nextDayIndex = marsCurrentIndex + 1;
+      const nextPosition = marsPosition.pathPoints[nextDayIndex];
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+      /* 火星の公転（反時計回り）*/
+      marsPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+
+      const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      // 火星は687日で360度するので1フレームあたりの回転量を計算
+      const marsRotation = (360 / (settings.lerpFrame * 687)) * settings.accelerationRotation;
+      const marsAngle = degToRad(marsRotation);
+      marsPlanet.rotateY(marsAngle);
     }
   }
 }

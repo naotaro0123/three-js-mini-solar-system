@@ -28,3 +28,9 @@ export const VENUS_SIZE = 6.1;
 export const VENUS_TILT = 177.4;
 export const VENUS_NAME = 'Venus';
 export const VENUS_ORBIT_COLOR = 0xffd700;
+
+// 火星のサイズと自転軸の傾き
+export const MARS_SIZE = 3.4;
+export const MARS_TILT = 25.2;
+export const MARS_NAME = 'Mars';
+export const MARS_ORBIT_COLOR = 0xff4500;
