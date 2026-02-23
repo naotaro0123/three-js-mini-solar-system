@@ -9,6 +9,21 @@ export type PlanetPositionRes = {
   todayRow: number;
   pathPoints: THREE.Vector3[];
 };
+// 公転日数
+export const orbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
+  switch (commandKey) {
+    case 'EARTH':
+      return 365;
+    case 'MERCURY': // 水星
+      return 88;
+    case 'VENUS': // 金星
+      return 225;
+    case 'MARS': // 火星
+      return 687;
+    default:
+      return 364;
+  }
+};
 
 export const getPlanetPosition = async (
   commandKey: RequestQueryBody['COMMAND'],
@@ -19,23 +34,7 @@ export const getPlanetPosition = async (
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
 
-  // 公転日数
-  const orbitalPeriod = () => {
-    switch (commandKey) {
-      case 'EARTH':
-        return 365;
-      case 'MERCURY': // 水星
-        return 88;
-      case 'VENUS': // 金星
-        return 225;
-      case 'MARS': // 火星
-        return 687;
-      default:
-        return 364;
-    }
-  };
-
-  const _endDate = addDays(_startDate, orbitalPeriod());
+  const _endDate = addDays(_startDate, orbitalPeriod(commandKey));
   const stopDate = format(_endDate, 'yyyy-MM-dd');
   // TODO: 木星などの場合は30dなどに変更する
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと

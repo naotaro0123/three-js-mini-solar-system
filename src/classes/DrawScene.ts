@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
-import { type PlanetPositionRes } from '../functions/get-planet-position';
+import { orbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
 import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
 import { createMarsGroup } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
@@ -209,7 +209,8 @@ export class DrawScene {
 
         const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
         // 水星は88日で360度するので1フレームあたりの回転量を計算
-        const mercuryRotation = (360 / (settings.lerpFrame * 88)) * settings.accelerationRotation;
+        const mercuryRotation =
+          (360 / (settings.lerpFrame * orbitalPeriod('MERCURY'))) * settings.accelerationRotation;
         const mercuryAngle = degToRad(mercuryRotation);
         mercuryPlanet.rotateY(mercuryAngle);
       }
@@ -242,7 +243,8 @@ export class DrawScene {
         venusPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
         // 金星は243日で360度するので1フレームあたりの回転量を計算
-        const venusRotation = (360 / (settings.lerpFrame * 243)) * settings.accelerationRotation;
+        const venusRotation =
+          (360 / (settings.lerpFrame * orbitalPeriod('VENUS'))) * settings.accelerationRotation;
         const venusAngle = degToRad(venusRotation);
         venusPlanet.rotateY(venusAngle);
         // 大気はスーパーローテーションさせる（自転速度の約60倍で回転させる）
@@ -275,7 +277,8 @@ export class DrawScene {
 
       const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 火星は687日で360度するので1フレームあたりの回転量を計算
-      const marsRotation = (360 / (settings.lerpFrame * 687)) * settings.accelerationRotation;
+      const marsRotation =
+        (360 / (settings.lerpFrame * orbitalPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
     }
