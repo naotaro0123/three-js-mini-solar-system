@@ -17,7 +17,7 @@ export const marsMoons: PlanetMoon[] = [
   // ダイモス
   {
     size: 0.1,
-    orbitRadius: 9,
+    orbitRadius: 12.5,
     orbitSpeed: 0.0005 * settings.accelerationOrbit,
     modelPath: '/images/mars/deimos.glb',
     xPosition: 14, // 火星から23,460kmだが目視で設定

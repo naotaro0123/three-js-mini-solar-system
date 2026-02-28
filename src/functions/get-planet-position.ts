@@ -4,10 +4,62 @@ import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from
 import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
+const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v1';
 
 export type PlanetPositionRes = {
   todayRow: number;
   pathPoints: THREE.Vector3[];
+};
+
+type PlanetPositionCache = {
+  todayRow: number;
+  pathPoints: Array<{ x: number; y: number; z: number }>;
+};
+
+const getCacheKey = (
+  commandKey: RequestQueryBody['COMMAND'],
+  startDate: string,
+  stopDate: string,
+) => {
+  return `${PLANET_POSITION_CACHE_PREFIX}:${commandKey}:${startDate}:${stopDate}`;
+};
+
+const loadPlanetPositionCache = (cacheKey: string): PlanetPositionRes | null => {
+  const cached = localStorage.getItem(cacheKey);
+  if (!cached) return null;
+
+  try {
+    const parsed = JSON.parse(cached) as PlanetPositionCache;
+    if (!Array.isArray(parsed.pathPoints) || typeof parsed.todayRow !== 'number') {
+      localStorage.removeItem(cacheKey);
+      return null;
+    }
+
+    const pathPoints = parsed.pathPoints.map((point) => {
+      return new THREE.Vector3(point.x, point.y, point.z);
+    });
+
+    return {
+      todayRow: parsed.todayRow,
+      pathPoints,
+    };
+  } catch {
+    localStorage.removeItem(cacheKey);
+    return null;
+  }
+};
+
+const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionRes) => {
+  const serializable: PlanetPositionCache = {
+    todayRow: data.todayRow,
+    pathPoints: data.pathPoints.map((point) => ({
+      x: point.x,
+      y: point.y,
+      z: point.z,
+    })),
+  };
+
+  localStorage.setItem(cacheKey, JSON.stringify(serializable));
 };
 // 公転日数
 export const orbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
@@ -28,8 +80,6 @@ export const orbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
 export const getPlanetPosition = async (
   commandKey: RequestQueryBody['COMMAND'],
 ): Promise<PlanetPositionRes> => {
-  // 複数回同時にAPIを叩くと503エラーになるので少し待機する
-  await sleep(50);
   const currentYear = new Date().getFullYear();
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
@@ -38,6 +88,14 @@ export const getPlanetPosition = async (
   const stopDate = format(_endDate, 'yyyy-MM-dd');
   // TODO: 木星などの場合は30dなどに変更する
   const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
+  const cacheKey = getCacheKey(commandKey, startDate, stopDate);
+  const cachedResult = loadPlanetPositionCache(cacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
+
+  // 複数回同時にAPIを叩くと503エラーになるので少し待機する
+  await sleep(50);
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}&COMMAND=${commandKey}`;
 
@@ -84,6 +142,7 @@ export const getPlanetPosition = async (
       const today = new Date();
       const dayOfYearWithDfs = getDayOfYear(today);
       result.todayRow = dayOfYearWithDfs;
+      savePlanetPositionCache(cacheKey, result);
     } else {
       console.error('データの取得に失敗しました:', data);
     }
