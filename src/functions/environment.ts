@@ -25,7 +25,7 @@ export const initEnvironment = (
   renderer.setClearColor(0x00000, 1.0);
   document.body.appendChild(renderer.domElement);
 
-  const camera = new THREE.PerspectiveCamera(50, width / height, 1, 1000);
+  const camera = new THREE.PerspectiveCamera(50, width / height, 1, 5000);
   camera.position.set(0, 20, 122);
 
   handleResize(camera, renderer);

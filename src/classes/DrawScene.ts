@@ -281,24 +281,22 @@ export class DrawScene {
         (360 / (settings.lerpFrame * orbitalPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
-      // TODO: 公転スピードが合ってるか確認。フォボスは約0.3日で公転してるはず
       // フォボスとダイモスの公転（反時計回り）
       const phobos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
       const deimos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_1`) as THREE.Mesh;
-      const tiltAngle = degToRad(5);
       const phobosOrbitRadius = marsMoons[0].orbitRadius;
       const deimosOrbitRadius = marsMoons[1].orbitRadius;
-      const phobosCurrentAngle = this.frameCount * settings.accelerationOrbit;
-      const deimosCurrentAngle = this.frameCount * settings.accelerationOrbit;
+      const phobosCurrentAngle = this.frameCount * settings.accelerationOrbit * 4.0; // フォボスは速い
+      const deimosCurrentAngle = this.frameCount * settings.accelerationOrbit * 1.0; // ダイモスは標準
       // フォボスの公転
       const phobosX = phobosOrbitRadius * Math.cos(phobosCurrentAngle);
-      const phobosY = phobosOrbitRadius * Math.sin(phobosCurrentAngle) * Math.sin(tiltAngle);
-      const phobosZ = phobosOrbitRadius * Math.sin(phobosCurrentAngle) * Math.cos(tiltAngle);
+      const phobosY = 0; // 火星の赤道面に沿って公転させるため、Y軸は0に固定
+      const phobosZ = phobosOrbitRadius * Math.sin(phobosCurrentAngle);
       phobos.position.set(-phobosX, phobosY, phobosZ);
       // ダイモスの公転
       const deimosX = deimosOrbitRadius * Math.cos(deimosCurrentAngle);
-      const deimosY = deimosOrbitRadius * Math.sin(deimosCurrentAngle) * Math.sin(tiltAngle);
-      const deimosZ = deimosOrbitRadius * Math.sin(deimosCurrentAngle) * Math.cos(tiltAngle);
+      const deimosY = 0; // 火星の赤道面に沿って公転させるため、Y軸は0に固定
+      const deimosZ = deimosOrbitRadius * Math.sin(deimosCurrentAngle);
       deimos.position.set(-deimosX, deimosY, deimosZ);
     }
   }
