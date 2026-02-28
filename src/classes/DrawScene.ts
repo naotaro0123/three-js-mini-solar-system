@@ -8,6 +8,10 @@ import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/la
 import { createMarsGroup, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
 import { Names } from '../functions/planet-common';
+import {
+  createPlanetInteractionController,
+  type PlanetInteractionController,
+} from '../functions/rimLight';
 import { settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
@@ -21,6 +25,8 @@ export class DrawScene {
   camera!: THREE.PerspectiveCamera;
   controls!: OrbitControls;
   composer!: EffectComposer;
+  zoomablePlanets: THREE.Mesh[] = [];
+  planetInteractionController!: PlanetInteractionController;
   sunMesh!: THREE.Mesh; // 太陽のメッシュ
   earthGroup!: THREE.Group; // 地球と月のグループ
   mercuryGroup!: THREE.Group; // 水星のグループ
@@ -74,6 +80,8 @@ export class DrawScene {
     this.marsGroup = await createMarsGroup();
     this.scene.add(this.marsGroup);
 
+    this.initDoubleClickZoom();
+
     // 現在のインデックスを表示するラベルを作成
     this.labelElement = createCurrentIndexLabel(this.currentIndex);
     document.body.appendChild(this.labelElement);
@@ -94,6 +102,37 @@ export class DrawScene {
       },
       userDataEarthPositionRes: this.userDataEarthPositionRes,
     });
+  }
+
+  initDoubleClickZoom(): void {
+    const earthPlanet = this.earthGroup.getObjectByName(Names.PLANET_NAME);
+    const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME);
+    const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME);
+    const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME);
+
+    this.zoomablePlanets = [earthPlanet, mercuryPlanet, venusPlanet, marsPlanet].filter(
+      (planet): planet is THREE.Mesh => planet instanceof THREE.Mesh,
+    );
+
+    this.planetInteractionController = createPlanetInteractionController({
+      renderer: this.renderer,
+      camera: this.camera,
+      controls: this.controls,
+      planets: this.zoomablePlanets,
+    });
+
+    this.renderer.domElement.addEventListener(
+      'dblclick',
+      this.planetInteractionController.handleDoubleClickPlanetZoom,
+    );
+    this.renderer.domElement.addEventListener(
+      'pointermove',
+      this.planetInteractionController.handlePlanetHover,
+    );
+    this.renderer.domElement.addEventListener(
+      'pointerleave',
+      this.planetInteractionController.clearPlanetHover,
+    );
   }
 
   render(): void {
