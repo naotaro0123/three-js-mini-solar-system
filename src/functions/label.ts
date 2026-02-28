@@ -1,4 +1,10 @@
-export const currentIndexLabelSuffix = '365日目';
+export const formatCurrentIndexDate = (index: number): string => {
+  const currentYear = new Date().getFullYear();
+  const date = new Date(currentYear, 0, 1);
+  date.setDate(date.getDate() + index);
+
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+};
 
 export const createCurrentIndexLabel = (index: number): HTMLDivElement => {
   const div = document.createElement('div');
@@ -9,6 +15,6 @@ export const createCurrentIndexLabel = (index: number): HTMLDivElement => {
   div.style.borderRadius = '4px';
   div.style.backgroundColor = 'white';
   div.style.color = 'black';
-  div.innerText = `${index}/${currentIndexLabelSuffix}`;
+  div.innerText = formatCurrentIndexDate(index);
   return div;
 };

@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
 import { orbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
-import { createCurrentIndexLabel, currentIndexLabelSuffix } from '../functions/label';
+import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
 import { Names } from '../functions/planet-common';
@@ -111,7 +111,7 @@ export class DrawScene {
     this.frameCount++;
     this.sunMesh.rotateY(0.001 * settings.accelerationRotation);
 
-    this.labelElement.innerText = `${this.currentIndex}/${currentIndexLabelSuffix}`;
+    this.labelElement.innerText = formatCurrentIndexDate(this.currentIndex);
 
     {
       // planet3dがearth。コードコピーする時間違えないように
