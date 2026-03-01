@@ -11,8 +11,10 @@ reference Page: https://github.com/N3rson/Solar-System-3D
 $ yarn
 
 # launch server
-$ yarn dev
+$ yarn dev:backend
+$ yarn dev:frontend
 
 # build for production and launch server
-$ yarn build
+$ yarn build:backend
+$ yarn build:frontend
 ```

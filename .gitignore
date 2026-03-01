@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Output
+out
+*.tgz
+
+# Code coverage
+coverage
+*.lcov
+
+# Caches
+.eslintcache
+.cache
+*.tsbuildinfo
