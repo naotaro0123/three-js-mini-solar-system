@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     /* Bundler mode */
+    "module": "preserve",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

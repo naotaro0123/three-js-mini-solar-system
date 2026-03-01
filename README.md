@@ -2,8 +2,6 @@
 
 Develop Status: InProgress
 
-reference Page: https://github.com/N3rson/Solar-System-3D
-
 # Build Setup
 
 ```
@@ -20,6 +18,8 @@ $ yarn build:frontend
 ```
 
 # other
+
+- [Reference Page](https://github.com/N3rson/Solar-System-3D)
 
 
 - [JPL Horizons API Doc](https://ssd-api.jpl.nasa.gov/doc/horizons.html)
