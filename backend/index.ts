@@ -6,7 +6,7 @@ import {
   planetPositionEndpoint,
   type RequestQueryBody,
   type ResponseData,
-} from "./common";
+} from "../common";
 
 const app = new Hono();
 

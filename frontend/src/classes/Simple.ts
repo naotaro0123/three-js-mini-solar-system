@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { RequestQueryBody } from '../functions/common';
+import type { RequestQueryBody } from '../../../common';
 import { getPlanetPosition } from '../functions/get-planet-position';
 import { handleResize } from '../functions/resize';
 
