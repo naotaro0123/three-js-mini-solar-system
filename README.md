@@ -2,8 +2,6 @@
 
 Develop Status: InProgress
 
-reference Page: https://github.com/N3rson/Solar-System-3D
-
 # Build Setup
 
 ```
@@ -20,6 +18,8 @@ $ yarn build:frontend
 ```
 
 # other
+
+- [Reference Page](https://github.com/N3rson/Solar-System-3D)
 
 - [Render Dashboard](https://dashboard.render.com/web/srv-d2goq2gdl3ps73fhtp90/deploys/dep-d2goq38dl3ps73fhtq10)
 
