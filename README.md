@@ -18,3 +18,8 @@ $ yarn dev:frontend
 $ yarn build:backend
 $ yarn build:frontend
 ```
+
+# other
+
+
+- [JPL Horizons API Doc](https://ssd-api.jpl.nasa.gov/doc/horizons.html)

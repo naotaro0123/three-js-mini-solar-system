@@ -1,6 +1,6 @@
 import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
-import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from './common';
+import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from '../../../common';
 import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
