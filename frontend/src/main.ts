@@ -1,4 +1,4 @@
-// import { Simple } from './classes/Simple';
+// import { DebugOrbitLine as Simple } from './classes/DebugOrbitLine';
 import { DrawScene as Simple } from './classes/DrawScene';
 
 window.addEventListener('DOMContentLoaded', () => {

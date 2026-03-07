@@ -4,7 +4,7 @@ import type { RequestQueryBody } from '../../../common';
 import { getPlanetPosition } from '../functions/get-planet-position';
 import { handleResize } from '../functions/resize';
 
-export class Simple {
+export class DebugOrbitLine {
   private width: number;
   private height: number;
   private renderer: THREE.WebGLRenderer;
@@ -21,7 +21,7 @@ export class Simple {
     document.body.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
+    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 10000);
     this.camera.position.set(0, 100, 160);
 
     handleResize(this.camera, this.renderer);
@@ -48,6 +48,7 @@ export class Simple {
       { commandKey: 'MERCURY', color: 0x0099ff },
       { commandKey: 'VENUS', color: 0xffd700 },
       { commandKey: 'MARS', color: 0xff0000 },
+      { commandKey: 'JUPITER', color: 0xffa500 },
     ];
 
     const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -64,6 +65,7 @@ export class Simple {
 
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
     const planetPositionRes = await getPlanetPosition(commandKey);
+    console.log('planetPositionRes', commandKey, planetPositionRes);
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
     const lineMaterial = new THREE.LineBasicMaterial({ color });
     const line = new THREE.LineLoop(lineGeometry, lineMaterial);
