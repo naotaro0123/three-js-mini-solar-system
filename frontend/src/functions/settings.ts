@@ -34,3 +34,9 @@ export const MARS_SIZE = 3.4;
 export const MARS_TILT = 25.2;
 export const MARS_NAME = 'Mars';
 export const MARS_ORBIT_COLOR = 0xff4500;
+
+// 木星のサイズと自転軸の傾き
+export const JUPITER_SIZE = EARTH_SIZE * 11; // 木星は地球の約11倍の大きさ
+export const JUPITER_TILT = 3.13;
+export const JUPITER_NAME = 'Jupiter';
+export const JUPITER_ORBIT_COLOR = 0x009900;

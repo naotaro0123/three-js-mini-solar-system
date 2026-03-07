@@ -78,6 +78,23 @@ export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
       return 364;
   }
 };
+// 自転日数
+export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
+  switch (commandKey) {
+    case 'EARTH':
+      return 1;
+    case 'MERCURY': // 水星
+      return 58.6;
+    case 'VENUS': // 金星
+      return 243; // 金星は自転が逆向きで約243日。VENUS_TILTで回転させてるので、ここでは243日で計算する
+    case 'MARS': // 火星
+      return 1.03; // 約24.6時間
+    case 'JUPITER': // 木星
+      return 0.41; // 約9.9時間
+    default:
+      return 1;
+  }
+};
 const getStepSize = (commandKey: RequestQueryBody['COMMAND']) => {
   // TODO: 木星以降は日数を検討する
   // https://ssd-api.jpl.nasa.gov/doc/horizons.html#stepping
