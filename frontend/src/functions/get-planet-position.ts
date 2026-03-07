@@ -62,7 +62,7 @@ const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionRes) => {
   localStorage.setItem(cacheKey, JSON.stringify(serializable));
 };
 // 公転日数
-export const orbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
+export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
     case 'EARTH':
       return 365;
@@ -72,8 +72,22 @@ export const orbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
       return 225;
     case 'MARS': // 火星
       return 687;
+    case 'JUPITER': // 木星
+      return 4333; // 約11.86年
     default:
       return 364;
+  }
+};
+const getStepSize = (commandKey: RequestQueryBody['COMMAND']) => {
+  // TODO: 木星以降は日数を検討する
+  // https://ssd-api.jpl.nasa.gov/doc/horizons.html#stepping
+  switch (commandKey) {
+    case 'JUPITER': // 木星
+      return '1months';
+    case 'MARS': // 火星
+      return '5days';
+    default:
+      return '1days';
   }
 };
 
@@ -84,10 +98,9 @@ export const getPlanetPosition = async (
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
 
-  const _endDate = addDays(_startDate, orbitalPeriod(commandKey));
+  const _endDate = addDays(_startDate, getOrbitalPeriod(commandKey));
   const stopDate = format(_endDate, 'yyyy-MM-dd');
-  // TODO: 木星などの場合は30dなどに変更する
-  const StepSize = '1d'; // '1d': 1日ごと, '1 mo: 1ヶ月ごと
+  const StepSize = getStepSize(commandKey);
   const cacheKey = getCacheKey(commandKey, startDate, stopDate);
   const cachedResult = loadPlanetPositionCache(cacheKey);
   if (cachedResult) {

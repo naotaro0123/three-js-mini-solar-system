@@ -3,7 +3,8 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
-import { orbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
+import { getOrbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
+import { createJupiterGroup } from '../functions/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
@@ -32,10 +33,11 @@ export class DrawScene {
   mercuryGroup!: THREE.Group; // 水星のグループ
   venusGroup!: THREE.Group; // 金星のグループ
   marsGroup!: THREE.Group; // 火星のグループ
+  jupiterGroup!: THREE.Group; // 木星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
-  clock = new THREE.Clock();
+  timer = new THREE.Timer();
   frameCount = 0;
 
   constructor() {
@@ -79,6 +81,9 @@ export class DrawScene {
     // 火星のメッシュを作成
     this.marsGroup = await createMarsGroup();
     this.scene.add(this.marsGroup);
+    // 木星のメッシュを作成
+    this.jupiterGroup = await createJupiterGroup();
+    this.scene.add(this.jupiterGroup);
 
     this.initDoubleClickZoom();
 
@@ -249,7 +254,8 @@ export class DrawScene {
         const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
         // 水星は88日で360度するので1フレームあたりの回転量を計算
         const mercuryRotation =
-          (360 / (settings.lerpFrame * orbitalPeriod('MERCURY'))) * settings.accelerationRotation;
+          (360 / (settings.lerpFrame * getOrbitalPeriod('MERCURY'))) *
+          settings.accelerationRotation;
         const mercuryAngle = degToRad(mercuryRotation);
         mercuryPlanet.rotateY(mercuryAngle);
       }
@@ -283,7 +289,7 @@ export class DrawScene {
 
         // 金星は243日で360度するので1フレームあたりの回転量を計算
         const venusRotation =
-          (360 / (settings.lerpFrame * orbitalPeriod('VENUS'))) * settings.accelerationRotation;
+          (360 / (settings.lerpFrame * getOrbitalPeriod('VENUS'))) * settings.accelerationRotation;
         const venusAngle = degToRad(venusRotation);
         venusPlanet.rotateY(venusAngle);
         // 大気はスーパーローテーションさせる（自転速度の約60倍で回転させる）
@@ -317,7 +323,7 @@ export class DrawScene {
       const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 火星は687日で360度するので1フレームあたりの回転量を計算
       const marsRotation =
-        (360 / (settings.lerpFrame * orbitalPeriod('MARS'))) * settings.accelerationRotation;
+        (360 / (settings.lerpFrame * getOrbitalPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
       // フォボスとダイモスの公転（反時計回り）
