@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
-import { getOrbitalPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
+import { getRotationPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
 import { createJupiterGroup } from '../functions/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, marsMoons } from '../functions/mars';
@@ -114,10 +114,15 @@ export class DrawScene {
     const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME);
     const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME);
     const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME);
+    const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME);
 
-    this.zoomablePlanets = [earthPlanet, mercuryPlanet, venusPlanet, marsPlanet].filter(
-      (planet): planet is THREE.Mesh => planet instanceof THREE.Mesh,
-    );
+    this.zoomablePlanets = [
+      earthPlanet,
+      mercuryPlanet,
+      venusPlanet,
+      marsPlanet,
+      jupiterPlanet,
+    ].filter((planet): planet is THREE.Mesh => planet instanceof THREE.Mesh);
 
     this.planetInteractionController = createPlanetInteractionController({
       renderer: this.renderer,
@@ -252,9 +257,9 @@ export class DrawScene {
         mercuryPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
         const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
-        // 水星は88日で360度するので1フレームあたりの回転量を計算
+        // 水星の自転: 1フレームあたりの回転量を計算
         const mercuryRotation =
-          (360 / (settings.lerpFrame * getOrbitalPeriod('MERCURY'))) *
+          (360 / (settings.lerpFrame * getRotationPeriod('MERCURY'))) *
           settings.accelerationRotation;
         const mercuryAngle = degToRad(mercuryRotation);
         mercuryPlanet.rotateY(mercuryAngle);
@@ -287,9 +292,9 @@ export class DrawScene {
         /* 金星の公転（反時計回り）*/
         venusPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
-        // 金星は243日で360度するので1フレームあたりの回転量を計算
+        // 金星の自転: 1フレームあたりの回転量を計算（時計回りだがVENUS_TILTで回転させてる）
         const venusRotation =
-          (360 / (settings.lerpFrame * getOrbitalPeriod('VENUS'))) * settings.accelerationRotation;
+          (360 / (settings.lerpFrame * getRotationPeriod('VENUS'))) * settings.accelerationRotation;
         const venusAngle = degToRad(venusRotation);
         venusPlanet.rotateY(venusAngle);
         // 大気はスーパーローテーションさせる（自転速度の約60倍で回転させる）
@@ -321,9 +326,9 @@ export class DrawScene {
       marsPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
       const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
-      // 火星は687日で360度するので1フレームあたりの回転量を計算
+      // 火星の自転: 1フレームあたりの回転量を計算
       const marsRotation =
-        (360 / (settings.lerpFrame * getOrbitalPeriod('MARS'))) * settings.accelerationRotation;
+        (360 / (settings.lerpFrame * getRotationPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
       // フォボスとダイモスの公転（反時計回り）
@@ -343,6 +348,39 @@ export class DrawScene {
       const deimosY = 0; // 火星の赤道面に沿って公転させるため、Y軸は0に固定
       const deimosZ = deimosOrbitRadius * Math.sin(deimosCurrentAngle);
       deimos.position.set(-deimosX, deimosY, deimosZ);
+    }
+
+    /* 木星の公転と自転（反時計回り） */
+    {
+      const jupiterPlanetSystem = this.jupiterGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+
+      // APIから取得した現在位置に惑星を配置
+      const jupiterPosition = this.jupiterGroup.userData.planetPositionRes as PlanetPositionRes;
+      const jupiterStepDays = 30;
+      const jupiterPathLength = jupiterPosition.pathPoints.length - 1;
+      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const jupiterCurrentIndex =
+        Math.floor(earthDayProgress / jupiterStepDays) % jupiterPathLength;
+      const currentPosition = jupiterPosition.pathPoints[jupiterCurrentIndex];
+
+      // 木星は30日刻みの点を使うため、次の点へは30日かけて補間する
+      const nextDayIndex = (jupiterCurrentIndex + 1) % jupiterPathLength;
+      const nextPosition = jupiterPosition.pathPoints[nextDayIndex];
+      const jupiterLerpFactor = (earthDayProgress % jupiterStepDays) / jupiterStepDays;
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), jupiterLerpFactor);
+      /* 木星の公転（反時計回り）*/
+      jupiterPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+
+      const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      // 木星の自転: 1フレームあたりの回転量を計算
+      const jupiterRotation =
+        (360 / (settings.lerpFrame * getRotationPeriod('JUPITER'))) * settings.accelerationRotation;
+      const jupiterAngle = degToRad(jupiterRotation);
+      jupiterPlanet.rotateY(jupiterAngle);
     }
   }
 }
