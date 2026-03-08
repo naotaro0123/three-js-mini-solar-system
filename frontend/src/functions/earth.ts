@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, type PlanetMoon } from './planet-common';
 import {
@@ -81,13 +82,7 @@ export const createEarthMesh = async (
 
   if (isDebug) {
     // 地球の現在位置を表示
-    const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const currentEarthPoint = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    const { pathPoints, todayRow } = planetPositionsRes;
-    const position = pathPoints[todayRow - 1];
-    currentEarthPoint.position.copy(position);
-    earthMesh.add(currentEarthPoint);
+    addCurrentPositionMarker({ parent: earthMesh, planetPositionsRes: planetPositionsRes });
   }
 
   return earthMesh;
