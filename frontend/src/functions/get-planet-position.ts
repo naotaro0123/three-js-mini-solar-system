@@ -1,6 +1,7 @@
 import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
 import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from '../../../common';
+import { getStepSize } from './settings';
 import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
@@ -20,8 +21,9 @@ const getCacheKey = (
   commandKey: RequestQueryBody['COMMAND'],
   startDate: string,
   stopDate: string,
+  stepSize: string,
 ) => {
-  return `${PLANET_POSITION_CACHE_PREFIX}:${commandKey}:${startDate}:${stopDate}`;
+  return `${PLANET_POSITION_CACHE_PREFIX}:${commandKey}:${startDate}:${stopDate}:${stepSize}`;
 };
 
 const loadPlanetPositionCache = (cacheKey: string): PlanetPositionRes | null => {
@@ -95,18 +97,6 @@ export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
       return 1;
   }
 };
-const getStepSize = (commandKey: RequestQueryBody['COMMAND']) => {
-  // TODO: 木星以降は日数を検討する
-  // https://ssd-api.jpl.nasa.gov/doc/horizons.html#stepping
-  switch (commandKey) {
-    case 'JUPITER': // 木星
-      return '1months';
-    case 'MARS': // 火星
-      return '5days';
-    default:
-      return '1days';
-  }
-};
 
 export const getPlanetPosition = async (
   commandKey: RequestQueryBody['COMMAND'],
@@ -117,8 +107,8 @@ export const getPlanetPosition = async (
 
   const _endDate = addDays(_startDate, getOrbitalPeriod(commandKey));
   const stopDate = format(_endDate, 'yyyy-MM-dd');
-  const StepSize = getStepSize(commandKey);
-  const cacheKey = getCacheKey(commandKey, startDate, stopDate);
+  const stepSize = getStepSize(commandKey);
+  const cacheKey = getCacheKey(commandKey, startDate, stopDate, stepSize);
   const cachedResult = loadPlanetPositionCache(cacheKey);
   if (cachedResult) {
     return cachedResult;
@@ -127,7 +117,7 @@ export const getPlanetPosition = async (
   // 複数回同時にAPIを叩くと503エラーになるので少し待機する
   await sleep(50);
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
-  const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${StepSize}&COMMAND=${commandKey}`;
+  const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${stepSize}&COMMAND=${commandKey}`;
 
   const result: PlanetPositionRes = { todayRow: 0, pathPoints: [] };
 

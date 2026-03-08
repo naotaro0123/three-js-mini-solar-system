@@ -1,3 +1,5 @@
+import type { RequestQueryBody } from '../../../common';
+
 export const settings = {
   lerpFrame: 60, // 1日を何フレームで補間するか
   accelerationOrbit: 1, // 公転スピード
@@ -40,3 +42,22 @@ export const JUPITER_SIZE = EARTH_SIZE * 11; // 木星は地球の約11倍の大
 export const JUPITER_TILT = 3.13;
 export const JUPITER_NAME = 'Jupiter';
 export const JUPITER_ORBIT_COLOR = 0x009900;
+
+const DEFAULT_STEP_DAYS = 1;
+const MARS_STEP_DAYS = 5;
+const JUPITER_STEP_DAYS = 30;
+
+export const getStepDays = (commandKey: RequestQueryBody['COMMAND']) => {
+  switch (commandKey) {
+    case 'JUPITER':
+      return JUPITER_STEP_DAYS;
+    case 'MARS':
+      return MARS_STEP_DAYS;
+    default:
+      return DEFAULT_STEP_DAYS;
+  }
+};
+
+export const getStepSize = (commandKey: RequestQueryBody['COMMAND']) => {
+  return `${getStepDays(commandKey)}days`;
+};

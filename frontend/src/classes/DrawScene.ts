@@ -13,7 +13,7 @@ import {
   createPlanetInteractionController,
   type PlanetInteractionController,
 } from '../functions/rimLight';
-import { settings } from '../functions/settings';
+import { getStepDays, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
@@ -310,18 +310,19 @@ export class DrawScene {
 
       // APIから取得した現在位置に惑星を配置
       const marsPosition = this.marsGroup.userData.planetPositionRes as PlanetPositionRes;
-      const marsCurrentIndex =
-        this.currentIndex < marsPosition.pathPoints.length - 1
-          ? this.currentIndex
-          : this.currentIndex % (marsPosition.pathPoints.length - 1);
+      const marsStepDays = getStepDays('MARS');
+      const marsPathLength = marsPosition.pathPoints.length - 1;
+      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const marsCurrentIndex = Math.floor(earthDayProgress / marsStepDays) % marsPathLength;
       const currentPosition = marsPosition.pathPoints[marsCurrentIndex];
 
-      // 次の日（nextDayIndex）の座標を取得
-      const nextDayIndex = marsCurrentIndex + 1;
+      // 火星は5日刻みの点を使うため、次の点へは5日かけて補間する
+      const nextDayIndex = (marsCurrentIndex + 1) % marsPathLength;
       const nextPosition = marsPosition.pathPoints[nextDayIndex];
+      const marsLerpFactor = (earthDayProgress % marsStepDays) / marsStepDays;
       const interpolatedPos = new THREE.Vector3()
         .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), marsLerpFactor);
       /* 火星の公転（反時計回り）*/
       marsPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
 
@@ -358,7 +359,7 @@ export class DrawScene {
 
       // APIから取得した現在位置に惑星を配置
       const jupiterPosition = this.jupiterGroup.userData.planetPositionRes as PlanetPositionRes;
-      const jupiterStepDays = 30;
+      const jupiterStepDays = getStepDays('JUPITER');
       const jupiterPathLength = jupiterPosition.pathPoints.length - 1;
       const earthDayProgress = this.currentIndex + this.lerpFactor;
       const jupiterCurrentIndex =
