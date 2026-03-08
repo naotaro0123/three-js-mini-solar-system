@@ -1,8 +1,11 @@
 import * as THREE from 'three';
+import type { RequestQueryBody } from '../../../common';
 import type { PlanetPositionsRes } from './get-planet-position';
+import { getStepDays } from './settings';
 
 type AddCurrentPositionMarkerParams = {
   parent: THREE.Object3D;
+  commandKey: RequestQueryBody['COMMAND'];
   planetPositionsRes: PlanetPositionsRes;
   radius?: number;
   color?: number;
@@ -10,6 +13,7 @@ type AddCurrentPositionMarkerParams = {
 
 export const addCurrentPositionMarker = ({
   parent,
+  commandKey,
   planetPositionsRes,
   radius = 1,
   color = 0xff0000,
@@ -24,8 +28,18 @@ export const addCurrentPositionMarker = ({
   currentPoint.renderOrder = 999;
 
   const { pathPoints, todayRow } = planetPositionsRes;
-  const position = pathPoints[todayRow - 1];
-  currentPoint.position.copy(position);
+  const pathLength = pathPoints.length - 1;
+  const earthDayProgress = todayRow - 1;
+  const stepDays = getStepDays(commandKey);
+  const currentIndex = Math.floor(earthDayProgress / stepDays) % pathLength;
+  const nextIndex = (currentIndex + 1) % pathLength;
+  const lerpFactor = (earthDayProgress % stepDays) / stepDays;
+  const currentPosition = pathPoints[currentIndex];
+  const nextPosition = pathPoints[nextIndex];
+  const interpolatedPos = new THREE.Vector3()
+    .fromArray(currentPosition.toArray())
+    .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), lerpFactor);
+  currentPoint.position.copy(interpolatedPos);
 
   parent.add(currentPoint);
   return currentPoint;
