@@ -73,16 +73,16 @@ export class DrawScene {
     this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
     // 水星のメッシュを作成
-    this.mercuryGroup = await createMercuryGroup();
+    this.mercuryGroup = await createMercuryGroup(isDebug);
     this.scene.add(this.mercuryGroup);
     // 金星のメッシュを作成
-    this.venusGroup = await createVenusGroup();
+    this.venusGroup = await createVenusGroup(isDebug);
     this.scene.add(this.venusGroup);
     // 火星のメッシュを作成
     this.marsGroup = await createMarsGroup(isDebug);
     this.scene.add(this.marsGroup);
     // 木星のメッシュを作成
-    this.jupiterGroup = await createJupiterGroup();
+    this.jupiterGroup = await createJupiterGroup(isDebug);
     this.scene.add(this.jupiterGroup);
 
     this.initDoubleClickZoom();

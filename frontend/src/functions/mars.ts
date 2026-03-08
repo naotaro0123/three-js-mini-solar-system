@@ -54,7 +54,7 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
   }
   if (isDebug) {
     // 火星の現在位置を表示
-    addCurrentPositionMarker({ parent: planetSystem, planetPositionsRes: planetPositionsRes });
+    addCurrentPositionMarker({ parent: marsGroup, planetPositionsRes: planetPositionsRes });
   }
 
   return marsGroup;
