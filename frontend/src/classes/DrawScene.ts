@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
 import { getRotationPeriod, type PlanetPositionsRes } from '../functions/get-planet-position';
-import { createJupiterGroup } from '../functions/jupiter';
+import { createJupiterGroup, jupiterMoons } from '../functions/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
@@ -382,6 +382,46 @@ export class DrawScene {
         (360 / (settings.lerpFrame * getRotationPeriod('JUPITER'))) * settings.accelerationRotation;
       const jupiterAngle = degToRad(jupiterRotation);
       jupiterPlanet.rotateY(jupiterAngle);
+      // 木星の衛星の公転
+      // イオは約1.8日、エウロパは約3.5日、ガニメデは約7.1日、カリストは約16.7日で木星を公転するので、それぞれの周期に応じた速度で公転させる
+      const io = this.jupiterGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+      const europa = this.jupiterGroup.getObjectByName(
+        `${Names.PLANET_MOONS_NAME}_1`,
+      ) as THREE.Mesh;
+      const ganymede = this.jupiterGroup.getObjectByName(
+        `${Names.PLANET_MOONS_NAME}_2`,
+      ) as THREE.Mesh;
+      const callisto = this.jupiterGroup.getObjectByName(
+        `${Names.PLANET_MOONS_NAME}_3`,
+      ) as THREE.Mesh;
+      const ioOrbitRadius = jupiterMoons[0].orbitRadius + (jupiterMoons[0].xPosition ?? 0);
+      const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
+      const ganymedeOrbitRadius = jupiterMoons[2].orbitRadius + (jupiterMoons[2].xPosition ?? 0);
+      const callistoOrbitRadius = jupiterMoons[3].orbitRadius + (jupiterMoons[3].xPosition ?? 0);
+      const ioCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.8);
+      const europaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 3.5);
+      const ganymedeCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 7.1);
+      const callistoCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 16.7);
+      // イオの公転
+      const ioX = ioOrbitRadius * Math.cos(ioCurrentAngle);
+      const ioY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+      const ioZ = ioOrbitRadius * Math.sin(ioCurrentAngle);
+      io.position.set(-ioX, ioY, ioZ);
+      // エウロパの公転
+      const europaX = europaOrbitRadius * Math.cos(europaCurrentAngle);
+      const europaY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+      const europaZ = europaOrbitRadius * Math.sin(europaCurrentAngle);
+      europa.position.set(-europaX, europaY, europaZ);
+      // ガニメデの公転
+      const ganymedeX = ganymedeOrbitRadius * Math.cos(ganymedeCurrentAngle);
+      const ganymedeY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+      const ganymedeZ = ganymedeOrbitRadius * Math.sin(ganymedeCurrentAngle);
+      ganymede.position.set(-ganymedeX, ganymedeY, ganymedeZ);
+      // カリストの公転
+      const callistoX = callistoOrbitRadius * Math.cos(callistoCurrentAngle);
+      const callistoY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+      const callistoZ = callistoOrbitRadius * Math.sin(callistoCurrentAngle);
+      callisto.position.set(-callistoX, callistoY, callistoZ);
     }
   }
 }

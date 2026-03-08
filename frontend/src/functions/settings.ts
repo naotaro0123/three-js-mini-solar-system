@@ -32,7 +32,7 @@ export const VENUS_NAME = 'Venus';
 const VENUS_ORBIT_COLOR = 0xffd700;
 
 // 火星のサイズと自転軸の傾き
-export const MARS_SIZE = 3.4;
+export const MARS_SIZE = EARTH_SIZE * 0.53; // 火星は地球の約0.53倍の大きさ
 export const MARS_TILT = 25.2;
 export const MARS_NAME = 'Mars';
 const MARS_ORBIT_COLOR = 0xff4500;

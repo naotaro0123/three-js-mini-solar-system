@@ -2,37 +2,48 @@ import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
-import { getOrbitColor, JUPITER_NAME, JUPITER_SIZE, JUPITER_TILT, settings } from './settings';
-import { loadGlTFModel } from './utils';
+import {
+  EARTH_SIZE,
+  getOrbitColor,
+  JUPITER_NAME,
+  JUPITER_SIZE,
+  JUPITER_TILT,
+  settings,
+} from './settings';
 
 export const jupiterMoons: PlanetMoon[] = [
+  // sizeは地球と比べてイオは約0.29倍、エウロパは約0.24倍、ガニメデは約0.41倍、カリストは約0.34倍
   // イオ
   {
-    size: 1.6,
+    size: EARTH_SIZE * 0.29,
     texture: '/images/jupiterIo.jpg',
     orbitRadius: 20,
     orbitSpeed: 0.0005 * settings.accelerationOrbit,
+    xPosition: 80, // 木星から42万kmだが目視で設定
   },
   // エウロパ
   {
-    size: 1.4,
+    size: EARTH_SIZE * 0.24,
     texture: '/images/jupiterEuropa.jpg',
     orbitRadius: 24,
     orbitSpeed: 0.00025 * settings.accelerationOrbit,
+    xPosition: 90, // 木星から約67万kmだが目視で設定
   },
   // ガニメデ
   {
-    size: 2,
+    size: EARTH_SIZE * 0.41,
     texture: '/images/jupiterGanymede.jpg',
     orbitRadius: 28,
     orbitSpeed: 0.000125 * settings.accelerationOrbit,
+    xPosition: 110, // 木星から約107万kmだが目視で設定
   },
   // カリスト
   {
-    size: 1.7,
+    size: EARTH_SIZE * 0.34,
     texture: '/images/jupiterCallisto.jpg',
     orbitRadius: 32,
     orbitSpeed: 0.00006 * settings.accelerationOrbit,
+    xPosition: 140, // 木星から約188万kmだが目視で設定
   },
 ];
 
@@ -48,21 +59,15 @@ export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group>
     null,
     null,
     null,
-    // jupiterMoons,
-    [],
+    jupiterMoons,
     planetPositionsRes,
   );
   const planetSystem = jupiterGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
-  for (const [index, moon] of jupiterMoons.entries()) {
-    if (moon.modelPath === undefined) continue;
-    const model = await loadGlTFModel(moon.modelPath);
-    moon.mesh = model.children[0] as THREE.Mesh;
-    moon.mesh.name = `${Names.PLANET_MOONS_NAME}_${index}`;
-    moon.mesh.scale.set(moon.size, moon.size, moon.size);
-    moon.mesh.position.set(moon.xPosition ?? 0, 0, 0);
-    moon.mesh.castShadow = true;
-    moon.mesh.receiveShadow = true;
-    planetSystem.add(moon.mesh);
+  const _jupiterMoons = planetSystem.children.filter((child) =>
+    child.name.startsWith(Names.PLANET_MOONS_NAME),
+  );
+  for (const [index, moon] of _jupiterMoons.entries()) {
+    moon.position.set(jupiterMoons[index].xPosition ?? 0, 0, 0);
   }
 
   if (isDebug) {
