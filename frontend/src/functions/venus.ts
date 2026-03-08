@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { getPlanetPosition } from './get-planet-position';
+import { getPlanetPositions } from './get-planet-position';
 import { createPlanet } from './planet-common';
 import { VENUS_NAME, VENUS_ORBIT_COLOR, VENUS_SIZE, VENUS_TILT } from './settings';
 
 export const createVenusGroup = async (): Promise<THREE.Group> => {
-  const position = await getPlanetPosition('VENUS');
+  const planetPositionsRes = await getPlanetPositions('VENUS');
   return createPlanet(
     VENUS_NAME,
     VENUS_SIZE,
@@ -15,6 +15,6 @@ export const createVenusGroup = async (): Promise<THREE.Group> => {
     null,
     '/images/venus_atmosphere.png',
     [],
-    position,
+    planetPositionsRes,
   );
 };

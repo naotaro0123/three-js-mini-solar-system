@@ -7,7 +7,7 @@ import { sleep } from './utils';
 const API_HOST = import.meta.env.VITE_API_HOST;
 const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v1';
 
-export type PlanetPositionRes = {
+export type PlanetPositionsRes = {
   todayRow: number;
   pathPoints: THREE.Vector3[];
 };
@@ -26,7 +26,7 @@ const getCacheKey = (
   return `${PLANET_POSITION_CACHE_PREFIX}:${commandKey}:${startDate}:${stopDate}:${stepSize}`;
 };
 
-const loadPlanetPositionCache = (cacheKey: string): PlanetPositionRes | null => {
+const loadPlanetPositionCache = (cacheKey: string): PlanetPositionsRes | null => {
   const cached = localStorage.getItem(cacheKey);
   if (!cached) return null;
 
@@ -51,7 +51,7 @@ const loadPlanetPositionCache = (cacheKey: string): PlanetPositionRes | null => 
   }
 };
 
-const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionRes) => {
+const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionsRes) => {
   const serializable: PlanetPositionCache = {
     todayRow: data.todayRow,
     pathPoints: data.pathPoints.map((point) => ({
@@ -98,9 +98,9 @@ export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   }
 };
 
-export const getPlanetPosition = async (
+export const getPlanetPositions = async (
   commandKey: RequestQueryBody['COMMAND'],
-): Promise<PlanetPositionRes> => {
+): Promise<PlanetPositionsRes> => {
   const currentYear = new Date().getFullYear();
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
@@ -119,7 +119,7 @@ export const getPlanetPosition = async (
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${stepSize}&COMMAND=${commandKey}`;
 
-  const result: PlanetPositionRes = { todayRow: 0, pathPoints: [] };
+  const result: PlanetPositionsRes = { todayRow: 0, pathPoints: [] };
 
   try {
     const response = await fetch(url);

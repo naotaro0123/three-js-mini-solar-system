@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
-import { getRotationPeriod, type PlanetPositionRes } from '../functions/get-planet-position';
+import { getRotationPeriod, type PlanetPositionsRes } from '../functions/get-planet-position';
 import { createJupiterGroup } from '../functions/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, marsMoons } from '../functions/mars';
@@ -54,8 +54,8 @@ export class DrawScene {
     this.render();
   }
 
-  get userDataEarthPositionRes(): PlanetPositionRes {
-    return this.earthGroup.userData.planetPositionRes as PlanetPositionRes;
+  get userDataEarthPositionRes(): PlanetPositionsRes {
+    return this.earthGroup.userData.planetPositionsRes as PlanetPositionsRes;
   }
   get width(): number {
     return window.innerWidth;
@@ -240,7 +240,7 @@ export class DrawScene {
         ) as THREE.Group;
 
         // APIから取得した現在位置に惑星を配置
-        const mercuryPosition = this.mercuryGroup.userData.planetPositionRes as PlanetPositionRes;
+        const mercuryPosition = this.mercuryGroup.userData.planetPositionsRes as PlanetPositionsRes;
         const mercuryCurrentIndex =
           this.currentIndex < mercuryPosition.pathPoints.length - 1
             ? this.currentIndex
@@ -276,7 +276,7 @@ export class DrawScene {
         ) as THREE.Mesh;
 
         // APIから取得した現在位置に惑星を配置
-        const venusPosition = this.venusGroup.userData.planetPositionRes as PlanetPositionRes;
+        const venusPosition = this.venusGroup.userData.planetPositionsRes as PlanetPositionsRes;
         const venusCurrentIndex =
           this.currentIndex < venusPosition.pathPoints.length - 1
             ? this.currentIndex
@@ -309,7 +309,7 @@ export class DrawScene {
       ) as THREE.Group;
 
       // APIから取得した現在位置に惑星を配置
-      const marsPosition = this.marsGroup.userData.planetPositionRes as PlanetPositionRes;
+      const marsPosition = this.marsGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const marsStepDays = getStepDays('MARS');
       const marsPathLength = marsPosition.pathPoints.length - 1;
       const earthDayProgress = this.currentIndex + this.lerpFactor;
@@ -358,7 +358,7 @@ export class DrawScene {
       ) as THREE.Group;
 
       // APIから取得した現在位置に惑星を配置
-      const jupiterPosition = this.jupiterGroup.userData.planetPositionRes as PlanetPositionRes;
+      const jupiterPosition = this.jupiterGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const jupiterStepDays = getStepDays('JUPITER');
       const jupiterPathLength = jupiterPosition.pathPoints.length - 1;
       const earthDayProgress = this.currentIndex + this.lerpFactor;

@@ -7,7 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import type { PlanetPositionRes } from './get-planet-position';
+import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
 
@@ -76,7 +76,7 @@ export const initGUI = (params: {
   setCurrentIndex: (value: number) => void;
   setLerpFactor: (value: number) => void;
   setFrameCount: (value: number) => void;
-  userDataEarthPositionRes: PlanetPositionRes;
+  userDataEarthPositionRes: PlanetPositionsRes;
 }): void => {
   const {
     sunMesh,

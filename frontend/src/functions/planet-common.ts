@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { PlanetPositionRes } from './get-planet-position';
+import type { PlanetPositionsRes } from './get-planet-position';
 import { degToRad } from './utils';
 
 export const Names = {
@@ -38,7 +38,7 @@ export const createPlanet = (
   ring: Ring | null,
   atmosphere: string | null,
   moons: PlanetMoon[],
-  planetPositionRes: PlanetPositionRes,
+  planetPositionsRes: PlanetPositionsRes,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -64,7 +64,7 @@ export const createPlanet = (
   const planetSystem = new THREE.Group();
   planetSystem.name = Names.PLANET_SYSTEM_NAME;
   // APIから取得した現在位置に惑星を配置
-  const earthPosition = planetPositionRes.pathPoints[planetPositionRes.todayRow - 1];
+  const earthPosition = planetPositionsRes.pathPoints[planetPositionsRes.todayRow - 1];
   planetSystem.position.copy(earthPosition);
   planetSystem.add(planet);
 
@@ -138,9 +138,9 @@ export const createPlanet = (
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
   planet3d.name = planetName;
-  planet3d.userData = { planetPositionRes };
+  planet3d.userData = { planetPositionsRes };
 
-  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
+  const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionsRes.pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
     color: orbitColor,
     transparent: true,
