@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
-import { MARS_NAME, MARS_ORBIT_COLOR, MARS_SIZE, MARS_TILT, settings } from './settings';
+import { getOrbitColor, MARS_NAME, MARS_SIZE, MARS_TILT, settings } from './settings';
 import { loadGlTFModel } from './utils';
 
 export const marsMoons: PlanetMoon[] = [
@@ -32,7 +32,7 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
     MARS_NAME,
     MARS_SIZE,
     MARS_TILT,
-    MARS_ORBIT_COLOR,
+    getOrbitColor('MARS'),
     '/images/marsmap.jpg',
     '/images/marsbump.jpg',
     null,

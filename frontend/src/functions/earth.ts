@@ -5,9 +5,9 @@ import { createPlanet, type PlanetMoon } from './planet-common';
 import {
   EARTH_MOON_SIZE,
   EARTH_NAME,
-  EARTH_ORBIT_COLOR,
   EARTH_SIZE,
   EARTH_TILT,
+  getOrbitColor,
   settings,
 } from './settings';
 
@@ -72,7 +72,7 @@ export const createEarthMesh = async (
     EARTH_NAME,
     EARTH_SIZE,
     EARTH_TILT,
-    EARTH_ORBIT_COLOR,
+    getOrbitColor('EARTH'),
     earthMaterial,
     null,
     null,

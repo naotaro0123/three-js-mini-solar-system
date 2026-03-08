@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { RequestQueryBody } from '../../../common';
 import type { PlanetPositionsRes } from './get-planet-position';
-import { getStepDays } from './settings';
+import { getOrbitColor, getStepDays } from './settings';
 
 type AddCurrentPositionMarkerParams = {
   parent: THREE.Object3D;
@@ -16,11 +16,11 @@ export const addCurrentPositionMarker = ({
   commandKey,
   planetPositionsRes,
   radius = 1,
-  color = 0xff0000,
+  color,
 }: AddCurrentPositionMarkerParams): THREE.Mesh => {
   const sphereGeometry = new THREE.SphereGeometry(radius, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({
-    color,
+    color: color ?? getOrbitColor(commandKey),
     depthTest: false,
     depthWrite: false,
   });
