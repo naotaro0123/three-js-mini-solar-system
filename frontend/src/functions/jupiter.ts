@@ -2,13 +2,7 @@ import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
-import {
-  JUPITER_NAME,
-  JUPITER_ORBIT_COLOR,
-  JUPITER_SIZE,
-  JUPITER_TILT,
-  settings,
-} from './settings';
+import { getOrbitColor, JUPITER_NAME, JUPITER_SIZE, JUPITER_TILT, settings } from './settings';
 import { loadGlTFModel } from './utils';
 
 export const jupiterMoons: PlanetMoon[] = [
@@ -49,7 +43,7 @@ export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group>
     JUPITER_NAME,
     JUPITER_SIZE,
     JUPITER_TILT,
-    JUPITER_ORBIT_COLOR,
+    getOrbitColor('JUPITER'),
     '/images/jupiter.jpg',
     null,
     null,
