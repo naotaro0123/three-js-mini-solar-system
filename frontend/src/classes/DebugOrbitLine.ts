@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { RequestQueryBody } from '../../../common';
-import { getPlanetPosition } from '../functions/get-planet-position';
+import { getPlanetPositions } from '../functions/get-planet-position';
 import { handleResize } from '../functions/resize';
 
 export class DebugOrbitLine {
@@ -64,9 +64,9 @@ export class DebugOrbitLine {
   }
 
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
-    const planetPositionRes = await getPlanetPosition(commandKey);
-    console.log('planetPositionRes', commandKey, planetPositionRes);
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionRes.pathPoints);
+    const planetPositionsRes = await getPlanetPositions(commandKey);
+    console.log('planetPositionsRes', commandKey, planetPositionsRes);
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionsRes.pathPoints);
     const lineMaterial = new THREE.LineBasicMaterial({ color });
     const line = new THREE.LineLoop(lineGeometry, lineMaterial);
     line.name = commandKey;

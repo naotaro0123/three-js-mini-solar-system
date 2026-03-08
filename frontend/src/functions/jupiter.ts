@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getPlanetPosition } from './get-planet-position';
+import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
   JUPITER_NAME,
@@ -42,7 +42,7 @@ export const jupiterMoons: PlanetMoon[] = [
 ];
 
 export const createJupiterGroup = async (): Promise<THREE.Group> => {
-  const position = await getPlanetPosition('JUPITER');
+  const planetPositionsRes = await getPlanetPositions('JUPITER');
   const jupiterGroup = createPlanet(
     JUPITER_NAME,
     JUPITER_SIZE,
@@ -54,7 +54,7 @@ export const createJupiterGroup = async (): Promise<THREE.Group> => {
     null,
     // jupiterMoons,
     [],
-    position,
+    planetPositionsRes,
   );
   const planetSystem = jupiterGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   for (const [index, moon] of jupiterMoons.entries()) {
