@@ -45,6 +45,7 @@ export const jupiterMoons: PlanetMoon[] = [
 export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('JUPITER');
   const jupiterGroup = createPlanet(
+    'JUPITER',
     JUPITER_NAME,
     JUPITER_SIZE,
     JUPITER_TILT,
@@ -72,7 +73,11 @@ export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group>
 
   if (isDebug) {
     // 木星の現在位置を表示
-    addCurrentPositionMarker({ parent: jupiterGroup, planetPositionsRes: planetPositionsRes });
+    addCurrentPositionMarker({
+      parent: jupiterGroup,
+      commandKey: 'JUPITER',
+      planetPositionsRes: planetPositionsRes,
+    });
   }
 
   return jupiterGroup;

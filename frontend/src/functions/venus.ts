@@ -7,6 +7,7 @@ import { VENUS_NAME, VENUS_ORBIT_COLOR, VENUS_SIZE, VENUS_TILT } from './setting
 export const createVenusGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('VENUS');
   const venusGroup = createPlanet(
+    'VENUS',
     VENUS_NAME,
     VENUS_SIZE,
     VENUS_TILT,
@@ -21,7 +22,11 @@ export const createVenusGroup = async (isDebug: boolean): Promise<THREE.Group> =
 
   if (isDebug) {
     // 金星の現在位置を表示
-    addCurrentPositionMarker({ parent: venusGroup, planetPositionsRes: planetPositionsRes });
+    addCurrentPositionMarker({
+      parent: venusGroup,
+      commandKey: 'VENUS',
+      planetPositionsRes: planetPositionsRes,
+    });
   }
 
   return venusGroup;

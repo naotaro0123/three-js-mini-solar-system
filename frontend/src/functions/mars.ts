@@ -28,6 +28,7 @@ export const marsMoons: PlanetMoon[] = [
 export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('MARS');
   const marsGroup = createPlanet(
+    'MARS',
     MARS_NAME,
     MARS_SIZE,
     MARS_TILT,
@@ -54,7 +55,11 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
   }
   if (isDebug) {
     // 火星の現在位置を表示
-    addCurrentPositionMarker({ parent: marsGroup, planetPositionsRes: planetPositionsRes });
+    addCurrentPositionMarker({
+      parent: marsGroup,
+      commandKey: 'MARS',
+      planetPositionsRes: planetPositionsRes,
+    });
   }
 
   return marsGroup;

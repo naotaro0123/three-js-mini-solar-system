@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import type { RequestQueryBody } from '../../../common';
 import type { PlanetPositionsRes } from './get-planet-position';
+import { getStepDays } from './settings';
 import { degToRad } from './utils';
 
 export const Names = {
@@ -29,6 +31,7 @@ export type PlanetMoon = {
 };
 
 export const createPlanet = (
+  commandKey: RequestQueryBody['COMMAND'],
   planetName: string,
   size: number,
   tilt: number, // 自転軸の傾き
@@ -64,8 +67,18 @@ export const createPlanet = (
   const planetSystem = new THREE.Group();
   planetSystem.name = Names.PLANET_SYSTEM_NAME;
   // APIから取得した現在位置に惑星を配置
-  const earthPosition = planetPositionsRes.pathPoints[planetPositionsRes.todayRow - 1];
-  planetSystem.position.copy(earthPosition);
+  const pathLength = planetPositionsRes.pathPoints.length - 1;
+  const earthDayProgress = planetPositionsRes.todayRow - 1;
+  const stepDays = getStepDays(commandKey);
+  const currentIndex = Math.floor(earthDayProgress / stepDays) % pathLength;
+  const nextIndex = (currentIndex + 1) % pathLength;
+  const lerpFactor = (earthDayProgress % stepDays) / stepDays;
+  const currentPosition = planetPositionsRes.pathPoints[currentIndex];
+  const nextPosition = planetPositionsRes.pathPoints[nextIndex];
+  const interpolatedPos = new THREE.Vector3()
+    .fromArray(currentPosition.toArray())
+    .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), lerpFactor);
+  planetSystem.position.copy(interpolatedPos);
   planetSystem.add(planet);
 
   // 自転軸を追加する
