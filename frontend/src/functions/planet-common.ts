@@ -121,7 +121,7 @@ export const createPlanet = (
     planet.add(atmosphereMesh);
   }
 
-  // TODO: 地球の月のみで火星は使ってないので分離する
+  // 火星は未使用。地球と木星の衛星は使用してる。
   let moonIndex = 0;
   for (const moon of moons) {
     let moonMaterial: THREE.MeshStandardMaterial;

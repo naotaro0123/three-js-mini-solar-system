@@ -14,7 +14,7 @@ export const createSunMesh = (): THREE.Mesh => {
   const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
   sunMesh.name = SUN_NAME;
 
-  const pointLight = new THREE.PointLight(0xfdffd3, 1200, 5000, 1.4);
+  const pointLight = new THREE.PointLight(0xfdffd3, 1200, 6000, 1.4);
   sunMesh.add(pointLight);
   return sunMesh;
 };
