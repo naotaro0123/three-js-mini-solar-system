@@ -67,7 +67,7 @@ export const createEarthMesh = async (
 
   const planetPositionsRes = await getPlanetPositions('EARTH');
 
-  const earthMesh = createPlanet(
+  const earthGroup = createPlanet(
     EARTH_NAME,
     EARTH_SIZE,
     EARTH_TILT,
@@ -82,8 +82,8 @@ export const createEarthMesh = async (
 
   if (isDebug) {
     // 地球の現在位置を表示
-    addCurrentPositionMarker({ parent: earthMesh, planetPositionsRes: planetPositionsRes });
+    addCurrentPositionMarker({ parent: earthGroup, planetPositionsRes: planetPositionsRes });
   }
 
-  return earthMesh;
+  return earthGroup;
 };

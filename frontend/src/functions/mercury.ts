@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet } from './planet-common';
 import { MERCURY_NAME, MERCURY_ORBIT_COLOR, MERCURY_SIZE, MERCURY_TILT } from './settings';
 
-export const createMercuryGroup = async (): Promise<THREE.Group> => {
+export const createMercuryGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('MERCURY');
-  return createPlanet(
+  const mercuryGroup = createPlanet(
     MERCURY_NAME,
     MERCURY_SIZE,
     MERCURY_TILT,
@@ -17,4 +18,11 @@ export const createMercuryGroup = async (): Promise<THREE.Group> => {
     [],
     planetPositionsRes,
   );
+
+  if (isDebug) {
+    // 水星の現在位置を表示
+    addCurrentPositionMarker({ parent: mercuryGroup, planetPositionsRes: planetPositionsRes });
+  }
+
+  return mercuryGroup;
 };

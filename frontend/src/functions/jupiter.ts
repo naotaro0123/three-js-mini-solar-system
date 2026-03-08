@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
@@ -41,7 +42,7 @@ export const jupiterMoons: PlanetMoon[] = [
   },
 ];
 
-export const createJupiterGroup = async (): Promise<THREE.Group> => {
+export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('JUPITER');
   const jupiterGroup = createPlanet(
     JUPITER_NAME,
@@ -68,5 +69,11 @@ export const createJupiterGroup = async (): Promise<THREE.Group> => {
     moon.mesh.receiveShadow = true;
     planetSystem.add(moon.mesh);
   }
+
+  if (isDebug) {
+    // 木星の現在位置を表示
+    addCurrentPositionMarker({ parent: jupiterGroup, planetPositionsRes: planetPositionsRes });
+  }
+
   return jupiterGroup;
 };
