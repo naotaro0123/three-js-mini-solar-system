@@ -18,7 +18,7 @@ import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
 
-const isDebug = false;
+const isDebug = true;
 
 export class DrawScene {
   renderer = new THREE.WebGLRenderer();
@@ -79,7 +79,7 @@ export class DrawScene {
     this.venusGroup = await createVenusGroup();
     this.scene.add(this.venusGroup);
     // 火星のメッシュを作成
-    this.marsGroup = await createMarsGroup();
+    this.marsGroup = await createMarsGroup(isDebug);
     this.scene.add(this.marsGroup);
     // 木星のメッシュを作成
     this.jupiterGroup = await createJupiterGroup();
