@@ -116,6 +116,7 @@ export const getPlanetPositions = async (
 
   // 複数回同時にAPIを叩くと503エラーになるので少し待機する
   await sleep(50);
+  // TODO: 土星の場合は90日刻みで1年分のデータを取るようにするなど、惑星ごとにAPIのパラメータを変える
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${stepSize}&COMMAND=${commandKey}`;
 

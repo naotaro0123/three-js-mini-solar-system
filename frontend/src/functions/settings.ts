@@ -43,9 +43,16 @@ export const JUPITER_TILT = 3.13;
 export const JUPITER_NAME = 'Jupiter';
 const JUPITER_ORBIT_COLOR = 0x009900;
 
+// 土星のサイズと自転軸の傾き
+export const SATURN_SIZE = EARTH_SIZE * 9.4; // 土星は地球の約9.4倍の大きさ
+export const SATURN_TILT = 26.7;
+export const SATURN_NAME = 'Saturn';
+const SATURN_ORBIT_COLOR = 0x996600;
+
 const DEFAULT_STEP_DAYS = 1;
 const MARS_STEP_DAYS = 5;
 const JUPITER_STEP_DAYS = 30;
+const SATURN_STEP_DAYS = 90;
 
 export const getStepDays = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
@@ -53,6 +60,8 @@ export const getStepDays = (commandKey: RequestQueryBody['COMMAND']) => {
       return JUPITER_STEP_DAYS;
     case 'MARS':
       return MARS_STEP_DAYS;
+    case 'SATURN':
+      return SATURN_STEP_DAYS;
     default:
       return DEFAULT_STEP_DAYS;
   }
@@ -74,6 +83,8 @@ export const getOrbitColor = (commandKey: RequestQueryBody['COMMAND']): number =
       return MARS_ORBIT_COLOR;
     case 'JUPITER':
       return JUPITER_ORBIT_COLOR;
+    case 'SATURN':
+      return SATURN_ORBIT_COLOR;
     default:
       return EARTH_ORBIT_COLOR;
   }

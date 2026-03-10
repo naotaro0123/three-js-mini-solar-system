@@ -13,6 +13,7 @@ import {
   createPlanetInteractionController,
   type PlanetInteractionController,
 } from '../functions/rimLight';
+import { createSaturnGroup } from '../functions/saturn';
 import { getStepDays, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
@@ -34,6 +35,7 @@ export class DrawScene {
   venusGroup!: THREE.Group; // 金星のグループ
   marsGroup!: THREE.Group; // 火星のグループ
   jupiterGroup!: THREE.Group; // 木星のグループ
+  saturnGroup!: THREE.Group; // 土星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -84,6 +86,9 @@ export class DrawScene {
     // 木星のメッシュを作成
     this.jupiterGroup = await createJupiterGroup(isDebug);
     this.scene.add(this.jupiterGroup);
+    // 土星のメッシュを作成
+    this.saturnGroup = await createSaturnGroup(isDebug);
+    this.scene.add(this.saturnGroup);
 
     this.initDoubleClickZoom();
 
@@ -115,6 +120,7 @@ export class DrawScene {
     const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME);
     const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME);
     const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME);
+    const saturnPlanet = this.saturnGroup.getObjectByName(Names.PLANET_NAME);
 
     this.zoomablePlanets = [
       earthPlanet,
@@ -122,6 +128,7 @@ export class DrawScene {
       venusPlanet,
       marsPlanet,
       jupiterPlanet,
+      saturnPlanet,
     ].filter((planet): planet is THREE.Mesh => planet instanceof THREE.Mesh);
 
     this.planetInteractionController = createPlanetInteractionController({

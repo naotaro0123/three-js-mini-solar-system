@@ -49,6 +49,7 @@ export class DebugOrbitLine {
       { commandKey: 'VENUS', color: 0xffd700 },
       { commandKey: 'MARS', color: 0xff0000 },
       { commandKey: 'JUPITER', color: 0xffa500 },
+      { commandKey: 'SATURN', color: 0x996600 },
     ];
 
     const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
