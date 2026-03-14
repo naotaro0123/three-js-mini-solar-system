@@ -25,6 +25,7 @@ export const addCurrentPositionMarker = ({
     depthWrite: false,
   });
   const currentPoint = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  currentPoint.name = `${commandKey}-current-position`;
   currentPoint.renderOrder = 999;
 
   const { pathPoints, todayRow } = planetPositionsRes;

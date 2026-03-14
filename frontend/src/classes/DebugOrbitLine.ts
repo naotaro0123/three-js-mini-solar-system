@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { RequestQueryBody } from '../../../common';
+import { addCurrentPositionMarker } from '../functions/debug';
 import { getPlanetPositions } from '../functions/get-planet-position';
 import { handleResize } from '../functions/resize';
 
@@ -22,7 +23,9 @@ export class DebugOrbitLine {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 10000);
-    this.camera.position.set(0, 100, 160);
+    this.camera.position.set(0, 1200, 0);
+    this.camera.lookAt(0, 0, 0);
+    // this.camera.zoom = 4;
 
     handleResize(this.camera, this.renderer);
     window.addEventListener('resize', () => handleResize(this.camera, this.renderer));
@@ -44,9 +47,9 @@ export class DebugOrbitLine {
       commandKey: RequestQueryBody['COMMAND'];
       color: number;
     }[] = [
-      { commandKey: 'EARTH', color: 0x0000ff },
       { commandKey: 'MERCURY', color: 0x0099ff },
       { commandKey: 'VENUS', color: 0xffd700 },
+      { commandKey: 'EARTH', color: 0x0000ff },
       { commandKey: 'MARS', color: 0xff0000 },
       { commandKey: 'JUPITER', color: 0xffa500 },
       { commandKey: 'SATURN', color: 0x996600 },
@@ -66,12 +69,39 @@ export class DebugOrbitLine {
 
   async drawOrbitLine(commandKey: RequestQueryBody['COMMAND'], color: THREE.Color) {
     const planetPositionsRes = await getPlanetPositions(commandKey);
-    console.log('planetPositionsRes', commandKey, planetPositionsRes);
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionsRes.pathPoints);
     const lineMaterial = new THREE.LineBasicMaterial({ color });
-    const line = new THREE.LineLoop(lineGeometry, lineMaterial);
+    const line = new THREE.Line(lineGeometry, lineMaterial);
     line.name = commandKey;
     this.scene.add(line);
+
+    const isDebug = false;
+
+    if (isDebug) {
+      const startPositionsRes = {
+        ...planetPositionsRes,
+        todayRow: 1,
+        commandKey: 'SATURN' as const,
+      };
+      // const debug1PositionsRes = {
+      //   ...planetPositionsRes,
+      //   todayRow: 360,
+      //   commandKey: 'SATURN' as const,
+      // };
+      const endPositionsRes = {
+        ...planetPositionsRes,
+        todayRow: 364,
+        commandKey: 'SATURN' as const,
+      };
+      const _debugPositionsResList = [startPositionsRes, endPositionsRes];
+      for (const _debugPositionsRes of _debugPositionsResList) {
+        addCurrentPositionMarker({
+          parent: line,
+          commandKey: _debugPositionsRes.commandKey,
+          planetPositionsRes: _debugPositionsRes,
+        });
+      }
+    }
   }
 
   render() {
