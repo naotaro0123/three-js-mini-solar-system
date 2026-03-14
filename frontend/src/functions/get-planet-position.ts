@@ -6,7 +6,7 @@ import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v1';
-const TARGET_POINTS_PER_YEAR = 365;
+const TARGET_POINTS_PER_YEAR = 367; // 地球の場合に始点と終点をつなぐために365点以上必要になるため、少し余裕を持たせて367点にする
 
 const normalizePathPointsToYear = (points: THREE.Vector3[]): THREE.Vector3[] => {
   if (points.length === 0) return points;
@@ -119,6 +119,8 @@ export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
       return 0.72;
     case 'NEPTUNE': // 海王星（約0.67日 = 約16.1時間）
       return 0.67;
+    default:
+      return 1;
   }
 };
 
