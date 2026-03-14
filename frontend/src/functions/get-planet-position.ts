@@ -77,29 +77,31 @@ const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionsRes) => 
 
   localStorage.setItem(cacheKey, JSON.stringify(serializable));
 };
+
 // 公転日数
 export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
-    case 'EARTH':
+    case 'EARTH': // 地球(約1年)
       return 365;
-    case 'MERCURY': // 水星
+    case 'MERCURY': // 水星(約0.24年)
       return 88;
-    case 'VENUS': // 金星
+    case 'VENUS': // 金星(約0.615年)
       return 225;
-    case 'MARS': // 火星
+    case 'MARS': // 火星(約1.88年)
       return 687;
-    case 'JUPITER': // 木星
-      return 4333; // 約11.86年
-    case 'SATURN': // 土星
-      return 10759; // 約29.46年
-    case 'URANUS': // 天王星
-      return 30687; // 約84年
-    case 'NEPTUNE': // 海王星
-      return 60190; // 約165年
+    case 'JUPITER': // 木星(約11.86年)
+      return 4333;
+    case 'SATURN': // 土星(約29.46年)
+      return 10759;
+    case 'URANUS': // 天王星(約84年)
+      return 30687;
+    case 'NEPTUNE': // 海王星(約165年)
+      return 60190;
     default:
       return 364;
   }
 };
+
 // 自転日数
 export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {

@@ -195,7 +195,7 @@ export class DrawScene {
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
 
         /* 地球の公転（反時計回り）*/
-        earthPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+        earthPlanetSystem.position.copy(interpolatedPos);
 
         // 小数点の誤差を防ぐため、toFixedで丸める
         this.lerpFactor = Number(
@@ -261,7 +261,7 @@ export class DrawScene {
           .fromArray(currentPosition.toArray())
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
         /* 水星の公転（反時計回り）*/
-        mercuryPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+        mercuryPlanetSystem.position.copy(interpolatedPos);
 
         const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
         // 水星の自転: 1フレームあたりの回転量を計算
@@ -297,7 +297,7 @@ export class DrawScene {
           .fromArray(currentPosition.toArray())
           .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
         /* 金星の公転（反時計回り）*/
-        venusPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+        venusPlanetSystem.position.copy(interpolatedPos);
 
         // 金星の自転: 1フレームあたりの回転量を計算（時計回りだがVENUS_TILTで回転させてる）
         const venusRotation =
@@ -381,7 +381,7 @@ export class DrawScene {
         .fromArray(currentPosition.toArray())
         .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), jupiterLerpFactor);
       /* 木星の公転（反時計回り）*/
-      jupiterPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+      jupiterPlanetSystem.position.copy(interpolatedPos);
 
       const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 木星の自転: 1フレームあたりの回転量を計算
@@ -429,6 +429,37 @@ export class DrawScene {
       const callistoY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
       const callistoZ = callistoOrbitRadius * Math.sin(callistoCurrentAngle);
       callisto.position.set(-callistoX, callistoY, callistoZ);
+    }
+
+    /* 土星の公転と自転（反時計回り） */
+    {
+      const saturnPlanetSystem = this.saturnGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+
+      // APIから取得した現在位置に惑星を配置
+      const saturnPosition = this.saturnGroup.userData.planetPositionsRes as PlanetPositionsRes;
+      const saturnStepDays = getStepDays('SATURN');
+      const saturnPathLength = saturnPosition.pathPoints.length - 1;
+      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const saturnCurrentIndex = Math.floor(earthDayProgress / saturnStepDays) % saturnPathLength;
+      const currentPosition = saturnPosition.pathPoints[saturnCurrentIndex];
+
+      // 土星は90日刻みの点を使うため、次の点へは90日かけて補間する
+      const nextDayIndex = (saturnCurrentIndex + 1) % saturnPathLength;
+      const nextPosition = saturnPosition.pathPoints[nextDayIndex];
+      const saturnLerpFactor = (earthDayProgress % saturnStepDays) / saturnStepDays;
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), saturnLerpFactor);
+      saturnPlanetSystem.position.copy(interpolatedPos);
+
+      const saturnPlanet = this.saturnGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      // 土星の自転: 1フレームあたりの回転量を計算
+      const saturnRotation =
+        (360 / (settings.lerpFrame * getRotationPeriod('SATURN'))) * settings.accelerationRotation;
+      const saturnAngle = degToRad(saturnRotation);
+      saturnPlanet.rotateY(saturnAngle);
     }
   }
 }

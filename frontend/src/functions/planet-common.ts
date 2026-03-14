@@ -62,6 +62,8 @@ export const createPlanet = (
   const geometry = new THREE.SphereGeometry(size, 32, 20);
   const planet = new THREE.Mesh(geometry, material);
   planet.rotation.z = degToRad(tilt);
+  planet.castShadow = true;
+  planet.receiveShadow = true;
   planet.name = Names.PLANET_NAME;
 
   const planetSystem = new THREE.Group();
@@ -143,6 +145,8 @@ export const createPlanet = (
     const moonGeometry = new THREE.SphereGeometry(moon.size, 32, 20);
     const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
     moonMesh.name = `${Names.PLANET_MOONS_NAME}_${moonIndex}`;
+    moonMesh.castShadow = true;
+    moonMesh.receiveShadow = true;
     moonIndex++;
     const moonOrbitDistance = size * 1.5;
     moonMesh.position.set(moonOrbitDistance, 0, 0);
