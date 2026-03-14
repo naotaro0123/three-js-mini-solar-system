@@ -6,6 +6,20 @@ import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v1';
+const TARGET_POINTS_PER_YEAR = 365;
+
+const normalizePathPointsToYear = (points: THREE.Vector3[]): THREE.Vector3[] => {
+  if (points.length === 0) return points;
+  if (points.length >= TARGET_POINTS_PER_YEAR) {
+    return points.slice(0, TARGET_POINTS_PER_YEAR);
+  }
+
+  const normalized: THREE.Vector3[] = [];
+  for (let i = 0; i < TARGET_POINTS_PER_YEAR; i++) {
+    normalized.push(points[i % points.length].clone());
+  }
+  return normalized;
+};
 
 export type PlanetPositionsRes = {
   todayRow: number;
@@ -76,6 +90,12 @@ export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
       return 687;
     case 'JUPITER': // 木星
       return 4333; // 約11.86年
+    case 'SATURN': // 土星
+      return 10759; // 約29.46年
+    case 'URANUS': // 天王星
+      return 30687; // 約84年
+    case 'NEPTUNE': // 海王星
+      return 60190; // 約165年
     default:
       return 364;
   }
@@ -83,18 +103,22 @@ export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
 // 自転日数
 export const getRotationPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
-    case 'EARTH':
+    case 'EARTH': // 地球（約1日 = 約24時間）
       return 1;
-    case 'MERCURY': // 水星
+    case 'MERCURY': // 水星（約58.6日 = 約1406.4時間）
       return 58.6;
-    case 'VENUS': // 金星
-      return 243; // 金星は自転が逆向きで約243日。VENUS_TILTで回転させてるので、ここでは243日で計算する
-    case 'MARS': // 火星
-      return 1.03; // 約24.6時間
-    case 'JUPITER': // 木星
-      return 0.41; // 約9.9時間
-    default:
-      return 1;
+    case 'VENUS': // 金星（約243日 = 約5832時間）
+      return 243; // 自転が逆向きでVENUS_TILTで回転させるため、マイナスでなくプラスで計算する
+    case 'MARS': // 火星（約1.03日 = 約24.7時間）
+      return 1.03;
+    case 'JUPITER': // 木星（約0.41日 = 約9.9時間）
+      return 0.41;
+    case 'SATURN': // 土星（約0.45日 = 約10.7時間）
+      return 0.45;
+    case 'URANUS': // 天王星（約0.72日 = 約17.2時間）
+      return 0.72;
+    case 'NEPTUNE': // 海王星（約0.67日 = 約16.1時間）
+      return 0.67;
   }
 };
 
@@ -104,8 +128,9 @@ export const getPlanetPositions = async (
   const currentYear = new Date().getFullYear();
   const _startDate = new Date(`${currentYear}-01-01`);
   const startDate = format(_startDate, 'yyyy-MM-dd');
+  const stopDateDays = getOrbitalPeriod(commandKey);
 
-  const _endDate = addDays(_startDate, getOrbitalPeriod(commandKey));
+  const _endDate = addDays(_startDate, stopDateDays);
   const stopDate = format(_endDate, 'yyyy-MM-dd');
   const stepSize = getStepSize(commandKey);
   const cacheKey = getCacheKey(commandKey, startDate, stopDate, stepSize);
@@ -116,7 +141,6 @@ export const getPlanetPositions = async (
 
   // 複数回同時にAPIを叩くと503エラーになるので少し待機する
   await sleep(50);
-  // TODO: 土星の場合は90日刻みで1年分のデータを取るようにするなど、惑星ごとにAPIのパラメータを変える
   // APIエンドポイントのURL(bun-mini-solar-systemリポジトリのサーバーを想定)
   const url = `${API_HOST}${planetPositionEndpoint}?START_TIME=${startDate}&STOP_TIME=${stopDate}&STEP_SIZE=${stepSize}&COMMAND=${commandKey}`;
 
@@ -158,7 +182,7 @@ export const getPlanetPositions = async (
           point.y * AU_IN_UNITS,
         );
       });
-      result.pathPoints = transformedData.reverse(); // 日付順にするため反転
+      result.pathPoints = normalizePathPointsToYear(transformedData.reverse()); // 日付順にした上で365列に揃える
 
       const today = new Date();
       const dayOfYearWithDfs = getDayOfYear(today);
