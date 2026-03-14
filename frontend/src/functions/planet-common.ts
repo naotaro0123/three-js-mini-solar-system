@@ -87,10 +87,10 @@ export const createPlanet = (
     const axisHeight = 2.8 * size; // 惑星の大きさに応じて軸の長さを調整
     const axisGeometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisHeight, 32);
     const axisMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const AxisMesh = new THREE.Mesh(axisGeometry, axisMaterial);
-    AxisMesh.name = Names.PLANET_AXIS_NAME;
-    AxisMesh.rotation.z = degToRad(tilt); // 自転軸の傾き
-    planetSystem.add(AxisMesh);
+    const axisMesh = new THREE.Mesh(axisGeometry, axisMaterial);
+    axisMesh.name = Names.PLANET_AXIS_NAME;
+    axisMesh.rotation.z = degToRad(tilt); // 自転軸の傾き
+    planetSystem.add(axisMesh);
   }
 
   if (ring) {
@@ -101,9 +101,11 @@ export const createPlanet = (
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
     ringMesh.name = Names.PLANET_RING_NAME;
+    ringMesh.rotation.x = degToRad(90);
+    ringMesh.rotation.y = degToRad(tilt);
     planetSystem.add(ringMesh);
-    ringMesh.position.x = 0.5 * Math.PI;
-    ringMesh.rotation.y = degToRad(-tilt);
+    const scaleSize = 3.6;
+    ringMesh.scale.set(scaleSize, scaleSize, scaleSize);
   }
 
   if (atmosphere) {
@@ -159,7 +161,7 @@ export const createPlanet = (
     transparent: true,
     opacity: 0.2,
   });
-  const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+  const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
   orbit.name = Names.PLANET_ORBIT_NAME;
   planet3d.add(orbit);
 
