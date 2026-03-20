@@ -465,18 +465,29 @@ export class DrawScene {
 
       // 土星の衛星の公転
       {
+        const saturnTiltAngle = degToRad(SATURN_TILT);
+
         // タイタンの公転（約15.95日）
         const titan = this.saturnGroup.getObjectByName(
           `${Names.PLANET_MOONS_NAME}_0`,
         ) as THREE.Mesh;
         const titanOrbitRadius = saturnMoons[0].orbitRadius + (saturnMoons[0].xPosition ?? 0);
         const titanCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 15.95);
-        const titanTiltAngle = degToRad(SATURN_TILT);
         const titanBaseX = -titanOrbitRadius * Math.cos(titanCurrentAngle);
         const titanBaseZ = titanOrbitRadius * Math.sin(titanCurrentAngle);
-        const titanX = titanBaseX * Math.cos(titanTiltAngle);
-        const titanY = titanBaseX * Math.sin(titanTiltAngle);
+        const titanX = titanBaseX * Math.cos(saturnTiltAngle);
+        const titanY = titanBaseX * Math.sin(saturnTiltAngle);
         titan.position.set(titanX, titanY, titanBaseZ);
+
+        // レアの公転（約4.52日）
+        const rhea = this.saturnGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_1`) as THREE.Mesh;
+        const rheaOrbitRadius = saturnMoons[1].orbitRadius + (saturnMoons[1].xPosition ?? 0);
+        const rheaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 4.52);
+        const rheaBaseX = -rheaOrbitRadius * Math.cos(rheaCurrentAngle);
+        const rheaBaseZ = rheaOrbitRadius * Math.sin(rheaCurrentAngle);
+        const rheaX = rheaBaseX * Math.cos(saturnTiltAngle);
+        const rheaY = rheaBaseX * Math.sin(saturnTiltAngle);
+        rhea.position.set(rheaX, rheaY, rheaBaseZ);
       }
     }
   }

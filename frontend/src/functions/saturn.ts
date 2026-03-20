@@ -12,13 +12,21 @@ import {
 } from './settings';
 
 export const saturnMoons: PlanetMoon[] = [
-  // タイタン: 地球の約0.4倍。土星からの距離は目視で調整。
+  // タイタン: 地球の約0.4倍。土星からの距離は目視で調整
   {
     size: EARTH_SIZE * 0.4,
     texture: '/images/RS3_Titan.webp',
     orbitRadius: 16,
     orbitSpeed: 0.00009 * settings.accelerationOrbit,
-    xPosition: 95,
+    xPosition: 125,
+  },
+  // レア: 地球の約0.12倍。タイタンより内側を公転
+  {
+    size: EARTH_SIZE * 0.12,
+    texture: '/images/RS3_Rhea.webp',
+    orbitRadius: 12,
+    orbitSpeed: 0.00018 * settings.accelerationOrbit,
+    xPosition: 104,
   },
 ];
 
