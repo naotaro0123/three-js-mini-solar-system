@@ -40,7 +40,7 @@ export const initEnvironment = (
 };
 
 const initLighting = (scene: THREE.Scene): void => {
-  const lightAmbient = new THREE.AmbientLight(0x222222, 6);
+  const lightAmbient = new THREE.AmbientLight(0x222222, 10);
   scene.add(lightAmbient);
 };
 
