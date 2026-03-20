@@ -11,6 +11,13 @@ import {
   settings,
 } from './settings';
 
+export const JUPITER_MOON_MESH_NAMES = {
+  IO: `${Names.PLANET_MOONS_NAME}_Io`,
+  EUROPA: `${Names.PLANET_MOONS_NAME}_Europa`,
+  GANYMEDE: `${Names.PLANET_MOONS_NAME}_Ganymede`,
+  CALLISTO: `${Names.PLANET_MOONS_NAME}_Callisto`,
+} as const;
+
 export const jupiterMoons: PlanetMoon[] = [
   // sizeは地球と比べてイオは約0.29倍、エウロパは約0.24倍、ガニメデは約0.41倍、カリストは約0.34倍
   // イオ
@@ -67,6 +74,10 @@ export const createJupiterGroup = async (isDebug: boolean): Promise<THREE.Group>
     child.name.startsWith(Names.PLANET_MOONS_NAME),
   );
   for (const [index, moon] of _jupiterMoons.entries()) {
+    if (index === 0) moon.name = JUPITER_MOON_MESH_NAMES.IO;
+    if (index === 1) moon.name = JUPITER_MOON_MESH_NAMES.EUROPA;
+    if (index === 2) moon.name = JUPITER_MOON_MESH_NAMES.GANYMEDE;
+    if (index === 3) moon.name = JUPITER_MOON_MESH_NAMES.CALLISTO;
     moon.position.set(jupiterMoons[index].xPosition ?? 0, 0, 0);
   }
 

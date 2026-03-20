@@ -5,6 +5,11 @@ import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import { getOrbitColor, MARS_NAME, MARS_SIZE, MARS_TILT, settings } from './settings';
 import { loadGlTFModel } from './utils';
 
+export const MARS_MOON_MESH_NAMES = {
+  PHOBOS: `${Names.PLANET_MOONS_NAME}_Phobos`,
+  DEIMOS: `${Names.PLANET_MOONS_NAME}_Deimos`,
+} as const;
+
 export const marsMoons: PlanetMoon[] = [
   // フォボス
   {
@@ -45,7 +50,8 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
     if (moon.modelPath === undefined) continue;
     const model = await loadGlTFModel(moon.modelPath);
     moon.mesh = model.children[0] as THREE.Mesh;
-    moon.mesh.name = `${Names.PLANET_MOONS_NAME}_${index}`;
+    if (index === 0) moon.mesh.name = MARS_MOON_MESH_NAMES.PHOBOS;
+    if (index === 1) moon.mesh.name = MARS_MOON_MESH_NAMES.DEIMOS;
     moon.mesh.scale.set(moon.size, moon.size, moon.size);
     moon.mesh.position.set(moon.xPosition ?? 0, 0, 0);
     moon.mesh.castShadow = true;

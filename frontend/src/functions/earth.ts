@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
-import { createPlanet, type PlanetMoon } from './planet-common';
+import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
   EARTH_MOON_SIZE,
   EARTH_NAME,
@@ -10,6 +10,10 @@ import {
   getOrbitColor,
   settings,
 } from './settings';
+
+export const EARTH_MOON_MESH_NAMES = {
+  MOON: `${Names.PLANET_MOONS_NAME}_Moon`,
+} as const;
 
 export const earthMoons: PlanetMoon[] = [
   {
@@ -80,6 +84,13 @@ export const createEarthMesh = async (
     earthMoons,
     planetPositionsRes,
   );
+  const planetSystem = earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
+  const moon = planetSystem.children.find((child) =>
+    child.name.startsWith(Names.PLANET_MOONS_NAME),
+  );
+  if (moon) {
+    moon.name = EARTH_MOON_MESH_NAMES.MOON;
+  }
 
   if (isDebug) {
     // 地球の現在位置を表示
