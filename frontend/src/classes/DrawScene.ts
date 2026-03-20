@@ -502,6 +502,16 @@ export class DrawScene {
         const iapetusX = iapetusBaseX * Math.cos(saturnTiltAngle);
         const iapetusY = iapetusBaseX * Math.sin(saturnTiltAngle);
         iapetus.position.set(iapetusX, iapetusY, iapetusBaseZ);
+
+        // ミマスの公転（約0.942日）
+        const mimas = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.MIMAS) as THREE.Mesh;
+        const mimasOrbitRadius = saturnMoons[3].orbitRadius + (saturnMoons[3].xPosition ?? 0);
+        const mimasCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 0.942);
+        const mimasBaseX = -mimasOrbitRadius * Math.cos(mimasCurrentAngle);
+        const mimasBaseZ = mimasOrbitRadius * Math.sin(mimasCurrentAngle);
+        const mimasX = mimasBaseX * Math.cos(saturnTiltAngle);
+        const mimasY = mimasBaseX * Math.sin(saturnTiltAngle);
+        mimas.position.set(mimasX, mimasY, mimasBaseZ);
       }
     }
   }

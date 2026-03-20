@@ -15,6 +15,7 @@ export const SATURN_MOON_MESH_NAMES = {
   TITAN: `${Names.PLANET_MOONS_NAME}_Titan`,
   RHEA: `${Names.PLANET_MOONS_NAME}_Rhea`,
   IAPETUS: `${Names.PLANET_MOONS_NAME}_Iapetus`,
+  MIMAS: `${Names.PLANET_MOONS_NAME}_Mimas`,
 } as const;
 
 export const saturnMoons: PlanetMoon[] = [
@@ -24,7 +25,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/RS3_Titan.webp',
     orbitRadius: 16,
     orbitSpeed: 0.00009 * settings.accelerationOrbit,
-    xPosition: 125,
+    xPosition: 137,
   },
   // レア: 地球の約0.12倍。タイタンより内側を公転
   {
@@ -32,7 +33,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/RS3_Rhea.webp',
     orbitRadius: 12,
     orbitSpeed: 0.00018 * settings.accelerationOrbit,
-    xPosition: 104,
+    xPosition: 116,
   },
   // イアペトゥス: 地球の約0.11倍。タイタンより外側をゆっくり公転
   {
@@ -40,7 +41,15 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/LapetusNew.webp',
     orbitRadius: 22,
     orbitSpeed: 0.00001 * settings.accelerationOrbit,
-    xPosition: 168,
+    xPosition: 180,
+  },
+  // ミマス: 地球の約0.03倍。土星に近い内側を高速公転
+  {
+    size: EARTH_SIZE * 0.031,
+    texture: '/images/RS3_Mimas.webp',
+    orbitRadius: 8,
+    orbitSpeed: 0.0007 * settings.accelerationOrbit,
+    xPosition: 102,
   },
 ];
 
@@ -71,6 +80,7 @@ export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> 
     if (index === 0) moon.name = SATURN_MOON_MESH_NAMES.TITAN;
     if (index === 1) moon.name = SATURN_MOON_MESH_NAMES.RHEA;
     if (index === 2) moon.name = SATURN_MOON_MESH_NAMES.IAPETUS;
+    if (index === 3) moon.name = SATURN_MOON_MESH_NAMES.MIMAS;
     moon.position.set(saturnMoons[index].xPosition ?? 0, 0, 0);
   }
 
