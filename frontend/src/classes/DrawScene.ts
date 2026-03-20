@@ -13,8 +13,8 @@ import {
   createPlanetInteractionController,
   type PlanetInteractionController,
 } from '../functions/rimLight';
-import { createSaturnGroup } from '../functions/saturn';
-import { getStepDays, settings } from '../functions/settings';
+import { createSaturnGroup, saturnMoons } from '../functions/saturn';
+import { getStepDays, SATURN_TILT, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
@@ -390,45 +390,47 @@ export class DrawScene {
       const jupiterAngle = degToRad(jupiterRotation);
       jupiterPlanet.rotateY(jupiterAngle);
       // 木星の衛星の公転
-      // イオは約1.8日、エウロパは約3.5日、ガニメデは約7.1日、カリストは約16.7日で木星を公転するので、それぞれの周期に応じた速度で公転させる
-      const io = this.jupiterGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
-      const europa = this.jupiterGroup.getObjectByName(
-        `${Names.PLANET_MOONS_NAME}_1`,
-      ) as THREE.Mesh;
-      const ganymede = this.jupiterGroup.getObjectByName(
-        `${Names.PLANET_MOONS_NAME}_2`,
-      ) as THREE.Mesh;
-      const callisto = this.jupiterGroup.getObjectByName(
-        `${Names.PLANET_MOONS_NAME}_3`,
-      ) as THREE.Mesh;
-      const ioOrbitRadius = jupiterMoons[0].orbitRadius + (jupiterMoons[0].xPosition ?? 0);
-      const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
-      const ganymedeOrbitRadius = jupiterMoons[2].orbitRadius + (jupiterMoons[2].xPosition ?? 0);
-      const callistoOrbitRadius = jupiterMoons[3].orbitRadius + (jupiterMoons[3].xPosition ?? 0);
-      const ioCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.8);
-      const europaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 3.5);
-      const ganymedeCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 7.1);
-      const callistoCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 16.7);
-      // イオの公転
-      const ioX = ioOrbitRadius * Math.cos(ioCurrentAngle);
-      const ioY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
-      const ioZ = ioOrbitRadius * Math.sin(ioCurrentAngle);
-      io.position.set(-ioX, ioY, ioZ);
-      // エウロパの公転
-      const europaX = europaOrbitRadius * Math.cos(europaCurrentAngle);
-      const europaY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
-      const europaZ = europaOrbitRadius * Math.sin(europaCurrentAngle);
-      europa.position.set(-europaX, europaY, europaZ);
-      // ガニメデの公転
-      const ganymedeX = ganymedeOrbitRadius * Math.cos(ganymedeCurrentAngle);
-      const ganymedeY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
-      const ganymedeZ = ganymedeOrbitRadius * Math.sin(ganymedeCurrentAngle);
-      ganymede.position.set(-ganymedeX, ganymedeY, ganymedeZ);
-      // カリストの公転
-      const callistoX = callistoOrbitRadius * Math.cos(callistoCurrentAngle);
-      const callistoY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
-      const callistoZ = callistoOrbitRadius * Math.sin(callistoCurrentAngle);
-      callisto.position.set(-callistoX, callistoY, callistoZ);
+      {
+        // イオは約1.8日、エウロパは約3.5日、ガニメデは約7.1日、カリストは約16.7日で木星を公転するので、それぞれの周期に応じた速度で公転させる
+        const io = this.jupiterGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+        const europa = this.jupiterGroup.getObjectByName(
+          `${Names.PLANET_MOONS_NAME}_1`,
+        ) as THREE.Mesh;
+        const ganymede = this.jupiterGroup.getObjectByName(
+          `${Names.PLANET_MOONS_NAME}_2`,
+        ) as THREE.Mesh;
+        const callisto = this.jupiterGroup.getObjectByName(
+          `${Names.PLANET_MOONS_NAME}_3`,
+        ) as THREE.Mesh;
+        const ioOrbitRadius = jupiterMoons[0].orbitRadius + (jupiterMoons[0].xPosition ?? 0);
+        const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
+        const ganymedeOrbitRadius = jupiterMoons[2].orbitRadius + (jupiterMoons[2].xPosition ?? 0);
+        const callistoOrbitRadius = jupiterMoons[3].orbitRadius + (jupiterMoons[3].xPosition ?? 0);
+        const ioCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.8);
+        const europaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 3.5);
+        const ganymedeCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 7.1);
+        const callistoCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 16.7);
+        // イオの公転
+        const ioX = ioOrbitRadius * Math.cos(ioCurrentAngle);
+        const ioY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+        const ioZ = ioOrbitRadius * Math.sin(ioCurrentAngle);
+        io.position.set(-ioX, ioY, ioZ);
+        // エウロパの公転
+        const europaX = europaOrbitRadius * Math.cos(europaCurrentAngle);
+        const europaY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+        const europaZ = europaOrbitRadius * Math.sin(europaCurrentAngle);
+        europa.position.set(-europaX, europaY, europaZ);
+        // ガニメデの公転
+        const ganymedeX = ganymedeOrbitRadius * Math.cos(ganymedeCurrentAngle);
+        const ganymedeY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+        const ganymedeZ = ganymedeOrbitRadius * Math.sin(ganymedeCurrentAngle);
+        ganymede.position.set(-ganymedeX, ganymedeY, ganymedeZ);
+        // カリストの公転
+        const callistoX = callistoOrbitRadius * Math.cos(callistoCurrentAngle);
+        const callistoY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
+        const callistoZ = callistoOrbitRadius * Math.sin(callistoCurrentAngle);
+        callisto.position.set(-callistoX, callistoY, callistoZ);
+      }
     }
 
     /* 土星の公転と自転（反時計回り） */
@@ -460,6 +462,22 @@ export class DrawScene {
         (360 / (settings.lerpFrame * getRotationPeriod('SATURN'))) * settings.accelerationRotation;
       const saturnAngle = degToRad(saturnRotation);
       saturnPlanet.rotateY(saturnAngle);
+
+      // 土星の衛星の公転
+      {
+        // タイタンの公転（約15.95日）
+        const titan = this.saturnGroup.getObjectByName(
+          `${Names.PLANET_MOONS_NAME}_0`,
+        ) as THREE.Mesh;
+        const titanOrbitRadius = saturnMoons[0].orbitRadius + (saturnMoons[0].xPosition ?? 0);
+        const titanCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 15.95);
+        const titanTiltAngle = degToRad(SATURN_TILT);
+        const titanBaseX = -titanOrbitRadius * Math.cos(titanCurrentAngle);
+        const titanBaseZ = titanOrbitRadius * Math.sin(titanCurrentAngle);
+        const titanX = titanBaseX * Math.cos(titanTiltAngle);
+        const titanY = titanBaseX * Math.sin(titanTiltAngle);
+        titan.position.set(titanX, titanY, titanBaseZ);
+      }
     }
   }
 }

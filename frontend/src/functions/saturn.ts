@@ -2,18 +2,24 @@ import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
-import { getOrbitColor, SATURN_NAME, SATURN_SIZE, SATURN_TILT } from './settings';
+import {
+  EARTH_SIZE,
+  getOrbitColor,
+  SATURN_NAME,
+  SATURN_SIZE,
+  SATURN_TILT,
+  settings,
+} from './settings';
 
 export const saturnMoons: PlanetMoon[] = [
-  // sizeは地球と比べてイオは約0.29倍、エウロパは約0.24倍、ガニメデは約0.41倍、カリストは約0.34倍
-  // イオ
-  // {
-  //   size: EARTH_SIZE * 0.29,
-  //   texture: '/images/jupiterIo.jpg',
-  //   orbitRadius: 20,
-  //   orbitSpeed: 0.0005 * settings.accelerationOrbit,
-  //   xPosition: 80, // 木星から42万kmだが目視で設定
-  // },
+  // タイタン: 地球の約0.4倍。土星からの距離は目視で調整。
+  {
+    size: EARTH_SIZE * 0.4,
+    texture: '/images/RS3_Titan.webp',
+    orbitRadius: 16,
+    orbitSpeed: 0.00009 * settings.accelerationOrbit,
+    xPosition: 95,
+  },
 ];
 
 export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> => {
