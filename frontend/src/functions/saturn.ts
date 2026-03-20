@@ -16,6 +16,7 @@ export const SATURN_MOON_MESH_NAMES = {
   RHEA: `${Names.PLANET_MOONS_NAME}_Rhea`,
   IAPETUS: `${Names.PLANET_MOONS_NAME}_Iapetus`,
   MIMAS: `${Names.PLANET_MOONS_NAME}_Mimas`,
+  ENCELADUS: `${Names.PLANET_MOONS_NAME}_Enceladus`,
 } as const;
 
 export const saturnMoons: PlanetMoon[] = [
@@ -51,6 +52,14 @@ export const saturnMoons: PlanetMoon[] = [
     orbitSpeed: 0.0007 * settings.accelerationOrbit,
     xPosition: 102,
   },
+  // エンケラドゥス: 地球の約0.04倍。ミマスの外側、レアの内側を公転
+  {
+    size: EARTH_SIZE * 0.04,
+    texture: '/images/Enceladus.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.00045 * settings.accelerationOrbit,
+    xPosition: 110,
+  },
 ];
 
 export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> => {
@@ -81,6 +90,7 @@ export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> 
     if (index === 1) moon.name = SATURN_MOON_MESH_NAMES.RHEA;
     if (index === 2) moon.name = SATURN_MOON_MESH_NAMES.IAPETUS;
     if (index === 3) moon.name = SATURN_MOON_MESH_NAMES.MIMAS;
+    if (index === 4) moon.name = SATURN_MOON_MESH_NAMES.ENCELADUS;
     moon.position.set(saturnMoons[index].xPosition ?? 0, 0, 0);
   }
 
