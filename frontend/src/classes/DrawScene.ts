@@ -512,6 +512,18 @@ export class DrawScene {
         const mimasX = mimasBaseX * Math.cos(saturnTiltAngle);
         const mimasY = mimasBaseX * Math.sin(saturnTiltAngle);
         mimas.position.set(mimasX, mimasY, mimasBaseZ);
+
+        // エンケラドゥスの公転（約1.37日）
+        const enceladus = this.saturnGroup.getObjectByName(
+          SATURN_MOON_MESH_NAMES.ENCELADUS,
+        ) as THREE.Mesh;
+        const enceladusOrbitRadius = saturnMoons[4].orbitRadius + (saturnMoons[4].xPosition ?? 0);
+        const enceladusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.37);
+        const enceladusBaseX = -enceladusOrbitRadius * Math.cos(enceladusCurrentAngle);
+        const enceladusBaseZ = enceladusOrbitRadius * Math.sin(enceladusCurrentAngle);
+        const enceladusX = enceladusBaseX * Math.cos(saturnTiltAngle);
+        const enceladusY = enceladusBaseX * Math.sin(saturnTiltAngle);
+        enceladus.position.set(enceladusX, enceladusY, enceladusBaseZ);
       }
     }
   }
