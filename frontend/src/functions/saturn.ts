@@ -11,6 +11,12 @@ import {
   settings,
 } from './settings';
 
+export const SATURN_MOON_MESH_NAMES = {
+  TITAN: `${Names.PLANET_MOONS_NAME}_Titan`,
+  RHEA: `${Names.PLANET_MOONS_NAME}_Rhea`,
+  IAPETUS: `${Names.PLANET_MOONS_NAME}_Iapetus`,
+} as const;
+
 export const saturnMoons: PlanetMoon[] = [
   // タイタン: 地球の約0.4倍。土星からの距離は目視で調整
   {
@@ -27,6 +33,14 @@ export const saturnMoons: PlanetMoon[] = [
     orbitRadius: 12,
     orbitSpeed: 0.00018 * settings.accelerationOrbit,
     xPosition: 104,
+  },
+  // イアペトゥス: 地球の約0.11倍。タイタンより外側をゆっくり公転
+  {
+    size: EARTH_SIZE * 0.115,
+    texture: '/images/LapetusNew.webp',
+    orbitRadius: 22,
+    orbitSpeed: 0.00001 * settings.accelerationOrbit,
+    xPosition: 168,
   },
 ];
 
@@ -54,6 +68,9 @@ export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> 
     child.name.startsWith(Names.PLANET_MOONS_NAME),
   );
   for (const [index, moon] of _saturnMoons.entries()) {
+    if (index === 0) moon.name = SATURN_MOON_MESH_NAMES.TITAN;
+    if (index === 1) moon.name = SATURN_MOON_MESH_NAMES.RHEA;
+    if (index === 2) moon.name = SATURN_MOON_MESH_NAMES.IAPETUS;
     moon.position.set(saturnMoons[index].xPosition ?? 0, 0, 0);
   }
 

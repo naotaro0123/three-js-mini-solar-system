@@ -1,19 +1,23 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createEarthMesh as createEarthGroup, earthMoons } from '../functions/earth';
+import {
+  createEarthMesh as createEarthGroup,
+  EARTH_MOON_MESH_NAMES,
+  earthMoons,
+} from '../functions/earth';
 import { initEnvironment, initGUI } from '../functions/environment';
 import { getRotationPeriod, type PlanetPositionsRes } from '../functions/get-planet-position';
-import { createJupiterGroup, jupiterMoons } from '../functions/jupiter';
+import { createJupiterGroup, JUPITER_MOON_MESH_NAMES, jupiterMoons } from '../functions/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
-import { createMarsGroup, marsMoons } from '../functions/mars';
+import { createMarsGroup, MARS_MOON_MESH_NAMES, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
 import { Names } from '../functions/planet-common';
 import {
   createPlanetInteractionController,
   type PlanetInteractionController,
 } from '../functions/rimLight';
-import { createSaturnGroup, saturnMoons } from '../functions/saturn';
+import { createSaturnGroup, SATURN_MOON_MESH_NAMES, saturnMoons } from '../functions/saturn';
 import { getStepDays, SATURN_TILT, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { degToRad } from '../functions/utils';
@@ -178,7 +182,7 @@ export class DrawScene {
       const earthAtmosphere = this.earthGroup.getObjectByName(
         Names.PLANET_ATMO_SPHERE_NAME,
       ) as THREE.Mesh;
-      const moon = this.earthGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+      const moon = this.earthGroup.getObjectByName(EARTH_MOON_MESH_NAMES.MOON) as THREE.Mesh;
 
       /* 地球の公転と自転（反時計回り） */
       {
@@ -340,8 +344,8 @@ export class DrawScene {
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
       // フォボスとダイモスの公転（反時計回り）
-      const phobos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
-      const deimos = this.marsGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_1`) as THREE.Mesh;
+      const phobos = this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.PHOBOS) as THREE.Mesh;
+      const deimos = this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.DEIMOS) as THREE.Mesh;
       const phobosOrbitRadius = marsMoons[0].orbitRadius;
       const deimosOrbitRadius = marsMoons[1].orbitRadius;
       const phobosCurrentAngle = this.frameCount * settings.accelerationOrbit * 4.0; // フォボスは速い
@@ -392,15 +396,15 @@ export class DrawScene {
       // 木星の衛星の公転
       {
         // イオは約1.8日、エウロパは約3.5日、ガニメデは約7.1日、カリストは約16.7日で木星を公転するので、それぞれの周期に応じた速度で公転させる
-        const io = this.jupiterGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_0`) as THREE.Mesh;
+        const io = this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.IO) as THREE.Mesh;
         const europa = this.jupiterGroup.getObjectByName(
-          `${Names.PLANET_MOONS_NAME}_1`,
+          JUPITER_MOON_MESH_NAMES.EUROPA,
         ) as THREE.Mesh;
         const ganymede = this.jupiterGroup.getObjectByName(
-          `${Names.PLANET_MOONS_NAME}_2`,
+          JUPITER_MOON_MESH_NAMES.GANYMEDE,
         ) as THREE.Mesh;
         const callisto = this.jupiterGroup.getObjectByName(
-          `${Names.PLANET_MOONS_NAME}_3`,
+          JUPITER_MOON_MESH_NAMES.CALLISTO,
         ) as THREE.Mesh;
         const ioOrbitRadius = jupiterMoons[0].orbitRadius + (jupiterMoons[0].xPosition ?? 0);
         const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
@@ -468,9 +472,7 @@ export class DrawScene {
         const saturnTiltAngle = degToRad(SATURN_TILT);
 
         // タイタンの公転（約15.95日）
-        const titan = this.saturnGroup.getObjectByName(
-          `${Names.PLANET_MOONS_NAME}_0`,
-        ) as THREE.Mesh;
+        const titan = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.TITAN) as THREE.Mesh;
         const titanOrbitRadius = saturnMoons[0].orbitRadius + (saturnMoons[0].xPosition ?? 0);
         const titanCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 15.95);
         const titanBaseX = -titanOrbitRadius * Math.cos(titanCurrentAngle);
@@ -480,7 +482,7 @@ export class DrawScene {
         titan.position.set(titanX, titanY, titanBaseZ);
 
         // レアの公転（約4.52日）
-        const rhea = this.saturnGroup.getObjectByName(`${Names.PLANET_MOONS_NAME}_1`) as THREE.Mesh;
+        const rhea = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.RHEA) as THREE.Mesh;
         const rheaOrbitRadius = saturnMoons[1].orbitRadius + (saturnMoons[1].xPosition ?? 0);
         const rheaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 4.52);
         const rheaBaseX = -rheaOrbitRadius * Math.cos(rheaCurrentAngle);
@@ -488,6 +490,18 @@ export class DrawScene {
         const rheaX = rheaBaseX * Math.cos(saturnTiltAngle);
         const rheaY = rheaBaseX * Math.sin(saturnTiltAngle);
         rhea.position.set(rheaX, rheaY, rheaBaseZ);
+
+        // イアペトゥスの公転（約79.3日）
+        const iapetus = this.saturnGroup.getObjectByName(
+          SATURN_MOON_MESH_NAMES.IAPETUS,
+        ) as THREE.Mesh;
+        const iapetusOrbitRadius = saturnMoons[2].orbitRadius + (saturnMoons[2].xPosition ?? 0);
+        const iapetusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 79.3);
+        const iapetusBaseX = -iapetusOrbitRadius * Math.cos(iapetusCurrentAngle);
+        const iapetusBaseZ = iapetusOrbitRadius * Math.sin(iapetusCurrentAngle);
+        const iapetusX = iapetusBaseX * Math.cos(saturnTiltAngle);
+        const iapetusY = iapetusBaseX * Math.sin(saturnTiltAngle);
+        iapetus.position.set(iapetusX, iapetusY, iapetusBaseZ);
       }
     }
   }
