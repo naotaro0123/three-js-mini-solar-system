@@ -32,7 +32,7 @@ export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> 
     URANUS_SIZE,
     URANUS_TILT,
     getOrbitColor('URANUS'),
-    '/images/uranusmap.jpg',
+    '/images/uranus.jpg',
     null,
     {
       innerRadius: 6,

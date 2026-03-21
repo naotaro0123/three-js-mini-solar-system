@@ -14,7 +14,12 @@ export const createSunMesh = (): THREE.Mesh => {
   const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
   sunMesh.name = SUN_NAME;
 
-  const pointLight = new THREE.PointLight(0xfdffd3, 1200, 6000, 1.4);
+  // 近距離の惑星向けの主光源
+  const pointLight = new THREE.PointLight(0xfdffd3, 100, 0, 1.4);
+  // 外惑星向けの補助光源
+  const outerFillLight = new THREE.PointLight(0xe8efff, 20, 80000, 0.5);
+
   sunMesh.add(pointLight);
+  sunMesh.add(outerFillLight);
   return sunMesh;
 };
