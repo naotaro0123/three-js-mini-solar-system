@@ -20,7 +20,7 @@ import {
 import { createSaturnGroup, SATURN_MOON_MESH_NAMES, saturnMoons } from '../functions/saturn';
 import { getStepDays, SATURN_TILT, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
-import { createUranusGroup } from '../functions/uranus';
+import { createUranusGroup, URANUS_MOON_MESH_NAMES, uranusMoons } from '../functions/uranus';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
 
@@ -563,6 +563,19 @@ export class DrawScene {
         (360 / (settings.lerpFrame * getRotationPeriod('URANUS'))) * settings.accelerationRotation;
       const uranusAngle = degToRad(uranusRotation);
       uranusPlanet.rotateY(uranusAngle);
+
+      // Mirandaの公転（約1.41日）
+      {
+        const miranda = this.uranusGroup.getObjectByName(
+          URANUS_MOON_MESH_NAMES.MIRANDA,
+        ) as THREE.Mesh;
+        const mirandaOrbitRadius = uranusMoons[0].orbitRadius + (uranusMoons[0].xPosition ?? 0);
+        const mirandaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.41);
+        const mirandaX = mirandaOrbitRadius * Math.cos(mirandaCurrentAngle);
+        const mirandaY = 0;
+        const mirandaZ = mirandaOrbitRadius * Math.sin(mirandaCurrentAngle);
+        miranda.position.set(-mirandaX, mirandaY, mirandaZ);
+      }
     }
   }
 }

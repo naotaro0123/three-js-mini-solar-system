@@ -32,3 +32,5 @@ $ yarn build:frontend
   - [Rhea Texture](https://planet-texture-maps.fandom.com/wiki/Rhea)
   - [Iapetus Texture](https://planet-texture-maps.fandom.com/wiki/Iapetus)
   - [Enceladus Texture](https://planet-texture-maps.fandom.com/wiki/Enceladus)
+- Uranus
+  - [Miranda Texure](https://planet-texture-maps.fandom.com/wiki/Miranda)
