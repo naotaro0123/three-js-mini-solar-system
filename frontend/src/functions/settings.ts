@@ -49,10 +49,17 @@ export const SATURN_TILT = 26.7;
 export const SATURN_NAME = 'Saturn';
 const SATURN_ORBIT_COLOR = 0x996600;
 
+// 天王星のサイズと自転軸の傾き
+export const URANUS_SIZE = EARTH_SIZE * 4; // 天王星は地球の約4倍の大きさ
+export const URANUS_TILT = 97.8;
+export const URANUS_NAME = 'Uranus';
+const URANUS_ORBIT_COLOR = 0x660099;
+
 const DEFAULT_STEP_DAYS = 1;
 const MARS_STEP_DAYS = 5;
-const JUPITER_STEP_DAYS = 30;
-const SATURN_STEP_DAYS = 90;
+const JUPITER_STEP_DAYS = 30; // 木星は公転周期が約12年と長いため、1日のフレーム数を減らす
+const SATURN_STEP_DAYS = 90; // 土星は公転周期が約29年と長いため、1日のフレーム数を減らす
+const URANUS_STEP_DAYS = 120; // 天王星は公転周期が約84年と長いため、1日のフレーム数を減らす
 
 export const getStepDays = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
@@ -62,6 +69,8 @@ export const getStepDays = (commandKey: RequestQueryBody['COMMAND']) => {
       return MARS_STEP_DAYS;
     case 'SATURN':
       return SATURN_STEP_DAYS;
+    case 'URANUS':
+      return URANUS_STEP_DAYS;
     default:
       return DEFAULT_STEP_DAYS;
   }
@@ -85,6 +94,8 @@ export const getOrbitColor = (commandKey: RequestQueryBody['COMMAND']): number =
       return JUPITER_ORBIT_COLOR;
     case 'SATURN':
       return SATURN_ORBIT_COLOR;
+    case 'URANUS':
+      return URANUS_ORBIT_COLOR;
     default:
       return EARTH_ORBIT_COLOR;
   }

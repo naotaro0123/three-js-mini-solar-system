@@ -125,7 +125,7 @@ export const createPlanet = (
     planet.add(atmosphereMesh);
   }
 
-  // 火星は未使用。地球と木星の衛星は使用してる。
+  // 火星の衛星では未使用（3Dモデルのため）
   let moonIndex = 0;
   for (const moon of moons) {
     let moonMaterial: THREE.MeshStandardMaterial;
