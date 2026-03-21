@@ -59,7 +59,7 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
     planetSystem.add(moon.mesh);
   }
   if (isDebug) {
-    // 火星の現在位置を表示
+    // 現在位置を表示
     addCurrentPositionMarker({
       parent: marsGroup,
       commandKey: 'MARS',

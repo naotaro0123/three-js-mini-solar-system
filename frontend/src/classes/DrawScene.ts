@@ -20,6 +20,7 @@ import {
 import { createSaturnGroup, SATURN_MOON_MESH_NAMES, saturnMoons } from '../functions/saturn';
 import { getStepDays, SATURN_TILT, settings } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
+import { createUranusGroup } from '../functions/uranus';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
 
@@ -40,6 +41,7 @@ export class DrawScene {
   marsGroup!: THREE.Group; // 火星のグループ
   jupiterGroup!: THREE.Group; // 木星のグループ
   saturnGroup!: THREE.Group; // 土星のグループ
+  uranusGroup!: THREE.Group; // 天王星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -93,6 +95,9 @@ export class DrawScene {
     // 土星のメッシュを作成
     this.saturnGroup = await createSaturnGroup(isDebug);
     this.scene.add(this.saturnGroup);
+    // 天王星のメッシュを作成
+    this.uranusGroup = await createUranusGroup(isDebug);
+    this.scene.add(this.uranusGroup);
 
     this.initDoubleClickZoom();
 
@@ -125,6 +130,7 @@ export class DrawScene {
     const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME);
     const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME);
     const saturnPlanet = this.saturnGroup.getObjectByName(Names.PLANET_NAME);
+    const uranusPlanet = this.uranusGroup.getObjectByName(Names.PLANET_NAME);
 
     this.zoomablePlanets = [
       earthPlanet,
@@ -133,6 +139,7 @@ export class DrawScene {
       marsPlanet,
       jupiterPlanet,
       saturnPlanet,
+      uranusPlanet,
     ].filter((planet): planet is THREE.Mesh => planet instanceof THREE.Mesh);
 
     this.planetInteractionController = createPlanetInteractionController({
@@ -525,6 +532,37 @@ export class DrawScene {
         const enceladusY = enceladusBaseX * Math.sin(saturnTiltAngle);
         enceladus.position.set(enceladusX, enceladusY, enceladusBaseZ);
       }
+    }
+
+    /* 天王星の公転と自転（反時計回り） */
+    {
+      const uranusPlanetSystem = this.uranusGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+
+      // APIから取得した現在位置に惑星を配置
+      const uranusPosition = this.uranusGroup.userData.planetPositionsRes as PlanetPositionsRes;
+      const uranusStepDays = getStepDays('URANUS');
+      const uranusPathLength = uranusPosition.pathPoints.length - 1;
+      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const uranusCurrentIndex = Math.floor(earthDayProgress / uranusStepDays) % uranusPathLength;
+      const currentPosition = uranusPosition.pathPoints[uranusCurrentIndex];
+
+      // 天王星は120日刻みの点を使うため、次の点へは120日かけて補間する
+      const nextDayIndex = (uranusCurrentIndex + 1) % uranusPathLength;
+      const nextPosition = uranusPosition.pathPoints[nextDayIndex];
+      const uranusLerpFactor = (earthDayProgress % uranusStepDays) / uranusStepDays;
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), uranusLerpFactor);
+      uranusPlanetSystem.position.copy(interpolatedPos);
+
+      const uranusPlanet = this.uranusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      // 天王星の自転: 1フレームあたりの回転量を計算
+      const uranusRotation =
+        (360 / (settings.lerpFrame * getRotationPeriod('URANUS'))) * settings.accelerationRotation;
+      const uranusAngle = degToRad(uranusRotation);
+      uranusPlanet.rotateY(uranusAngle);
     }
   }
 }

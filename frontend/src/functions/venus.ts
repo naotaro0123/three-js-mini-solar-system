@@ -21,7 +21,7 @@ export const createVenusGroup = async (isDebug: boolean): Promise<THREE.Group> =
   );
 
   if (isDebug) {
-    // 金星の現在位置を表示
+    // 現在位置を表示
     addCurrentPositionMarker({
       parent: venusGroup,
       commandKey: 'VENUS',

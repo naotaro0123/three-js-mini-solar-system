@@ -21,7 +21,7 @@ export const createMercuryGroup = async (isDebug: boolean): Promise<THREE.Group>
   );
 
   if (isDebug) {
-    // 水星の現在位置を表示
+    // 現在位置を表示
     addCurrentPositionMarker({
       parent: mercuryGroup,
       commandKey: 'MERCURY',

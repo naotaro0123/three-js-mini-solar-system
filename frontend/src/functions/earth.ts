@@ -93,7 +93,7 @@ export const createEarthMesh = async (
   }
 
   if (isDebug) {
-    // 地球の現在位置を表示
+    // 現在位置を表示
     addCurrentPositionMarker({
       parent: earthGroup,
       commandKey: 'EARTH',
