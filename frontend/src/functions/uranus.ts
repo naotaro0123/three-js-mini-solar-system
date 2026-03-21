@@ -2,7 +2,14 @@ import * as THREE from 'three';
 import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
-import { getOrbitColor, URANUS_NAME, URANUS_SIZE, URANUS_TILT } from './settings';
+import {
+  EARTH_SIZE,
+  getOrbitColor,
+  settings,
+  URANUS_NAME,
+  URANUS_SIZE,
+  URANUS_TILT,
+} from './settings';
 
 export const URANUS_MOON_MESH_NAMES = {
   MIRANDA: `${Names.PLANET_MOONS_NAME}_Miranda`,
@@ -13,15 +20,14 @@ export const URANUS_MOON_MESH_NAMES = {
 } as const;
 
 export const uranusMoons: PlanetMoon[] = [
-  // TODO: ミランダ、アリエル、ウンブリエル、チタニア、オベロンを追加
-  // タイタン: 地球の約0.4倍。土星からの距離は目視で調整
-  // {
-  //   size: EARTH_SIZE * 0.4,
-  //   texture: '/images/RS3_Titan.webp',
-  //   orbitRadius: 16,
-  //   orbitSpeed: 0.00009 * settings.accelerationOrbit,
-  //   xPosition: 137,
-  // },
+  // Miranda: 地球の約0.037倍。天王星に近い内側を公転
+  {
+    size: EARTH_SIZE * 0.037,
+    texture: '/images/Miranda-0.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.0007 * settings.accelerationOrbit,
+    xPosition: 58,
+  },
 ];
 
 export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> => {
@@ -35,8 +41,8 @@ export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> 
     '/images/uranus.jpg',
     null,
     {
-      innerRadius: 6,
-      outerRadius: 8,
+      innerRadius: 8,
+      outerRadius: 10,
       texture: '/images/uranus_ring.png',
     },
     null,
