@@ -37,3 +37,7 @@ $ yarn build:frontend
   - [Uranus Texture](https://planet-texture-maps.fandom.com/wiki/Uranus)
   - [Titania Texture](https://planet-texture-maps.fandom.com/wiki/Titania)
   - [Oberon Texuture](https://planet-texture-maps.fandom.com/wiki/Oberon)
+- Neptune
+  - [Triton Texture](https://planet-texture-maps.fandom.com/wiki/Triton)
+  - [Proteus Texture](https://planet-texture-maps.fandom.com/wiki/Proteus)
+  - [Nereid Texture](https://planet-texture-maps.fandom.com/wiki/Nereid)
