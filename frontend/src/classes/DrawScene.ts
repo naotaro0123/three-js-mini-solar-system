@@ -12,6 +12,7 @@ import { createJupiterGroup, JUPITER_MOON_MESH_NAMES, jupiterMoons } from '../fu
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, MARS_MOON_MESH_NAMES, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
+import { createNeptuneGroup } from '../functions/neptune';
 import { Names } from '../functions/planet-common';
 import {
   createPlanetInteractionController,
@@ -42,6 +43,7 @@ export class DrawScene {
   jupiterGroup!: THREE.Group; // 木星のグループ
   saturnGroup!: THREE.Group; // 土星のグループ
   uranusGroup!: THREE.Group; // 天王星のグループ
+  neptuneGroup!: THREE.Group; // 海王星のグループ
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -98,6 +100,9 @@ export class DrawScene {
     // 天王星のメッシュを作成
     this.uranusGroup = await createUranusGroup(isDebug);
     this.scene.add(this.uranusGroup);
+    // 海王星のメッシュを作成
+    this.neptuneGroup = await createNeptuneGroup(isDebug);
+    this.scene.add(this.neptuneGroup);
 
     this.initDoubleClickZoom();
 
@@ -131,6 +136,7 @@ export class DrawScene {
     const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME);
     const saturnPlanet = this.saturnGroup.getObjectByName(Names.PLANET_NAME);
     const uranusPlanet = this.uranusGroup.getObjectByName(Names.PLANET_NAME);
+    const neptunePlanet = this.neptuneGroup.getObjectByName(Names.PLANET_NAME);
 
     this.zoomablePlanets = [
       earthPlanet,
@@ -140,6 +146,7 @@ export class DrawScene {
       jupiterPlanet,
       saturnPlanet,
       uranusPlanet,
+      neptunePlanet,
     ].filter((planet): planet is THREE.Mesh => planet instanceof THREE.Mesh);
 
     this.planetInteractionController = createPlanetInteractionController({
@@ -626,6 +633,38 @@ export class DrawScene {
         const oberonY = oberonBaseX * Math.sin(uranusTiltAngle);
         oberon.position.set(oberonX, oberonY, oberonBaseZ);
       }
+    }
+
+    /* 海王星の公転と自転（反時計回り） */
+    {
+      const neptunePlanetSystem = this.neptuneGroup.getObjectByName(
+        Names.PLANET_SYSTEM_NAME,
+      ) as THREE.Group;
+
+      // APIから取得した現在位置に惑星を配置
+      const neptunePosition = this.neptuneGroup.userData.planetPositionsRes as PlanetPositionsRes;
+      const neptuneStepDays = getStepDays('NEPTUNE');
+      const neptunePathLength = neptunePosition.pathPoints.length - 1;
+      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const neptuneCurrentIndex =
+        Math.floor(earthDayProgress / neptuneStepDays) % neptunePathLength;
+      const currentPosition = neptunePosition.pathPoints[neptuneCurrentIndex];
+
+      // 海王星は180日刻みの点を使うため、次の点へは180日かけて補間する
+      const nextDayIndex = (neptuneCurrentIndex + 1) % neptunePathLength;
+      const nextPosition = neptunePosition.pathPoints[nextDayIndex];
+      const neptuneLerpFactor = (earthDayProgress % neptuneStepDays) / neptuneStepDays;
+      const interpolatedPos = new THREE.Vector3()
+        .fromArray(currentPosition.toArray())
+        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), neptuneLerpFactor);
+      neptunePlanetSystem.position.copy(interpolatedPos);
+
+      const neptunePlanet = this.neptuneGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
+      // 海王星の自転: 1フレームあたりの回転量を計算
+      const neptuneRotation =
+        (360 / (settings.lerpFrame * getRotationPeriod('NEPTUNE'))) * settings.accelerationRotation;
+      const neptuneAngle = degToRad(neptuneRotation);
+      neptunePlanet.rotateY(neptuneAngle);
     }
   }
 }
