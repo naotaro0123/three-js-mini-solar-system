@@ -28,6 +28,38 @@ export const uranusMoons: PlanetMoon[] = [
     orbitSpeed: 0.0007 * settings.accelerationOrbit,
     xPosition: 58,
   },
+  // Ariel: 地球の約0.084倍。天王星の第2衛星
+  {
+    size: EARTH_SIZE * 0.084,
+    texture: '/images/Ariel-0.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.0005 * settings.accelerationOrbit,
+    xPosition: 90,
+  },
+  // Umbriel: 地球の約0.070倍。天王星の第3衛星
+  {
+    size: EARTH_SIZE * 0.07,
+    texture: '/images/Umbriel-0.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.0004 * settings.accelerationOrbit,
+    xPosition: 120,
+  },
+  // Titania: 地球の約0.110倍。天王星の第4衛星
+  {
+    size: EARTH_SIZE * 0.11,
+    texture: '/images/Titania-0.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.0003 * settings.accelerationOrbit,
+    xPosition: 150,
+  },
+  // Oberon: 地球の約0.105倍。天王星の第5衛星
+  {
+    size: EARTH_SIZE * 0.105,
+    texture: '/images/Oberon-0.webp',
+    orbitRadius: 10,
+    orbitSpeed: 0.0002 * settings.accelerationOrbit,
+    xPosition: 180,
+  },
 ];
 
 export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> => {

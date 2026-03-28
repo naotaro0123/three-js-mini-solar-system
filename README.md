@@ -34,3 +34,7 @@ $ yarn build:frontend
   - [Enceladus Texture](https://planet-texture-maps.fandom.com/wiki/Enceladus)
 - Uranus
   - [Miranda Texure](https://planet-texture-maps.fandom.com/wiki/Miranda)
+  - [Ariel Texture](https://planet-texture-maps.fandom.com/wiki/Ariel)
+  - [Uranus Texture](https://planet-texture-maps.fandom.com/wiki/Uranus)
+  - [Titania Texture](https://planet-texture-maps.fandom.com/wiki/Titania)
+  - [Oberon Texuture](https://planet-texture-maps.fandom.com/wiki/Oberon)
