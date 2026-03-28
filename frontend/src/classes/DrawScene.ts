@@ -12,14 +12,20 @@ import { createJupiterGroup, JUPITER_MOON_MESH_NAMES, jupiterMoons } from '../fu
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
 import { createMarsGroup, MARS_MOON_MESH_NAMES, marsMoons } from '../functions/mars';
 import { createMercuryGroup } from '../functions/mercury';
-import { createNeptuneGroup } from '../functions/neptune';
+import { createNeptuneGroup, NEPTUNE_MOON_MESH_NAMES, neptuneMoons } from '../functions/neptune';
 import { Names } from '../functions/planet-common';
 import {
   createPlanetInteractionController,
   type PlanetInteractionController,
 } from '../functions/rimLight';
 import { createSaturnGroup, SATURN_MOON_MESH_NAMES, saturnMoons } from '../functions/saturn';
-import { getStepDays, SATURN_TILT, settings, URANUS_TILT } from '../functions/settings';
+import {
+  getStepDays,
+  NEPTUNE_TILT,
+  SATURN_TILT,
+  settings,
+  URANUS_TILT,
+} from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { createUranusGroup, URANUS_MOON_MESH_NAMES, uranusMoons } from '../functions/uranus';
 import { degToRad } from '../functions/utils';
@@ -665,6 +671,48 @@ export class DrawScene {
         (360 / (settings.lerpFrame * getRotationPeriod('NEPTUNE'))) * settings.accelerationRotation;
       const neptuneAngle = degToRad(neptuneRotation);
       neptunePlanet.rotateY(neptuneAngle);
+
+      // 海王星の衛星の公転
+      {
+        const neptuneTiltAngle = degToRad(NEPTUNE_TILT);
+
+        // Tritonの公転（約5.88日）
+        // トリトンは太陽系の主要衛星では珍しい逆行衛星
+        const triton = this.neptuneGroup.getObjectByName(
+          NEPTUNE_MOON_MESH_NAMES.TRITON,
+        ) as THREE.Mesh;
+        const tritonOrbitRadius = neptuneMoons[0].orbitRadius + (neptuneMoons[0].xPosition ?? 0);
+        const tritonCurrentAngle = -this.frameCount * settings.accelerationOrbit * (1 / 5.88);
+        const tritonBaseX = -tritonOrbitRadius * Math.cos(tritonCurrentAngle);
+        const tritonBaseZ = tritonOrbitRadius * Math.sin(tritonCurrentAngle);
+        const tritonX = tritonBaseX * Math.cos(neptuneTiltAngle);
+        const tritonY = tritonBaseX * Math.sin(neptuneTiltAngle);
+        triton.position.set(tritonX, tritonY, tritonBaseZ);
+
+        // Proteusの公転（約1.12日）
+        const proteus = this.neptuneGroup.getObjectByName(
+          NEPTUNE_MOON_MESH_NAMES.PROTEUS,
+        ) as THREE.Mesh;
+        const proteusOrbitRadius = neptuneMoons[1].orbitRadius + (neptuneMoons[1].xPosition ?? 0);
+        const proteusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.12);
+        const proteusBaseX = -proteusOrbitRadius * Math.cos(proteusCurrentAngle);
+        const proteusBaseZ = proteusOrbitRadius * Math.sin(proteusCurrentAngle);
+        const proteusX = proteusBaseX * Math.cos(neptuneTiltAngle);
+        const proteusY = proteusBaseX * Math.sin(neptuneTiltAngle);
+        proteus.position.set(proteusX, proteusY, proteusBaseZ);
+
+        // Nereidの公転（約360.14日）
+        const nereid = this.neptuneGroup.getObjectByName(
+          NEPTUNE_MOON_MESH_NAMES.NEREID,
+        ) as THREE.Mesh;
+        const nereidOrbitRadius = neptuneMoons[2].orbitRadius + (neptuneMoons[2].xPosition ?? 0);
+        const nereidCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 360.14);
+        const nereidBaseX = -nereidOrbitRadius * Math.cos(nereidCurrentAngle);
+        const nereidBaseZ = nereidOrbitRadius * Math.sin(nereidCurrentAngle);
+        const nereidX = nereidBaseX * Math.cos(neptuneTiltAngle);
+        const nereidY = nereidBaseX * Math.sin(neptuneTiltAngle);
+        nereid.position.set(nereidX, nereidY, nereidBaseZ);
+      }
     }
   }
 }
