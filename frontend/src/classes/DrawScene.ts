@@ -18,7 +18,7 @@ import {
   type PlanetInteractionController,
 } from '../functions/rimLight';
 import { createSaturnGroup, SATURN_MOON_MESH_NAMES, saturnMoons } from '../functions/saturn';
-import { getStepDays, SATURN_TILT, settings } from '../functions/settings';
+import { getStepDays, SATURN_TILT, settings, URANUS_TILT } from '../functions/settings';
 import { createSunMesh } from '../functions/sun';
 import { createUranusGroup, URANUS_MOON_MESH_NAMES, uranusMoons } from '../functions/uranus';
 import { degToRad } from '../functions/utils';
@@ -564,17 +564,67 @@ export class DrawScene {
       const uranusAngle = degToRad(uranusRotation);
       uranusPlanet.rotateY(uranusAngle);
 
-      // Mirandaの公転（約1.41日）
+      // 天王星の衛星の公転
       {
+        const uranusTiltAngle = degToRad(URANUS_TILT);
+
+        // Mirandaの公転（約1.41日）
         const miranda = this.uranusGroup.getObjectByName(
           URANUS_MOON_MESH_NAMES.MIRANDA,
         ) as THREE.Mesh;
         const mirandaOrbitRadius = uranusMoons[0].orbitRadius + (uranusMoons[0].xPosition ?? 0);
         const mirandaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 1.41);
-        const mirandaX = mirandaOrbitRadius * Math.cos(mirandaCurrentAngle);
-        const mirandaY = 0;
-        const mirandaZ = mirandaOrbitRadius * Math.sin(mirandaCurrentAngle);
-        miranda.position.set(-mirandaX, mirandaY, mirandaZ);
+        const mirandaBaseX = -mirandaOrbitRadius * Math.cos(mirandaCurrentAngle);
+        const mirandaBaseZ = mirandaOrbitRadius * Math.sin(mirandaCurrentAngle);
+        const mirandaX = mirandaBaseX * Math.cos(uranusTiltAngle);
+        const mirandaY = mirandaBaseX * Math.sin(uranusTiltAngle);
+        miranda.position.set(mirandaX, mirandaY, mirandaBaseZ);
+
+        // Arielの公転（約2.52日）
+        const ariel = this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.ARIEL) as THREE.Mesh;
+        const arielOrbitRadius = uranusMoons[1].orbitRadius + (uranusMoons[1].xPosition ?? 0);
+        const arielCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 2.52);
+        const arielBaseX = -arielOrbitRadius * Math.cos(arielCurrentAngle);
+        const arielBaseZ = arielOrbitRadius * Math.sin(arielCurrentAngle);
+        const arielX = arielBaseX * Math.cos(uranusTiltAngle);
+        const arielY = arielBaseX * Math.sin(uranusTiltAngle);
+        ariel.position.set(arielX, arielY, arielBaseZ);
+
+        // Umbrielの公転（約4.14日）
+        const umbriel = this.uranusGroup.getObjectByName(
+          URANUS_MOON_MESH_NAMES.UMBRIEL,
+        ) as THREE.Mesh;
+        const umbrielOrbitRadius = uranusMoons[2].orbitRadius + (uranusMoons[2].xPosition ?? 0);
+        const umbrielCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 4.14);
+        const umbrielBaseX = -umbrielOrbitRadius * Math.cos(umbrielCurrentAngle);
+        const umbrielBaseZ = umbrielOrbitRadius * Math.sin(umbrielCurrentAngle);
+        const umbrielX = umbrielBaseX * Math.cos(uranusTiltAngle);
+        const umbrielY = umbrielBaseX * Math.sin(uranusTiltAngle);
+        umbriel.position.set(umbrielX, umbrielY, umbrielBaseZ);
+
+        // Titaniaの公転（約8.71日）
+        const titania = this.uranusGroup.getObjectByName(
+          URANUS_MOON_MESH_NAMES.TITANIA,
+        ) as THREE.Mesh;
+        const titaniaOrbitRadius = uranusMoons[3].orbitRadius + (uranusMoons[3].xPosition ?? 0);
+        const titaniaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 8.71);
+        const titaniaBaseX = -titaniaOrbitRadius * Math.cos(titaniaCurrentAngle);
+        const titaniaBaseZ = titaniaOrbitRadius * Math.sin(titaniaCurrentAngle);
+        const titaniaX = titaniaBaseX * Math.cos(uranusTiltAngle);
+        const titaniaY = titaniaBaseX * Math.sin(uranusTiltAngle);
+        titania.position.set(titaniaX, titaniaY, titaniaBaseZ);
+
+        // Oberonの公転（約13.46日）
+        const oberon = this.uranusGroup.getObjectByName(
+          URANUS_MOON_MESH_NAMES.OBERON,
+        ) as THREE.Mesh;
+        const oberonOrbitRadius = uranusMoons[4].orbitRadius + (uranusMoons[4].xPosition ?? 0);
+        const oberonCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / 13.46);
+        const oberonBaseX = -oberonOrbitRadius * Math.cos(oberonCurrentAngle);
+        const oberonBaseZ = oberonOrbitRadius * Math.sin(oberonCurrentAngle);
+        const oberonX = oberonBaseX * Math.cos(uranusTiltAngle);
+        const oberonY = oberonBaseX * Math.sin(uranusTiltAngle);
+        oberon.position.set(oberonX, oberonY, oberonBaseZ);
       }
     }
   }
