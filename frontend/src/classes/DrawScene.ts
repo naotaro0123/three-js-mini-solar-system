@@ -30,6 +30,7 @@ import { createSunMesh } from '../functions/sun';
 import { createUranusGroup, URANUS_MOON_MESH_NAMES, uranusMoons } from '../functions/uranus';
 import { degToRad } from '../functions/utils';
 import { createVenusGroup } from '../functions/venus';
+import { AsteroidBelt } from './AsteroidBelt';
 
 const isDebug = true;
 
@@ -50,6 +51,7 @@ export class DrawScene {
   saturnGroup!: THREE.Group; // 土星のグループ
   uranusGroup!: THREE.Group; // 天王星のグループ
   neptuneGroup!: THREE.Group; // 海王星のグループ
+  asteroidBelt!: AsteroidBelt; // 小惑星帯
   lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
   currentIndex = 0; // 現在のインデックス（0から364まで）
   labelElement!: HTMLDivElement;
@@ -109,6 +111,9 @@ export class DrawScene {
     // 海王星のメッシュを作成
     this.neptuneGroup = await createNeptuneGroup(isDebug);
     this.scene.add(this.neptuneGroup);
+    // 小惑星帯を作成
+    this.asteroidBelt = new AsteroidBelt();
+    this.scene.add(this.asteroidBelt.getGroup());
 
     this.initDoubleClickZoom();
 
@@ -714,5 +719,8 @@ export class DrawScene {
         nereid.position.set(nereidX, nereidY, nereidBaseZ);
       }
     }
+
+    /* 小惑星帯のアニメーション */
+    this.asteroidBelt.animate(0.016);
   }
 }
