@@ -10,5 +10,8 @@
     "dev:backend": "yarn workspace backend dev",
     "build:frontend": "yarn workspace frontend build",
     "build:backend": "yarn workspace backend build"
+  },
+  "resolutions": {
+    "eslint-visitor-keys": "^4.2.1"
   }
 }
