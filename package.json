@@ -10,5 +10,6 @@
     "dev:backend": "yarn workspace backend dev",
     "build:frontend": "yarn workspace frontend build",
     "build:backend": "yarn workspace backend build"
-  }
+  },
+  "version": "0.0.0"
 }
