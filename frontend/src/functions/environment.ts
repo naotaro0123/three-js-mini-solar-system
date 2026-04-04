@@ -27,6 +27,17 @@ export const initEnvironment = (
   renderer.setClearColor(0x00000, 1.0);
   document.body.appendChild(renderer.domElement);
 
+  // 外側の銀河背景をキューブマップで設定
+  const cubeTextureLoader = new THREE.CubeTextureLoader();
+  scene.background = cubeTextureLoader.load([
+    '/images/3.jpg',
+    '/images/1.jpg',
+    '/images/2.jpg',
+    '/images/2.jpg',
+    '/images/4.jpg',
+    '/images/2.jpg',
+  ]);
+
   const labelRenderer = new CSS2DRenderer();
   labelRenderer.setSize(width, height);
   labelRenderer.domElement.style.position = 'absolute';
