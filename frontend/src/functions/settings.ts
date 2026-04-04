@@ -6,6 +6,9 @@ export const settings = {
   accelerationRotation: 1, // 自転スピード
   sunIntensity: 2.1, // 太陽の明るさ
   isAnimating: false, // アニメーションの再生/停止
+  showOrbits: true, // 公転軌道の表示/非表示
+  showLabels: true, // 惑星名ラベルの表示/非表示
+  showPlanets: true, // 惑星の表示/非表示
 };
 
 // 地球のサイズと自転軸の傾き

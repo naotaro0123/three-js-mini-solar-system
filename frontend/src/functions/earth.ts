@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
@@ -83,6 +82,7 @@ export const createEarthMesh = async (
     '/images/earth_atmosphere.jpg',
     earthMoons,
     planetPositionsRes,
+    isDebug,
   );
   const planetSystem = earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   const moon = planetSystem.children.find((child) =>
@@ -90,15 +90,6 @@ export const createEarthMesh = async (
   );
   if (moon) {
     moon.name = EARTH_MOON_MESH_NAMES.MOON;
-  }
-
-  if (isDebug) {
-    // 現在位置を表示
-    addCurrentPositionMarker({
-      parent: earthGroup,
-      commandKey: 'EARTH',
-      planetPositionsRes: planetPositionsRes,
-    });
   }
 
   return earthGroup;
