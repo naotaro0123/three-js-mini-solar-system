@@ -6,6 +6,7 @@
     "target": "ESNext",
     "module": "Preserve",
     "allowJs": true,
+    "types": ["bun"],
 
     // Best practices
     "noUncheckedIndexedAccess": true,
