@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { RequestQueryBody } from '../../../common';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { getStepDays } from './settings';
@@ -12,7 +13,20 @@ export const Names = {
   PLANET_SYSTEM_NAME: 'PlanetSystem',
   PLANET_ATMO_SPHERE_NAME: 'PlanetAtmosphere',
   PLANET_MOONS_NAME: 'PlanetMoons',
+  PLANET_LABEL_NAME: 'PlanetLabel',
 } as const;
+
+const planetLabelDisplayMap: Record<RequestQueryBody['COMMAND'], string> = {
+  MERCURY: 'Mercury（水星）',
+  VENUS: 'Venus（金星）',
+  EARTH: 'Earth（地球）',
+  MARS: 'Mars（火星）',
+  JUPITER: 'Jupiter（木星）',
+  SATURN: 'Saturn（土星）',
+  URANUS: 'Uranus（天王星）',
+  NEPTUNE: 'Neptune（海王星）',
+  PLUTO: 'Pluto（冥王星）',
+};
 
 type Ring = {
   innerRadius: number;
@@ -82,6 +96,15 @@ export const createPlanet = (
     .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), lerpFactor);
   planetSystem.position.copy(interpolatedPos);
   planetSystem.add(planet);
+
+  // 惑星名ラベルを惑星の上に表示
+  const labelElement = document.createElement('div');
+  labelElement.className = 'planet-name-label';
+  labelElement.textContent = planetLabelDisplayMap[commandKey] ?? planetName;
+  const labelObject = new CSS2DObject(labelElement);
+  labelObject.name = Names.PLANET_LABEL_NAME;
+  labelObject.position.set(0, size + 3, 0);
+  planetSystem.add(labelObject);
 
   // 自転軸を追加する
   {
