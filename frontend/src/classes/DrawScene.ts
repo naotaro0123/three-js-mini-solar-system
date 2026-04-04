@@ -71,8 +71,7 @@ export class DrawScene {
     this.controls = controls;
     this.composer = composer;
     this.labelRenderer = labelRenderer;
-    this.initPlanets();
-    this.render();
+    void this.initPlanets();
   }
 
   get userDataEarthPositionRes(): PlanetPositionsRes {
@@ -140,6 +139,9 @@ export class DrawScene {
       },
       userDataEarthPositionRes: this.userDataEarthPositionRes,
     });
+
+    // 惑星の初期化完了後にレンダリングを開始する
+    this.render();
   }
 
   initDoubleClickZoom(): void {
@@ -194,6 +196,50 @@ export class DrawScene {
     if (settings.isAnimating) {
       this.animate();
     }
+
+    // レイヤー表示フラグを毎フレーム反映
+    this.#updateLayerVisibility();
+  }
+
+  #updateLayerVisibility(): void {
+    // 各惑星グループについてレイヤー表示を制御
+    const planetGroups = [
+      this.earthGroup,
+      this.mercuryGroup,
+      this.venusGroup,
+      this.marsGroup,
+      this.jupiterGroup,
+      this.saturnGroup,
+      this.uranusGroup,
+      this.neptuneGroup,
+    ];
+
+    planetGroups.forEach((group) => {
+      const planetSystem = group.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
+      const orbit = group.getObjectByName(Names.PLANET_ORBIT_NAME);
+
+      // 軌道の表示/非表示
+      if (orbit) {
+        orbit.visible = settings.showOrbits;
+      }
+
+      // 惑星とラベルの表示/非表示
+      if (planetSystem) {
+        planetSystem.traverse((child) => {
+          if (
+            child.name === Names.PLANET_NAME ||
+            child.name === Names.PLANET_RING_NAME ||
+            child.name === Names.PLANET_ATMO_SPHERE_NAME ||
+            child.name.startsWith(Names.PLANET_MOONS_NAME)
+          ) {
+            child.visible = settings.showPlanets;
+          }
+          if (child.name === Names.PLANET_LABEL_NAME) {
+            child.visible = settings.showLabels;
+          }
+        });
+      }
+    });
   }
 
   animate(): void {
