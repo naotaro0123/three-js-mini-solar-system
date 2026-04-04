@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { RequestQueryBody } from '../../../common';
+import { addCurrentPositionMarker } from './debug';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { getStepDays } from './settings';
 import { degToRad } from './utils';
@@ -56,6 +57,7 @@ export const createPlanet = (
   atmosphere: string | null,
   moons: PlanetMoon[],
   planetPositionsRes: PlanetPositionsRes,
+  isDebug = false,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -191,6 +193,15 @@ export const createPlanet = (
   const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
   orbit.name = Names.PLANET_ORBIT_NAME;
   planet3d.add(orbit);
+
+  if (isDebug) {
+    // 現在位置を表示
+    addCurrentPositionMarker({
+      parent: planet3d,
+      commandKey,
+      planetPositionsRes,
+    });
+  }
 
   return planet3d;
 };

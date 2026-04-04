@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
@@ -80,6 +79,7 @@ export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> 
     null,
     saturnMoons,
     planetPositionsRes,
+    isDebug,
   );
   const planetSystem = saturnGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   const _saturnMoons = planetSystem.children.filter((child) =>
@@ -92,15 +92,6 @@ export const createSaturnGroup = async (isDebug: boolean): Promise<THREE.Group> 
     if (index === 3) moon.name = SATURN_MOON_MESH_NAMES.MIMAS;
     if (index === 4) moon.name = SATURN_MOON_MESH_NAMES.ENCELADUS;
     moon.position.set(saturnMoons[index].xPosition ?? 0, 0, 0);
-  }
-
-  if (isDebug) {
-    // 現在位置を表示
-    addCurrentPositionMarker({
-      parent: saturnGroup,
-      commandKey: 'SATURN',
-      planetPositionsRes: planetPositionsRes,
-    });
   }
 
   return saturnGroup;

@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { addCurrentPositionMarker } from './debug';
 import { getPlanetPositions } from './get-planet-position';
 import { createPlanet, Names, type PlanetMoon } from './planet-common';
 import {
@@ -80,6 +79,7 @@ export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> 
     null,
     uranusMoons,
     planetPositionsRes,
+    isDebug,
   );
   const planetSystem = uranusGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   const _uranusMoons = planetSystem.children.filter((child) =>
@@ -92,15 +92,6 @@ export const createUranusGroup = async (isDebug: boolean): Promise<THREE.Group> 
     if (index === 3) moon.name = URANUS_MOON_MESH_NAMES.TITANIA;
     if (index === 4) moon.name = URANUS_MOON_MESH_NAMES.OBERON;
     moon.position.set(uranusMoons[index].xPosition ?? 0, 0, 0);
-  }
-
-  if (isDebug) {
-    // 現在位置を表示
-    addCurrentPositionMarker({
-      parent: uranusGroup,
-      commandKey: 'URANUS',
-      planetPositionsRes: planetPositionsRes,
-    });
   }
 
   return uranusGroup;

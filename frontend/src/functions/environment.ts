@@ -129,6 +129,10 @@ export const initGUI = (params: {
     .onChange((value) => {
       settings.isAnimating = value;
     });
+  // レイヤー表示/非表示
+  gui.add(settings, 'showOrbits').name('公転軌道表示');
+  gui.add(settings, 'showLabels').name('惑星名ラベル表示');
+  gui.add(settings, 'showPlanets').name('惑星表示');
   // Top View
   gui
     .add(
