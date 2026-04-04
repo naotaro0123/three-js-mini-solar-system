@@ -1,6 +1,7 @@
 import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
 import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from '../../../common';
+import { deleteFromIndexedDB, getFromIndexedDB, saveToIndexedDB } from './indexed-db';
 import { getStepSize } from './settings';
 import { sleep } from './utils';
 
@@ -40,32 +41,29 @@ const getCacheKey = (
   return `${PLANET_POSITION_CACHE_PREFIX}:${commandKey}:${startDate}:${stopDate}:${stepSize}`;
 };
 
-const loadPlanetPositionCache = (cacheKey: string): PlanetPositionsRes | null => {
-  const cached = localStorage.getItem(cacheKey);
-  if (!cached) return null;
-
+const loadPlanetPositionCache = async (cacheKey: string): Promise<PlanetPositionsRes | null> => {
   try {
-    const parsed = JSON.parse(cached) as PlanetPositionCache;
-    if (!Array.isArray(parsed.pathPoints) || typeof parsed.todayRow !== 'number') {
-      localStorage.removeItem(cacheKey);
+    const record = await getFromIndexedDB<PlanetPositionCache>(cacheKey);
+    if (!record) return null;
+    if (!Array.isArray(record.pathPoints) || typeof record.todayRow !== 'number') {
+      await deleteFromIndexedDB(cacheKey);
       return null;
     }
 
-    const pathPoints = parsed.pathPoints.map((point) => {
+    const pathPoints = record.pathPoints.map((point) => {
       return new THREE.Vector3(point.x, point.y, point.z);
     });
 
     return {
-      todayRow: parsed.todayRow,
+      todayRow: record.todayRow,
       pathPoints,
     };
   } catch {
-    localStorage.removeItem(cacheKey);
     return null;
   }
 };
 
-const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionsRes) => {
+const savePlanetPositionCache = async (cacheKey: string, data: PlanetPositionsRes): Promise<void> => {
   const serializable: PlanetPositionCache = {
     todayRow: data.todayRow,
     pathPoints: data.pathPoints.map((point) => ({
@@ -75,7 +73,7 @@ const savePlanetPositionCache = (cacheKey: string, data: PlanetPositionsRes) => 
     })),
   };
 
-  localStorage.setItem(cacheKey, JSON.stringify(serializable));
+  await saveToIndexedDB(cacheKey, serializable);
 };
 
 // 公転日数
@@ -138,7 +136,7 @@ export const getPlanetPositions = async (
   const stopDate = format(_endDate, 'yyyy-MM-dd');
   const stepSize = getStepSize(commandKey);
   const cacheKey = getCacheKey(commandKey, startDate, stopDate, stepSize);
-  const cachedResult = loadPlanetPositionCache(cacheKey);
+  const cachedResult = await loadPlanetPositionCache(cacheKey);
   if (cachedResult) {
     return cachedResult;
   }
@@ -191,7 +189,7 @@ export const getPlanetPositions = async (
       const today = new Date();
       const dayOfYearWithDfs = getDayOfYear(today);
       result.todayRow = dayOfYearWithDfs;
-      savePlanetPositionCache(cacheKey, result);
+      await savePlanetPositionCache(cacheKey, result);
     } else {
       console.error('データの取得に失敗しました:', data);
     }
