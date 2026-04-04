@@ -7,6 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
@@ -20,23 +21,33 @@ export const initEnvironment = (
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
   composer: EffectComposer;
+  labelRenderer: CSS2DRenderer;
 } => {
   renderer.setSize(width, height);
   renderer.setClearColor(0x00000, 1.0);
   document.body.appendChild(renderer.domElement);
 
+  const labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(width, height);
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0';
+  labelRenderer.domElement.style.left = '0';
+  labelRenderer.domElement.style.pointerEvents = 'none';
+  labelRenderer.domElement.style.zIndex = '10';
+  document.body.appendChild(labelRenderer.domElement);
+
   const camera = new THREE.PerspectiveCamera(50, width / height, 1, 5000);
   camera.position.set(0, 20, 122);
 
-  handleResize(camera, renderer);
-  window.addEventListener('resize', () => handleResize(camera, renderer));
+  handleResize(camera, renderer, labelRenderer);
+  window.addEventListener('resize', () => handleResize(camera, renderer, labelRenderer));
 
   const controls = new OrbitControls(camera, renderer.domElement);
 
   const composer = initComposer(renderer, scene, camera, width, height);
   initLighting(scene);
 
-  return { camera, controls, composer };
+  return { camera, controls, composer, labelRenderer };
 };
 
 const initLighting = (scene: THREE.Scene): void => {

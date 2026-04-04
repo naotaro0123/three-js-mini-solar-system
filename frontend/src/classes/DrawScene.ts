@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {
   createEarthMesh as createEarthGroup,
   EARTH_MOON_MESH_NAMES,
@@ -40,6 +41,7 @@ export class DrawScene {
   camera!: THREE.PerspectiveCamera;
   controls!: OrbitControls;
   composer!: EffectComposer;
+  labelRenderer!: CSS2DRenderer;
   zoomablePlanets: THREE.Mesh[] = [];
   planetInteractionController!: PlanetInteractionController;
   sunMesh!: THREE.Mesh; // 太陽のメッシュ
@@ -59,7 +61,7 @@ export class DrawScene {
   frameCount = 0;
 
   constructor() {
-    const { camera, controls, composer } = initEnvironment(
+    const { camera, controls, composer, labelRenderer } = initEnvironment(
       this.renderer,
       this.scene,
       this.width,
@@ -68,6 +70,7 @@ export class DrawScene {
     this.camera = camera;
     this.controls = controls;
     this.composer = composer;
+    this.labelRenderer = labelRenderer;
     this.initPlanets();
     this.render();
   }
@@ -185,6 +188,7 @@ export class DrawScene {
     this.renderer.render(this.scene, this.camera);
     this.controls.update();
     this.composer.render();
+    this.labelRenderer.render(this.scene, this.camera);
 
     this.renderer.setAnimationLoop(() => this.render());
     if (settings.isAnimating) {
