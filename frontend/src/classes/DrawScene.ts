@@ -215,7 +215,6 @@ export class DrawScene {
     ];
 
     planetGroups.forEach((group) => {
-      const planetSystem = group.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
       const orbit = group.getObjectByName(Names.PLANET_ORBIT_NAME);
 
       // 軌道の表示/非表示
@@ -224,21 +223,21 @@ export class DrawScene {
       }
 
       // 惑星とラベルの表示/非表示
-      if (planetSystem) {
-        planetSystem.traverse((child) => {
-          if (
-            child.name === Names.PLANET_NAME ||
-            child.name === Names.PLANET_RING_NAME ||
-            child.name === Names.PLANET_ATMO_SPHERE_NAME ||
-            child.name.startsWith(Names.PLANET_MOONS_NAME)
-          ) {
-            child.visible = settings.showPlanets;
-          }
-          if (child.name === Names.PLANET_LABEL_NAME) {
-            child.visible = settings.showLabels;
-          }
-        });
-      }
+      group.traverse((child) => {
+        if (
+          child.name === Names.PLANET_NAME ||
+          child.name === Names.PLANET_RING_NAME ||
+          child.name === Names.PLANET_AXIS_NAME ||
+          child.name === Names.PLANET_ATMO_SPHERE_NAME ||
+          child.name.startsWith(Names.PLANET_MOONS_NAME) ||
+          child.name.endsWith('-current-position')
+        ) {
+          child.visible = settings.showPlanets;
+        }
+        if (child.name === Names.PLANET_LABEL_NAME) {
+          child.visible = settings.showLabels;
+        }
+      });
     });
   }
 
