@@ -95,8 +95,8 @@ export const initGUI = (params: {
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
   getCurrentIndex: () => number;
-  setCurrentIndex: (value: number) => void;
-  setLerpFactor: (value: number) => void;
+  setDayIndex: (value: number) => void;
+  setDayFraction: (value: number) => void;
   setFrameCount: (value: number) => void;
   userDataEarthPositionRes: PlanetPositionsRes;
 }): void => {
@@ -104,8 +104,8 @@ export const initGUI = (params: {
     sunMesh,
     camera,
     controls,
-    setCurrentIndex,
-    setLerpFactor,
+    setDayIndex,
+    setDayFraction,
     setFrameCount,
     userDataEarthPositionRes,
   } = params;
@@ -164,8 +164,8 @@ export const initGUI = (params: {
     .add(
       {
         resetValues: () => {
-          setCurrentIndex(userDataEarthPositionRes.todayRow - 1);
-          setLerpFactor(0);
+          setDayIndex(userDataEarthPositionRes.todayRow - 1);
+          setDayFraction(0);
           setFrameCount(0);
           // 惑星の位置を最新化してからリセット
           setTimeout(() => gui.reset(), 100);

@@ -59,8 +59,8 @@ export class DrawScene {
   uranusGroup!: THREE.Group; // 天王星のグループ
   neptuneGroup!: THREE.Group; // 海王星のグループ
   asteroidBelt!: AsteroidBelt; // 小惑星帯
-  lerpFactor = 0; // 補間の進捗（0.0 から 1.0 まで）
-  currentIndex = 0; // 現在のインデックス（0から364まで）
+  dayFraction = 0; // 補間の進捗（0.0 から 1.0 まで）
+  dayIndex = 0; // 現在の日インデックス（0から364まで）
   labelElement!: HTMLDivElement;
   timer = new THREE.Timer();
   frameCount = 0;
@@ -95,7 +95,7 @@ export class DrawScene {
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成
     this.earthGroup = await createEarthGroup(this.sunMesh.position, isDebug);
-    this.currentIndex = this.userDataEarthPositionRes.todayRow - 1;
+    this.dayIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
     // 水星のメッシュを作成
     this.mercuryGroup = await createMercuryGroup(isDebug);
@@ -125,19 +125,19 @@ export class DrawScene {
     this.initDoubleClickZoom();
 
     // 現在のインデックスを表示するラベルを作成
-    this.labelElement = createCurrentIndexLabel(this.currentIndex);
+    this.labelElement = createCurrentIndexLabel(this.dayIndex);
     document.body.appendChild(this.labelElement);
 
     initGUI({
       sunMesh: this.sunMesh,
       camera: this.camera,
       controls: this.controls,
-      getCurrentIndex: () => this.currentIndex,
-      setCurrentIndex: (value: number) => {
-        this.currentIndex = value;
+      getCurrentIndex: () => this.dayIndex,
+      setDayIndex: (value: number) => {
+        this.dayIndex = value;
       },
-      setLerpFactor: (value: number) => {
-        this.lerpFactor = value;
+      setDayFraction: (value: number) => {
+        this.dayFraction = value;
       },
       setFrameCount: (value: number) => {
         this.frameCount = value;
@@ -250,7 +250,26 @@ export class DrawScene {
     this.frameCount++;
     this.sunMesh.rotateY(SUN_ROTATION_SPEED * settings.accelerationRotation);
 
-    this.labelElement.innerText = formatCurrentIndexDate(this.currentIndex);
+    this.labelElement.innerText = formatCurrentIndexDate(this.dayIndex);
+
+    // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
+    {
+      const earthPosition = this.userDataEarthPositionRes;
+      // 小数点の誤差を防ぐため、toFixedで丸める
+      this.dayFraction = Number(
+        ((this.dayFraction + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
+      );
+      // 次の日に到達したらインデックスを更新し、進捗をリセット
+      if (this.dayFraction >= 1) {
+        const nextDayIndex = this.dayIndex + 1;
+        if (nextDayIndex < earthPosition.pathPoints.length - 1) {
+          this.dayIndex = nextDayIndex;
+        } else {
+          this.dayIndex = 0;
+        }
+        this.dayFraction = 0;
+      }
+    }
 
     {
       // planet3dがearth。コードコピーする時間違えないように
@@ -267,32 +286,18 @@ export class DrawScene {
       {
         // APIから取得した現在位置に惑星を配置
         const earthPosition = this.userDataEarthPositionRes;
-        const currentPosition = earthPosition.pathPoints[this.currentIndex];
+        const currentPosition = earthPosition.pathPoints[this.dayIndex];
 
         // 次の日（nextDayIndex）の座標を取得
-        const nextDayIndex = this.currentIndex + 1;
+        const nextDayIndex = this.dayIndex + 1;
         const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
 
         /* 地球の公転（反時計回り）*/
         earthPlanetSystem.position.copy(interpolatedPos);
-
-        // 小数点の誤差を防ぐため、toFixedで丸める
-        this.lerpFactor = Number(
-          ((this.lerpFactor + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
-        );
-        // 次の日に到達したらインデックスを更新し、進捗をリセット
-        if (this.lerpFactor >= 1) {
-          if (nextDayIndex < earthPosition.pathPoints.length - 1) {
-            this.currentIndex = nextDayIndex;
-          } else {
-            this.currentIndex = 0;
-          }
-          this.lerpFactor = 0;
-        }
 
         // 地球は1日で360度するので1フレームあたりの回転量を計算
         const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
@@ -331,9 +336,9 @@ export class DrawScene {
         // APIから取得した現在位置に惑星を配置
         const mercuryPosition = this.mercuryGroup.userData.planetPositionsRes as PlanetPositionsRes;
         const mercuryCurrentIndex =
-          this.currentIndex < mercuryPosition.pathPoints.length - 1
-            ? this.currentIndex
-            : this.currentIndex % (mercuryPosition.pathPoints.length - 1);
+          this.dayIndex < mercuryPosition.pathPoints.length - 1
+            ? this.dayIndex
+            : this.dayIndex % (mercuryPosition.pathPoints.length - 1);
         const currentPosition = mercuryPosition.pathPoints[mercuryCurrentIndex];
 
         // 次の日（nextDayIndex）の座標を取得
@@ -341,7 +346,7 @@ export class DrawScene {
         const nextPosition = mercuryPosition.pathPoints[nextDayIndex];
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
         /* 水星の公転（反時計回り）*/
         mercuryPlanetSystem.position.copy(interpolatedPos);
 
@@ -367,9 +372,9 @@ export class DrawScene {
         // APIから取得した現在位置に惑星を配置
         const venusPosition = this.venusGroup.userData.planetPositionsRes as PlanetPositionsRes;
         const venusCurrentIndex =
-          this.currentIndex < venusPosition.pathPoints.length - 1
-            ? this.currentIndex
-            : this.currentIndex % (venusPosition.pathPoints.length - 1);
+          this.dayIndex < venusPosition.pathPoints.length - 1
+            ? this.dayIndex
+            : this.dayIndex % (venusPosition.pathPoints.length - 1);
         const currentPosition = venusPosition.pathPoints[venusCurrentIndex];
 
         // 次の日（nextDayIndex）の座標を取得
@@ -377,7 +382,7 @@ export class DrawScene {
         const nextPosition = venusPosition.pathPoints[nextDayIndex];
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.lerpFactor);
+          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
         /* 金星の公転（反時計回り）*/
         venusPlanetSystem.position.copy(interpolatedPos);
 
@@ -401,7 +406,7 @@ export class DrawScene {
       const marsPosition = this.marsGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const marsStepDays = getStepDays('MARS');
       const marsPathLength = marsPosition.pathPoints.length - 1;
-      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const earthDayProgress = this.dayIndex + this.dayFraction;
       const marsCurrentIndex = Math.floor(earthDayProgress / marsStepDays) % marsPathLength;
       const currentPosition = marsPosition.pathPoints[marsCurrentIndex];
 
@@ -450,7 +455,7 @@ export class DrawScene {
       const jupiterPosition = this.jupiterGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const jupiterStepDays = getStepDays('JUPITER');
       const jupiterPathLength = jupiterPosition.pathPoints.length - 1;
-      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const earthDayProgress = this.dayIndex + this.dayFraction;
       const jupiterCurrentIndex =
         Math.floor(earthDayProgress / jupiterStepDays) % jupiterPathLength;
       const currentPosition = jupiterPosition.pathPoints[jupiterCurrentIndex];
@@ -525,7 +530,7 @@ export class DrawScene {
       const saturnPosition = this.saturnGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const saturnStepDays = getStepDays('SATURN');
       const saturnPathLength = saturnPosition.pathPoints.length - 1;
-      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const earthDayProgress = this.dayIndex + this.dayFraction;
       const saturnCurrentIndex = Math.floor(earthDayProgress / saturnStepDays) % saturnPathLength;
       const currentPosition = saturnPosition.pathPoints[saturnCurrentIndex];
 
@@ -615,7 +620,7 @@ export class DrawScene {
       const uranusPosition = this.uranusGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const uranusStepDays = getStepDays('URANUS');
       const uranusPathLength = uranusPosition.pathPoints.length - 1;
-      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const earthDayProgress = this.dayIndex + this.dayFraction;
       const uranusCurrentIndex = Math.floor(earthDayProgress / uranusStepDays) % uranusPathLength;
       const currentPosition = uranusPosition.pathPoints[uranusCurrentIndex];
 
@@ -709,7 +714,7 @@ export class DrawScene {
       const neptunePosition = this.neptuneGroup.userData.planetPositionsRes as PlanetPositionsRes;
       const neptuneStepDays = getStepDays('NEPTUNE');
       const neptunePathLength = neptunePosition.pathPoints.length - 1;
-      const earthDayProgress = this.currentIndex + this.lerpFactor;
+      const earthDayProgress = this.dayIndex + this.dayFraction;
       const neptuneCurrentIndex =
         Math.floor(earthDayProgress / neptuneStepDays) % neptunePathLength;
       const currentPosition = neptunePosition.pathPoints[neptuneCurrentIndex];
