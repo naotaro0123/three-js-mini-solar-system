@@ -23,7 +23,9 @@ export const neptuneMoons: PlanetMoon[] = [
     texture: '/images/Triton-tok.webp',
     orbitRadius: 14,
     orbitSpeed: 0.0007 * settings.accelerationOrbit,
+    orbitalPeriodDays: 5.88, // トリトンの公転周期
     xPosition: 120,
+    retrograde: true, // トリトンは逆行衛星
   },
   // Proteus: 地球の約0.033倍。海王星に比較的近い不規則衛星
   {
@@ -31,6 +33,7 @@ export const neptuneMoons: PlanetMoon[] = [
     texture: '/images/Proteus.webp',
     orbitRadius: 10,
     orbitSpeed: 0.00035 * settings.accelerationOrbit,
+    orbitalPeriodDays: 1.12, // プロテウスの公転周期
     xPosition: 150,
   },
   // Nereid: 地球の約0.053倍。遠方を大きく公転する衛星
@@ -39,6 +42,7 @@ export const neptuneMoons: PlanetMoon[] = [
     texture: '/images/Nereidimproved.webp',
     orbitRadius: 18,
     orbitSpeed: 0.00008 * settings.accelerationOrbit,
+    orbitalPeriodDays: 360.14, // ネレイドの公転周期
     xPosition: 210,
   },
 ];

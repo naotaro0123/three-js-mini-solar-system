@@ -25,6 +25,7 @@ export const jupiterMoons: PlanetMoon[] = [
     texture: '/images/jupiterIo.jpg',
     orbitRadius: 20,
     orbitSpeed: 0.0005 * settings.accelerationOrbit,
+    orbitalPeriodDays: 1.8, // イオの公転周期
     xPosition: 80, // 木星から42万kmだが目視で設定
   },
   // エウロパ
@@ -33,6 +34,7 @@ export const jupiterMoons: PlanetMoon[] = [
     texture: '/images/jupiterEuropa.jpg',
     orbitRadius: 24,
     orbitSpeed: 0.00025 * settings.accelerationOrbit,
+    orbitalPeriodDays: 3.5, // エウロパの公転周期
     xPosition: 90, // 木星から約67万kmだが目視で設定
   },
   // ガニメデ
@@ -41,6 +43,7 @@ export const jupiterMoons: PlanetMoon[] = [
     texture: '/images/jupiterGanymede.jpg',
     orbitRadius: 28,
     orbitSpeed: 0.000125 * settings.accelerationOrbit,
+    orbitalPeriodDays: 7.1, // ガニメデの公転周期
     xPosition: 110, // 木星から約107万kmだが目視で設定
   },
   // カリスト
@@ -49,6 +52,7 @@ export const jupiterMoons: PlanetMoon[] = [
     texture: '/images/jupiterCallisto.jpg',
     orbitRadius: 32,
     orbitSpeed: 0.00006 * settings.accelerationOrbit,
+    orbitalPeriodDays: 16.7, // カリストの公転周期
     xPosition: 140, // 木星から約188万kmだが目視で設定
   },
 ];

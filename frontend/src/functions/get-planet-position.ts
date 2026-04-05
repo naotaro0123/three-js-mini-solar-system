@@ -2,7 +2,7 @@ import { addDays, format, getDayOfYear } from 'date-fns';
 import * as THREE from 'three';
 import { planetPositionEndpoint, type RequestQueryBody, type ResponseData } from '../../../common';
 import { deleteFromIndexedDB, getFromIndexedDB, saveToIndexedDB } from './indexed-db';
-import { getStepSize } from './settings';
+import { AU_IN_UNITS, getStepSize } from './settings';
 import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
@@ -175,7 +175,6 @@ export const getPlanetPositions = async (
       });
 
       // 座標を正規化する
-      const AU_IN_UNITS = 90; // 1AUを90に設定
       const transformedData = pathPoints.map((point) => {
         return new THREE.Vector3(
           point.x * AU_IN_UNITS,
