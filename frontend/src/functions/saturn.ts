@@ -25,6 +25,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/RS3_Titan.webp',
     orbitRadius: 16,
     orbitSpeed: 0.00009 * settings.accelerationOrbit,
+    orbitalPeriodDays: 15.95, // タイタンの公転周期
     xPosition: 137,
   },
   // レア: 地球の約0.12倍。タイタンより内側を公転
@@ -33,6 +34,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/RS3_Rhea.webp',
     orbitRadius: 12,
     orbitSpeed: 0.00018 * settings.accelerationOrbit,
+    orbitalPeriodDays: 4.52, // レアの公転周期
     xPosition: 116,
   },
   // イアペトゥス: 地球の約0.11倍。タイタンより外側をゆっくり公転
@@ -41,6 +43,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/LapetusNew.webp',
     orbitRadius: 22,
     orbitSpeed: 0.00001 * settings.accelerationOrbit,
+    orbitalPeriodDays: 79.3, // イアペトゥスの公転周期
     xPosition: 180,
   },
   // ミマス: 地球の約0.03倍。土星に近い内側を高速公転
@@ -49,6 +52,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/RS3_Mimas.webp',
     orbitRadius: 8,
     orbitSpeed: 0.0007 * settings.accelerationOrbit,
+    orbitalPeriodDays: 0.942, // ミマスの公転周期
     xPosition: 102,
   },
   // エンケラドゥス: 地球の約0.04倍。ミマスの外側、レアの内側を公転
@@ -57,6 +61,7 @@ export const saturnMoons: PlanetMoon[] = [
     texture: '/images/Enceladus.webp',
     orbitRadius: 10,
     orbitSpeed: 0.00045 * settings.accelerationOrbit,
+    orbitalPeriodDays: 1.37, // エンケラドゥスの公転周期
     xPosition: 110,
   },
 ];

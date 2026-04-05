@@ -18,9 +18,27 @@ export const EARTH_NAME = 'Earth';
 const EARTH_ORBIT_COLOR = 0xffffff;
 // 月は地球の約1/4（1/3.7）の大きさ
 export const EARTH_MOON_SIZE = EARTH_SIZE / 3.7;
+export const EARTH_MOON_ORBITAL_TILT = 5; // 月の軌道傾斜角（度）
+export const EARTH_MOON_ORBITAL_PERIOD_DAYS = 27.322; // 月の公転周期（恒星月）
+export const EARTH_ATMOSPHERE_ROTATION_OFFSET = 0.00002; // 大気の回転オフセット
+export const VENUS_ATMOSPHERE_ROTATION_MULTIPLIER = 60; // 金星スーパーローテーション倍率
 
 // 太陽は地球の約109倍の大きさ（他の惑星が豆粒になるため、1/40縮小版で表示）
 export const SUN_SIZE = (EARTH_SIZE * 109) / 40;
+export const SUN_ROTATION_SPEED = 0.001; // 太陽の自転速度
+export const SUN_EMISSIVE_COLOR = 0xfff88f; // 太陽の発光色
+
+// 太陽の光源設定
+export const SUN_POINT_LIGHT_COLOR = 0xfdffd3; // 近距離の惑星向けの主光源色
+export const SUN_POINT_LIGHT_INTENSITY = 100;
+export const SUN_POINT_LIGHT_DECAY = 1.4;
+export const SUN_FILL_LIGHT_COLOR = 0xe8efff; // 外惑星向けの補助光源色
+export const SUN_FILL_LIGHT_INTENSITY = 20;
+export const SUN_FILL_LIGHT_DISTANCE = 80000;
+export const SUN_FILL_LIGHT_DECAY = 0.5;
+
+// AU変換係数（1AUを何単位にするか）
+export const AU_IN_UNITS = 90;
 
 // 水星のサイズと自転軸の傾き
 export const MERCURY_SIZE = 2.4;

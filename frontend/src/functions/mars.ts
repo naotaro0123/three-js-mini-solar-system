@@ -15,6 +15,7 @@ export const marsMoons: PlanetMoon[] = [
     size: 0.1, // GLTFなのでサイズは目視で調整する
     orbitRadius: 5,
     orbitSpeed: 0.002 * settings.accelerationOrbit,
+    orbitalPeriodDays: 0.319, // フォボスの公転周期（約7.66時間）
     modelPath: '/images/mars/phobos.glb',
     xPosition: 6, // 火星から9,378kmだが目視で設定
   },
@@ -23,6 +24,7 @@ export const marsMoons: PlanetMoon[] = [
     size: 0.1, // GLTFなのでサイズは目視で調整する
     orbitRadius: 12.5,
     orbitSpeed: 0.0005 * settings.accelerationOrbit,
+    orbitalPeriodDays: 1.263, // ダイモスの公転周期（約30.3時間）
     modelPath: '/images/mars/deimos.glb',
     xPosition: 14, // 火星から23,460kmだが目視で設定
   },

@@ -21,6 +21,7 @@ export const earthMoons: PlanetMoon[] = [
     bump: '/images/moonbump.jpg',
     orbitSpeed: 0.001 * settings.accelerationOrbit,
     orbitRadius: 10, // 月の軌道半径
+    orbitalPeriodDays: 27.322, // 恒星月
   },
 ];
 

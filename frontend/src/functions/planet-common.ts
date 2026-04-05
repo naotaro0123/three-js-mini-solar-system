@@ -38,11 +38,13 @@ export type PlanetMoon = {
   size: number;
   orbitSpeed: number;
   orbitRadius: number;
+  orbitalPeriodDays: number; // 衛星の公転周期（日）
   texture?: string;
   bump?: string;
   mesh?: THREE.Mesh;
   modelPath?: string;
   xPosition?: number;
+  retrograde?: boolean; // 逆行衛星かどうか
 };
 
 export const createPlanet = (
