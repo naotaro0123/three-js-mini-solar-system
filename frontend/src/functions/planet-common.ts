@@ -108,6 +108,15 @@ export const createPlanet = (
   labelObject.position.set(0, size + 3, 0);
   planetSystem.add(labelObject);
 
+  // 傾き角度ラベルを惑星の下に表示
+  const tiltLabelElement = document.createElement('div');
+  tiltLabelElement.className = 'planet-tilt-label';
+  tiltLabelElement.textContent = `傾き: ${tilt}°`;
+  const tiltLabelObject = new CSS2DObject(tiltLabelElement);
+  tiltLabelObject.name = Names.PLANET_LABEL_NAME;
+  tiltLabelObject.position.set(0, -(size + 3), 0);
+  planetSystem.add(tiltLabelObject);
+
   // 自転軸を追加する
   {
     const axisRadius = 0.1;
