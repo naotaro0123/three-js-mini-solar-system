@@ -10,6 +10,40 @@ import {
 
 const app = new Hono();
 
+const isCommandKey = (value: string): value is keyof typeof commandMap =>
+  value in commandMap;
+
+const isResponseData = (data: unknown): data is ResponseData => {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+
+  if (!("result" in data) || typeof data.result !== "string") {
+    return false;
+  }
+
+  if (!("signature" in data)) {
+    return false;
+  }
+
+  const signature = data.signature;
+  if (typeof signature !== "object" || signature === null) {
+    return false;
+  }
+
+  return (
+    "version" in signature &&
+    typeof signature.version === "string" &&
+    "source" in signature &&
+    typeof signature.source === "string"
+  );
+};
+
+const isContentfulStatusCode = (
+  statusCode: number,
+): statusCode is ContentfulStatusCode =>
+  Number.isInteger(statusCode) && statusCode >= 100 && statusCode <= 599;
+
 app.use(
   "/api/*",
   cors({
@@ -19,11 +53,16 @@ app.use(
 
 app.get(planetPositionEndpoint, async (c) => {
   // クエリパラメータから取得
-  const { START_TIME, STOP_TIME, STEP_SIZE, COMMAND } =
-    c.req.query() as RequestQueryBody;
-  // TODO: asばかりなのでsatisfiesを使いたい
+  const query = c.req.query();
+  const { START_TIME, STOP_TIME, STEP_SIZE, COMMAND } = query;
 
-  if (!START_TIME || !STOP_TIME || !STEP_SIZE || !COMMAND) {
+  if (
+    !START_TIME ||
+    !STOP_TIME ||
+    !STEP_SIZE ||
+    !COMMAND ||
+    !isCommandKey(COMMAND)
+  ) {
     return c.json(
       {
         error: "必須項目がありません",
@@ -32,7 +71,14 @@ app.get(planetPositionEndpoint, async (c) => {
     );
   }
 
-  const commandValue = commandMap[COMMAND];
+  const requestQuery = {
+    START_TIME,
+    STOP_TIME,
+    STEP_SIZE,
+    COMMAND,
+  } satisfies RequestQueryBody;
+
+  const commandValue = commandMap[requestQuery.COMMAND];
   // 外部APIのURLを作成
   // Doc: https://ssd-api.jpl.nasa.gov/doc/horizons.html
   // ref: https://gemini.google.com/app/8aa75ba3ab0dece5
@@ -52,13 +98,19 @@ app.get(planetPositionEndpoint, async (c) => {
 
     if (!response.ok) {
       // 外部APIからの非200レスポンスを処理
+      const statusCode = isContentfulStatusCode(response.status)
+        ? response.status
+        : 502;
       return c.json(
         { error: "外部APIからのデータ取得に失敗しました。" },
-        response.status as ContentfulStatusCode,
+        statusCode,
       );
     }
 
-    const data = (await response.json()) as ResponseData;
+    const data = await response.json();
+    if (!isResponseData(data)) {
+      return c.json({ error: "外部APIのレスポンス形式が不正です。" }, 502);
+    }
 
     // 外部APIからのデータをそのまま返す
     return c.json(data);
