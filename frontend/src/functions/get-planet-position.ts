@@ -63,7 +63,10 @@ const loadPlanetPositionCache = async (cacheKey: string): Promise<PlanetPosition
   }
 };
 
-const savePlanetPositionCache = async (cacheKey: string, data: PlanetPositionsRes): Promise<void> => {
+const savePlanetPositionCache = async (
+  cacheKey: string,
+  data: PlanetPositionsRes,
+): Promise<void> => {
   const serializable: PlanetPositionCache = {
     todayRow: data.todayRow,
     pathPoints: data.pathPoints.map((point) => ({

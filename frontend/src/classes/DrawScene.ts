@@ -493,10 +493,14 @@ export class DrawScene {
         const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
         const ganymedeOrbitRadius = jupiterMoons[2].orbitRadius + (jupiterMoons[2].xPosition ?? 0);
         const callistoOrbitRadius = jupiterMoons[3].orbitRadius + (jupiterMoons[3].xPosition ?? 0);
-        const ioCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[0].orbitalPeriodDays);
-        const europaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[1].orbitalPeriodDays);
-        const ganymedeCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[2].orbitalPeriodDays);
-        const callistoCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[3].orbitalPeriodDays);
+        const ioCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[0].orbitalPeriodDays);
+        const europaCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[1].orbitalPeriodDays);
+        const ganymedeCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[2].orbitalPeriodDays);
+        const callistoCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / jupiterMoons[3].orbitalPeriodDays);
         // イオの公転
         const ioX = ioOrbitRadius * Math.cos(ioCurrentAngle);
         const ioY = 0; // 木星の赤道面に沿って公転させるため、Y軸は0に固定
@@ -557,7 +561,8 @@ export class DrawScene {
         // タイタンの公転（約15.95日）
         const titan = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.TITAN) as THREE.Mesh;
         const titanOrbitRadius = saturnMoons[0].orbitRadius + (saturnMoons[0].xPosition ?? 0);
-        const titanCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[0].orbitalPeriodDays);
+        const titanCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[0].orbitalPeriodDays);
         const titanBaseX = -titanOrbitRadius * Math.cos(titanCurrentAngle);
         const titanBaseZ = titanOrbitRadius * Math.sin(titanCurrentAngle);
         const titanX = titanBaseX * Math.cos(saturnTiltAngle);
@@ -567,7 +572,8 @@ export class DrawScene {
         // レアの公転（約4.52日）
         const rhea = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.RHEA) as THREE.Mesh;
         const rheaOrbitRadius = saturnMoons[1].orbitRadius + (saturnMoons[1].xPosition ?? 0);
-        const rheaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[1].orbitalPeriodDays);
+        const rheaCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[1].orbitalPeriodDays);
         const rheaBaseX = -rheaOrbitRadius * Math.cos(rheaCurrentAngle);
         const rheaBaseZ = rheaOrbitRadius * Math.sin(rheaCurrentAngle);
         const rheaX = rheaBaseX * Math.cos(saturnTiltAngle);
@@ -579,7 +585,8 @@ export class DrawScene {
           SATURN_MOON_MESH_NAMES.IAPETUS,
         ) as THREE.Mesh;
         const iapetusOrbitRadius = saturnMoons[2].orbitRadius + (saturnMoons[2].xPosition ?? 0);
-        const iapetusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[2].orbitalPeriodDays);
+        const iapetusCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[2].orbitalPeriodDays);
         const iapetusBaseX = -iapetusOrbitRadius * Math.cos(iapetusCurrentAngle);
         const iapetusBaseZ = iapetusOrbitRadius * Math.sin(iapetusCurrentAngle);
         const iapetusX = iapetusBaseX * Math.cos(saturnTiltAngle);
@@ -589,7 +596,8 @@ export class DrawScene {
         // ミマスの公転（約0.942日）
         const mimas = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.MIMAS) as THREE.Mesh;
         const mimasOrbitRadius = saturnMoons[3].orbitRadius + (saturnMoons[3].xPosition ?? 0);
-        const mimasCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[3].orbitalPeriodDays);
+        const mimasCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[3].orbitalPeriodDays);
         const mimasBaseX = -mimasOrbitRadius * Math.cos(mimasCurrentAngle);
         const mimasBaseZ = mimasOrbitRadius * Math.sin(mimasCurrentAngle);
         const mimasX = mimasBaseX * Math.cos(saturnTiltAngle);
@@ -601,7 +609,8 @@ export class DrawScene {
           SATURN_MOON_MESH_NAMES.ENCELADUS,
         ) as THREE.Mesh;
         const enceladusOrbitRadius = saturnMoons[4].orbitRadius + (saturnMoons[4].xPosition ?? 0);
-        const enceladusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[4].orbitalPeriodDays);
+        const enceladusCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[4].orbitalPeriodDays);
         const enceladusBaseX = -enceladusOrbitRadius * Math.cos(enceladusCurrentAngle);
         const enceladusBaseZ = enceladusOrbitRadius * Math.sin(enceladusCurrentAngle);
         const enceladusX = enceladusBaseX * Math.cos(saturnTiltAngle);
@@ -649,7 +658,8 @@ export class DrawScene {
           URANUS_MOON_MESH_NAMES.MIRANDA,
         ) as THREE.Mesh;
         const mirandaOrbitRadius = uranusMoons[0].orbitRadius + (uranusMoons[0].xPosition ?? 0);
-        const mirandaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[0].orbitalPeriodDays);
+        const mirandaCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[0].orbitalPeriodDays);
         const mirandaBaseX = -mirandaOrbitRadius * Math.cos(mirandaCurrentAngle);
         const mirandaBaseZ = mirandaOrbitRadius * Math.sin(mirandaCurrentAngle);
         const mirandaX = mirandaBaseX * Math.cos(uranusTiltAngle);
@@ -659,7 +669,8 @@ export class DrawScene {
         // Arielの公転（約2.52日）
         const ariel = this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.ARIEL) as THREE.Mesh;
         const arielOrbitRadius = uranusMoons[1].orbitRadius + (uranusMoons[1].xPosition ?? 0);
-        const arielCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[1].orbitalPeriodDays);
+        const arielCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[1].orbitalPeriodDays);
         const arielBaseX = -arielOrbitRadius * Math.cos(arielCurrentAngle);
         const arielBaseZ = arielOrbitRadius * Math.sin(arielCurrentAngle);
         const arielX = arielBaseX * Math.cos(uranusTiltAngle);
@@ -671,7 +682,8 @@ export class DrawScene {
           URANUS_MOON_MESH_NAMES.UMBRIEL,
         ) as THREE.Mesh;
         const umbrielOrbitRadius = uranusMoons[2].orbitRadius + (uranusMoons[2].xPosition ?? 0);
-        const umbrielCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[2].orbitalPeriodDays);
+        const umbrielCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[2].orbitalPeriodDays);
         const umbrielBaseX = -umbrielOrbitRadius * Math.cos(umbrielCurrentAngle);
         const umbrielBaseZ = umbrielOrbitRadius * Math.sin(umbrielCurrentAngle);
         const umbrielX = umbrielBaseX * Math.cos(uranusTiltAngle);
@@ -683,7 +695,8 @@ export class DrawScene {
           URANUS_MOON_MESH_NAMES.TITANIA,
         ) as THREE.Mesh;
         const titaniaOrbitRadius = uranusMoons[3].orbitRadius + (uranusMoons[3].xPosition ?? 0);
-        const titaniaCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[3].orbitalPeriodDays);
+        const titaniaCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[3].orbitalPeriodDays);
         const titaniaBaseX = -titaniaOrbitRadius * Math.cos(titaniaCurrentAngle);
         const titaniaBaseZ = titaniaOrbitRadius * Math.sin(titaniaCurrentAngle);
         const titaniaX = titaniaBaseX * Math.cos(uranusTiltAngle);
@@ -695,7 +708,8 @@ export class DrawScene {
           URANUS_MOON_MESH_NAMES.OBERON,
         ) as THREE.Mesh;
         const oberonOrbitRadius = uranusMoons[4].orbitRadius + (uranusMoons[4].xPosition ?? 0);
-        const oberonCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[4].orbitalPeriodDays);
+        const oberonCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[4].orbitalPeriodDays);
         const oberonBaseX = -oberonOrbitRadius * Math.cos(oberonCurrentAngle);
         const oberonBaseZ = oberonOrbitRadius * Math.sin(oberonCurrentAngle);
         const oberonX = oberonBaseX * Math.cos(uranusTiltAngle);
@@ -746,7 +760,11 @@ export class DrawScene {
         ) as THREE.Mesh;
         const tritonOrbitRadius = neptuneMoons[0].orbitRadius + (neptuneMoons[0].xPosition ?? 0);
         const tritonDirection = neptuneMoons[0].retrograde ? -1 : 1;
-        const tritonCurrentAngle = tritonDirection * this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[0].orbitalPeriodDays);
+        const tritonCurrentAngle =
+          tritonDirection *
+          this.frameCount *
+          settings.accelerationOrbit *
+          (1 / neptuneMoons[0].orbitalPeriodDays);
         const tritonBaseX = -tritonOrbitRadius * Math.cos(tritonCurrentAngle);
         const tritonBaseZ = tritonOrbitRadius * Math.sin(tritonCurrentAngle);
         const tritonX = tritonBaseX * Math.cos(neptuneTiltAngle);
@@ -758,7 +776,8 @@ export class DrawScene {
           NEPTUNE_MOON_MESH_NAMES.PROTEUS,
         ) as THREE.Mesh;
         const proteusOrbitRadius = neptuneMoons[1].orbitRadius + (neptuneMoons[1].xPosition ?? 0);
-        const proteusCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[1].orbitalPeriodDays);
+        const proteusCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[1].orbitalPeriodDays);
         const proteusBaseX = -proteusOrbitRadius * Math.cos(proteusCurrentAngle);
         const proteusBaseZ = proteusOrbitRadius * Math.sin(proteusCurrentAngle);
         const proteusX = proteusBaseX * Math.cos(neptuneTiltAngle);
@@ -770,7 +789,8 @@ export class DrawScene {
           NEPTUNE_MOON_MESH_NAMES.NEREID,
         ) as THREE.Mesh;
         const nereidOrbitRadius = neptuneMoons[2].orbitRadius + (neptuneMoons[2].xPosition ?? 0);
-        const nereidCurrentAngle = this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[2].orbitalPeriodDays);
+        const nereidCurrentAngle =
+          this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[2].orbitalPeriodDays);
         const nereidBaseX = -nereidOrbitRadius * Math.cos(nereidCurrentAngle);
         const nereidBaseZ = nereidOrbitRadius * Math.sin(nereidCurrentAngle);
         const nereidX = nereidBaseX * Math.cos(neptuneTiltAngle);

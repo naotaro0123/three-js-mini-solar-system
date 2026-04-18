@@ -9,9 +9,8 @@
     "dev:frontend": "yarn workspace frontend dev",
     "dev:backend": "yarn workspace backend dev",
     "build:frontend": "yarn workspace frontend build",
-    "build:backend": "yarn workspace backend build"
-  },
-  "resolutions": {
-    "eslint-visitor-keys": "^4.2.1"
+    "build:backend": "yarn workspace backend build",
+    "lint": "yarn workspace frontend lint",
+    "format": "yarn workspace frontend format"
   }
 }
