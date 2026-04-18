@@ -60,7 +60,7 @@ export class DrawScene {
   neptuneGroup!: THREE.Group; // 海王星のグループ
   asteroidBelt!: AsteroidBelt; // 小惑星帯
   dayFraction = 0; // 補間の進捗（0.0 から 1.0 まで）
-  dayIndex = 0; // 現在の日インデックス（0から364まで）
+  dayIndex = 0; // アニメーション開始からの経過日数
   labelElement!: HTMLDivElement;
   timer = new THREE.Timer();
   frameCount = 0;
@@ -254,19 +254,13 @@ export class DrawScene {
 
     // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
     {
-      const earthPosition = this.userDataEarthPositionRes;
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.dayFraction = Number(
         ((this.dayFraction + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
       );
       // 次の日に到達したらインデックスを更新し、進捗をリセット
       if (this.dayFraction >= 1) {
-        const nextDayIndex = this.dayIndex + 1;
-        if (nextDayIndex < earthPosition.pathPoints.length - 1) {
-          this.dayIndex = nextDayIndex;
-        } else {
-          this.dayIndex = 0;
-        }
+        this.dayIndex += 1;
         this.dayFraction = 0;
       }
     }
@@ -286,10 +280,12 @@ export class DrawScene {
       {
         // APIから取得した現在位置に惑星を配置
         const earthPosition = this.userDataEarthPositionRes;
-        const currentPosition = earthPosition.pathPoints[this.dayIndex];
+        const earthPathLength = earthPosition.pathPoints.length - 1;
+        const earthCurrentIndex = this.dayIndex % earthPathLength;
+        const currentPosition = earthPosition.pathPoints[earthCurrentIndex];
 
         // 次の日（nextDayIndex）の座標を取得
-        const nextDayIndex = this.dayIndex + 1;
+        const nextDayIndex = (earthCurrentIndex + 1) % earthPathLength;
         const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
         const interpolatedPos = new THREE.Vector3()
@@ -335,14 +331,12 @@ export class DrawScene {
 
         // APIから取得した現在位置に惑星を配置
         const mercuryPosition = this.mercuryGroup.userData.planetPositionsRes as PlanetPositionsRes;
-        const mercuryCurrentIndex =
-          this.dayIndex < mercuryPosition.pathPoints.length - 1
-            ? this.dayIndex
-            : this.dayIndex % (mercuryPosition.pathPoints.length - 1);
+        const mercuryPathLength = mercuryPosition.pathPoints.length - 1;
+        const mercuryCurrentIndex = this.dayIndex % mercuryPathLength;
         const currentPosition = mercuryPosition.pathPoints[mercuryCurrentIndex];
 
         // 次の日（nextDayIndex）の座標を取得
-        const nextDayIndex = mercuryCurrentIndex + 1;
+        const nextDayIndex = (mercuryCurrentIndex + 1) % mercuryPathLength;
         const nextPosition = mercuryPosition.pathPoints[nextDayIndex];
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
@@ -371,14 +365,12 @@ export class DrawScene {
 
         // APIから取得した現在位置に惑星を配置
         const venusPosition = this.venusGroup.userData.planetPositionsRes as PlanetPositionsRes;
-        const venusCurrentIndex =
-          this.dayIndex < venusPosition.pathPoints.length - 1
-            ? this.dayIndex
-            : this.dayIndex % (venusPosition.pathPoints.length - 1);
+        const venusPathLength = venusPosition.pathPoints.length - 1;
+        const venusCurrentIndex = this.dayIndex % venusPathLength;
         const currentPosition = venusPosition.pathPoints[venusCurrentIndex];
 
         // 次の日（nextDayIndex）の座標を取得
-        const nextDayIndex = venusCurrentIndex + 1;
+        const nextDayIndex = (venusCurrentIndex + 1) % venusPathLength;
         const nextPosition = venusPosition.pathPoints[nextDayIndex];
         const interpolatedPos = new THREE.Vector3()
           .fromArray(currentPosition.toArray())
