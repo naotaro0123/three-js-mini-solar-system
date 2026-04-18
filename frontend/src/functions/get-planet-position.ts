@@ -6,20 +6,18 @@ import { AU_IN_UNITS, getStepSize } from './settings';
 import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST;
-const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v1';
-const TARGET_POINTS_PER_YEAR = 367; // 地球の場合に始点と終点をつなぐために365点以上必要になるため、少し余裕を持たせて367点にする
+const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v2';
 
-const normalizePathPointsToYear = (points: THREE.Vector3[]): THREE.Vector3[] => {
+const closeOrbitPath = (points: THREE.Vector3[]): THREE.Vector3[] => {
   if (points.length === 0) return points;
-  if (points.length >= TARGET_POINTS_PER_YEAR) {
-    return points.slice(0, TARGET_POINTS_PER_YEAR);
+  const firstPoint = points[0];
+  const lastPoint = points[points.length - 1];
+
+  if (firstPoint.equals(lastPoint)) {
+    return points;
   }
 
-  const normalized: THREE.Vector3[] = [];
-  for (let i = 0; i < TARGET_POINTS_PER_YEAR; i++) {
-    normalized.push(points[i % points.length].clone());
-  }
-  return normalized;
+  return [...points, firstPoint.clone()];
 };
 
 export type PlanetPositionsRes = {
@@ -186,7 +184,7 @@ export const getPlanetPositions = async (
           point.y * AU_IN_UNITS,
         );
       });
-      result.pathPoints = normalizePathPointsToYear(transformedData.reverse()); // 日付順にした上で365列に揃える
+      result.pathPoints = closeOrbitPath(transformedData.reverse()); // 日付順にした上で始点と終点をつなげる
 
       const today = new Date();
       const dayOfYearWithDfs = getDayOfYear(today);
