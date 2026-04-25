@@ -11,15 +11,15 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "oxlint": "^0.16.6",
-    "typescript": "~5.9.3",
-    "vite": "^7.3.1"
+    "oxlint": "^1.61.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
   },
   "dependencies": {
     "@types/three": "^0.184.0",
     "date-fns": "^4.1.0",
     "lil-gui": "^0.21.0",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.3",
     "three": "^0.184.0"
   }
 }
