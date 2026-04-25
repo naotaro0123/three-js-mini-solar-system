@@ -65,6 +65,56 @@ export class DrawScene {
   timer = new THREE.Timer();
   frameCount = 0;
 
+  // 毎フレームの getObjectByName（tree走査）を排除するためのキャッシュ
+  private _cachedMeshes!: {
+    earthPlanetSystem: THREE.Group;
+    earthPlanet: THREE.Mesh;
+    earthAtmosphere: THREE.Mesh;
+    moon: THREE.Mesh;
+    mercuryPlanetSystem: THREE.Group;
+    mercuryPlanet: THREE.Mesh;
+    venusPlanetSystem: THREE.Group;
+    venusPlanet: THREE.Mesh;
+    venusAtmosphere: THREE.Mesh;
+    marsPlanetSystem: THREE.Group;
+    marsPlanet: THREE.Mesh;
+    phobos: THREE.Mesh;
+    deimos: THREE.Mesh;
+    jupiterPlanetSystem: THREE.Group;
+    jupiterPlanet: THREE.Mesh;
+    io: THREE.Mesh;
+    europa: THREE.Mesh;
+    ganymede: THREE.Mesh;
+    callisto: THREE.Mesh;
+    saturnPlanetSystem: THREE.Group;
+    saturnPlanet: THREE.Mesh;
+    titan: THREE.Mesh;
+    rhea: THREE.Mesh;
+    iapetus: THREE.Mesh;
+    mimas: THREE.Mesh;
+    enceladus: THREE.Mesh;
+    uranusPlanetSystem: THREE.Group;
+    uranusPlanet: THREE.Mesh;
+    miranda: THREE.Mesh;
+    ariel: THREE.Mesh;
+    umbriel: THREE.Mesh;
+    titania: THREE.Mesh;
+    oberon: THREE.Mesh;
+    neptunePlanetSystem: THREE.Group;
+    neptunePlanet: THREE.Mesh;
+    triton: THREE.Mesh;
+    proteus: THREE.Mesh;
+    nereid: THREE.Mesh;
+  };
+
+  // 毎フレームの Vector3 アロケーションを排除するための共有バッファ
+  private readonly _interpolatedPos = new THREE.Vector3();
+
+  // updateLayerVisibility の毎フレーム走査を抑制するための前回値キャッシュ
+  private _prevShowOrbits = settings.showOrbits;
+  private _prevShowLabels = settings.showLabels;
+  private _prevShowPlanets = settings.showPlanets;
+
   constructor() {
     const { camera, controls, composer, labelRenderer } = initEnvironment(
       this.renderer,
@@ -93,31 +143,34 @@ export class DrawScene {
     // 太陽のメッシュを作成
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
-    // 地球と月のメッシュを作成
+    // 地球と月のメッシュを作成（dayIndex取得のため先行）
     this.earthGroup = await createEarthGroup(this.sunMesh.position, isDebug);
     this.dayIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
-    // 水星のメッシュを作成
-    this.mercuryGroup = await createMercuryGroup(isDebug);
-    this.scene.add(this.mercuryGroup);
-    // 金星のメッシュを作成
-    this.venusGroup = await createVenusGroup(isDebug);
-    this.scene.add(this.venusGroup);
-    // 火星のメッシュを作成
-    this.marsGroup = await createMarsGroup(isDebug);
-    this.scene.add(this.marsGroup);
-    // 木星のメッシュを作成
-    this.jupiterGroup = await createJupiterGroup(isDebug);
-    this.scene.add(this.jupiterGroup);
-    // 土星のメッシュを作成
-    this.saturnGroup = await createSaturnGroup(isDebug);
-    this.scene.add(this.saturnGroup);
-    // 天王星のメッシュを作成
-    this.uranusGroup = await createUranusGroup(isDebug);
-    this.scene.add(this.uranusGroup);
-    // 海王星のメッシュを作成
-    this.neptuneGroup = await createNeptuneGroup(isDebug);
-    this.scene.add(this.neptuneGroup);
+    // 残り7惑星を並列初期化（sleep(50)が並行実行されるため起動時間を短縮）
+    const [mercury, venus, mars, jupiter, saturn, uranus, neptune] = await Promise.all([
+      createMercuryGroup(isDebug),
+      createVenusGroup(isDebug),
+      createMarsGroup(isDebug),
+      createJupiterGroup(isDebug),
+      createSaturnGroup(isDebug),
+      createUranusGroup(isDebug),
+      createNeptuneGroup(isDebug),
+    ]);
+    this.mercuryGroup = mercury;
+    this.scene.add(mercury);
+    this.venusGroup = venus;
+    this.scene.add(venus);
+    this.marsGroup = mars;
+    this.scene.add(mars);
+    this.jupiterGroup = jupiter;
+    this.scene.add(jupiter);
+    this.saturnGroup = saturn;
+    this.scene.add(saturn);
+    this.uranusGroup = uranus;
+    this.scene.add(uranus);
+    this.neptuneGroup = neptune;
+    this.scene.add(neptune);
     // 小惑星帯を作成
     this.asteroidBelt = new AsteroidBelt();
     this.scene.add(this.asteroidBelt.getGroup());
@@ -146,7 +199,59 @@ export class DrawScene {
     });
 
     // 惑星の初期化完了後にレンダリングを開始する
+    this._initMeshCache();
     this.render();
+  }
+
+  private _initMeshCache(): void {
+    this._cachedMeshes = {
+      // 地球
+      earthPlanetSystem: this.earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      earthPlanet: this.earthGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      earthAtmosphere: this.earthGroup.getObjectByName(Names.PLANET_ATMO_SPHERE_NAME) as THREE.Mesh,
+      moon: this.earthGroup.getObjectByName(EARTH_MOON_MESH_NAMES.MOON) as THREE.Mesh,
+      // 水星
+      mercuryPlanetSystem: this.mercuryGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      mercuryPlanet: this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      // 金星
+      venusPlanetSystem: this.venusGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      venusPlanet: this.venusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      venusAtmosphere: this.venusGroup.getObjectByName(Names.PLANET_ATMO_SPHERE_NAME) as THREE.Mesh,
+      // 火星
+      marsPlanetSystem: this.marsGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      marsPlanet: this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      phobos: this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.PHOBOS) as THREE.Mesh,
+      deimos: this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.DEIMOS) as THREE.Mesh,
+      // 木星
+      jupiterPlanetSystem: this.jupiterGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      jupiterPlanet: this.jupiterGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      io: this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.IO) as THREE.Mesh,
+      europa: this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.EUROPA) as THREE.Mesh,
+      ganymede: this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.GANYMEDE) as THREE.Mesh,
+      callisto: this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.CALLISTO) as THREE.Mesh,
+      // 土星
+      saturnPlanetSystem: this.saturnGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      saturnPlanet: this.saturnGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      titan: this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.TITAN) as THREE.Mesh,
+      rhea: this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.RHEA) as THREE.Mesh,
+      iapetus: this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.IAPETUS) as THREE.Mesh,
+      mimas: this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.MIMAS) as THREE.Mesh,
+      enceladus: this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.ENCELADUS) as THREE.Mesh,
+      // 天王星
+      uranusPlanetSystem: this.uranusGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      uranusPlanet: this.uranusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      miranda: this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.MIRANDA) as THREE.Mesh,
+      ariel: this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.ARIEL) as THREE.Mesh,
+      umbriel: this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.UMBRIEL) as THREE.Mesh,
+      titania: this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.TITANIA) as THREE.Mesh,
+      oberon: this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.OBERON) as THREE.Mesh,
+      // 海王星
+      neptunePlanetSystem: this.neptuneGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group,
+      neptunePlanet: this.neptuneGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh,
+      triton: this.neptuneGroup.getObjectByName(NEPTUNE_MOON_MESH_NAMES.TRITON) as THREE.Mesh,
+      proteus: this.neptuneGroup.getObjectByName(NEPTUNE_MOON_MESH_NAMES.PROTEUS) as THREE.Mesh,
+      nereid: this.neptuneGroup.getObjectByName(NEPTUNE_MOON_MESH_NAMES.NEREID) as THREE.Mesh,
+    };
   }
 
   initDoubleClickZoom(): void {
@@ -207,6 +312,18 @@ export class DrawScene {
   }
 
   #updateLayerVisibility(): void {
+    // settings が変わっていない場合はスキップ（毎フレームの traverse を排除）
+    const changed =
+      settings.showOrbits !== this._prevShowOrbits ||
+      settings.showLabels !== this._prevShowLabels ||
+      settings.showPlanets !== this._prevShowPlanets;
+
+    if (!changed) return;
+
+    this._prevShowOrbits = settings.showOrbits;
+    this._prevShowLabels = settings.showLabels;
+    this._prevShowPlanets = settings.showPlanets;
+
     // 各惑星グループについてレイヤー表示を制御
     const planetGroups = [
       this.earthGroup,
@@ -267,14 +384,7 @@ export class DrawScene {
 
     {
       // planet3dがearth。コードコピーする時間違えないように
-      const earthPlanetSystem = this.earthGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
-      const earthPlanet = this.earthGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
-      const earthAtmosphere = this.earthGroup.getObjectByName(
-        Names.PLANET_ATMO_SPHERE_NAME,
-      ) as THREE.Mesh;
-      const moon = this.earthGroup.getObjectByName(EARTH_MOON_MESH_NAMES.MOON) as THREE.Mesh;
+      const { earthPlanetSystem, earthPlanet, earthAtmosphere, moon } = this._cachedMeshes;
 
       /* 地球の公転と自転（反時計回り） */
       {
@@ -288,12 +398,10 @@ export class DrawScene {
         const nextDayIndex = (earthCurrentIndex + 1) % earthPathLength;
         const nextPosition = earthPosition.pathPoints[nextDayIndex];
 
-        const interpolatedPos = new THREE.Vector3()
-          .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
+        this._interpolatedPos.copy(currentPosition).lerp(nextPosition, this.dayFraction);
 
         /* 地球の公転（反時計回り）*/
-        earthPlanetSystem.position.copy(interpolatedPos);
+        earthPlanetSystem.position.copy(this._interpolatedPos);
 
         // 地球は1日で360度するので1フレームあたりの回転量を計算
         const earthRotation = (360 / settings.lerpFrame) * settings.accelerationRotation;
@@ -325,9 +433,7 @@ export class DrawScene {
 
       /* 水星の公転と自転（反時計回り） */
       {
-        const mercuryPlanetSystem = this.mercuryGroup.getObjectByName(
-          Names.PLANET_SYSTEM_NAME,
-        ) as THREE.Group;
+        const { mercuryPlanetSystem, mercuryPlanet } = this._cachedMeshes;
 
         // APIから取得した現在位置に惑星を配置
         const mercuryPosition = this.mercuryGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -338,13 +444,10 @@ export class DrawScene {
         // 次の日（nextDayIndex）の座標を取得
         const nextDayIndex = (mercuryCurrentIndex + 1) % mercuryPathLength;
         const nextPosition = mercuryPosition.pathPoints[nextDayIndex];
-        const interpolatedPos = new THREE.Vector3()
-          .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
+        this._interpolatedPos.copy(currentPosition).lerp(nextPosition, this.dayFraction);
         /* 水星の公転（反時計回り）*/
-        mercuryPlanetSystem.position.copy(interpolatedPos);
+        mercuryPlanetSystem.position.copy(this._interpolatedPos);
 
-        const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
         // 水星の自転: 1フレームあたりの回転量を計算
         const mercuryRotation =
           (360 / (settings.lerpFrame * getRotationPeriod('MERCURY'))) *
@@ -355,13 +458,7 @@ export class DrawScene {
 
       /* 金星の公転と自転（反時計回り） */
       {
-        const venusPlanetSystem = this.venusGroup.getObjectByName(
-          Names.PLANET_SYSTEM_NAME,
-        ) as THREE.Group;
-        const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
-        const venusAtmosphere = this.venusGroup.getObjectByName(
-          Names.PLANET_ATMO_SPHERE_NAME,
-        ) as THREE.Mesh;
+        const { venusPlanetSystem, venusPlanet, venusAtmosphere } = this._cachedMeshes;
 
         // APIから取得した現在位置に惑星を配置
         const venusPosition = this.venusGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -372,11 +469,9 @@ export class DrawScene {
         // 次の日（nextDayIndex）の座標を取得
         const nextDayIndex = (venusCurrentIndex + 1) % venusPathLength;
         const nextPosition = venusPosition.pathPoints[nextDayIndex];
-        const interpolatedPos = new THREE.Vector3()
-          .fromArray(currentPosition.toArray())
-          .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), this.dayFraction);
+        this._interpolatedPos.copy(currentPosition).lerp(nextPosition, this.dayFraction);
         /* 金星の公転（反時計回り）*/
-        venusPlanetSystem.position.copy(interpolatedPos);
+        venusPlanetSystem.position.copy(this._interpolatedPos);
 
         // 金星の自転: 1フレームあたりの回転量を計算（時計回りだがVENUS_TILTで回転させてる）
         const venusRotation =
@@ -390,9 +485,7 @@ export class DrawScene {
 
     /* 火星の公転と自転（反時計回り） */
     {
-      const marsPlanetSystem = this.marsGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
+      const { marsPlanetSystem, marsPlanet, phobos, deimos } = this._cachedMeshes;
 
       // APIから取得した現在位置に惑星を配置
       const marsPosition = this.marsGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -406,21 +499,16 @@ export class DrawScene {
       const nextDayIndex = (marsCurrentIndex + 1) % marsPathLength;
       const nextPosition = marsPosition.pathPoints[nextDayIndex];
       const marsLerpFactor = (earthDayProgress % marsStepDays) / marsStepDays;
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), marsLerpFactor);
+      this._interpolatedPos.copy(currentPosition).lerp(nextPosition, marsLerpFactor);
       /* 火星の公転（反時計回り）*/
-      marsPlanetSystem.position.set(interpolatedPos.x, interpolatedPos.y, interpolatedPos.z);
+      marsPlanetSystem.position.copy(this._interpolatedPos);
 
-      const marsPlanet = this.marsGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 火星の自転: 1フレームあたりの回転量を計算
       const marsRotation =
         (360 / (settings.lerpFrame * getRotationPeriod('MARS'))) * settings.accelerationRotation;
       const marsAngle = degToRad(marsRotation);
       marsPlanet.rotateY(marsAngle);
       // フォボスとダイモスの公転（反時計回り）
-      const phobos = this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.PHOBOS) as THREE.Mesh;
-      const deimos = this.marsGroup.getObjectByName(MARS_MOON_MESH_NAMES.DEIMOS) as THREE.Mesh;
       const phobosOrbitRadius = marsMoons[0].orbitRadius;
       const deimosOrbitRadius = marsMoons[1].orbitRadius;
       const phobosCurrentAngle = this.frameCount * settings.accelerationOrbit * 4.0; // フォボスは速い
@@ -439,9 +527,8 @@ export class DrawScene {
 
     /* 木星の公転と自転（反時計回り） */
     {
-      const jupiterPlanetSystem = this.jupiterGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
+      const { jupiterPlanetSystem, jupiterPlanet, io, europa, ganymede, callisto } =
+        this._cachedMeshes;
 
       // APIから取得した現在位置に惑星を配置
       const jupiterPosition = this.jupiterGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -456,13 +543,10 @@ export class DrawScene {
       const nextDayIndex = (jupiterCurrentIndex + 1) % jupiterPathLength;
       const nextPosition = jupiterPosition.pathPoints[nextDayIndex];
       const jupiterLerpFactor = (earthDayProgress % jupiterStepDays) / jupiterStepDays;
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), jupiterLerpFactor);
+      this._interpolatedPos.copy(currentPosition).lerp(nextPosition, jupiterLerpFactor);
       /* 木星の公転（反時計回り）*/
-      jupiterPlanetSystem.position.copy(interpolatedPos);
+      jupiterPlanetSystem.position.copy(this._interpolatedPos);
 
-      const jupiterPlanet = this.jupiterGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 木星の自転: 1フレームあたりの回転量を計算
       const jupiterRotation =
         (360 / (settings.lerpFrame * getRotationPeriod('JUPITER'))) * settings.accelerationRotation;
@@ -471,16 +555,6 @@ export class DrawScene {
       // 木星の衛星の公転
       {
         // イオは約1.8日、エウロパは約3.5日、ガニメデは約7.1日、カリストは約16.7日で木星を公転するので、それぞれの周期に応じた速度で公転させる
-        const io = this.jupiterGroup.getObjectByName(JUPITER_MOON_MESH_NAMES.IO) as THREE.Mesh;
-        const europa = this.jupiterGroup.getObjectByName(
-          JUPITER_MOON_MESH_NAMES.EUROPA,
-        ) as THREE.Mesh;
-        const ganymede = this.jupiterGroup.getObjectByName(
-          JUPITER_MOON_MESH_NAMES.GANYMEDE,
-        ) as THREE.Mesh;
-        const callisto = this.jupiterGroup.getObjectByName(
-          JUPITER_MOON_MESH_NAMES.CALLISTO,
-        ) as THREE.Mesh;
         const ioOrbitRadius = jupiterMoons[0].orbitRadius + (jupiterMoons[0].xPosition ?? 0);
         const europaOrbitRadius = jupiterMoons[1].orbitRadius + (jupiterMoons[1].xPosition ?? 0);
         const ganymedeOrbitRadius = jupiterMoons[2].orbitRadius + (jupiterMoons[2].xPosition ?? 0);
@@ -518,9 +592,8 @@ export class DrawScene {
 
     /* 土星の公転と自転（反時計回り） */
     {
-      const saturnPlanetSystem = this.saturnGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
+      const { saturnPlanetSystem, saturnPlanet, titan, rhea, iapetus, mimas, enceladus } =
+        this._cachedMeshes;
 
       // APIから取得した現在位置に惑星を配置
       const saturnPosition = this.saturnGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -534,12 +607,9 @@ export class DrawScene {
       const nextDayIndex = (saturnCurrentIndex + 1) % saturnPathLength;
       const nextPosition = saturnPosition.pathPoints[nextDayIndex];
       const saturnLerpFactor = (earthDayProgress % saturnStepDays) / saturnStepDays;
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), saturnLerpFactor);
-      saturnPlanetSystem.position.copy(interpolatedPos);
+      this._interpolatedPos.copy(currentPosition).lerp(nextPosition, saturnLerpFactor);
+      saturnPlanetSystem.position.copy(this._interpolatedPos);
 
-      const saturnPlanet = this.saturnGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 土星の自転: 1フレームあたりの回転量を計算
       const saturnRotation =
         (360 / (settings.lerpFrame * getRotationPeriod('SATURN'))) * settings.accelerationRotation;
@@ -551,7 +621,6 @@ export class DrawScene {
         const saturnTiltAngle = degToRad(SATURN_TILT);
 
         // タイタンの公転（約15.95日）
-        const titan = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.TITAN) as THREE.Mesh;
         const titanOrbitRadius = saturnMoons[0].orbitRadius + (saturnMoons[0].xPosition ?? 0);
         const titanCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[0].orbitalPeriodDays);
@@ -562,7 +631,6 @@ export class DrawScene {
         titan.position.set(titanX, titanY, titanBaseZ);
 
         // レアの公転（約4.52日）
-        const rhea = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.RHEA) as THREE.Mesh;
         const rheaOrbitRadius = saturnMoons[1].orbitRadius + (saturnMoons[1].xPosition ?? 0);
         const rheaCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[1].orbitalPeriodDays);
@@ -573,9 +641,6 @@ export class DrawScene {
         rhea.position.set(rheaX, rheaY, rheaBaseZ);
 
         // イアペトゥスの公転（約79.3日）
-        const iapetus = this.saturnGroup.getObjectByName(
-          SATURN_MOON_MESH_NAMES.IAPETUS,
-        ) as THREE.Mesh;
         const iapetusOrbitRadius = saturnMoons[2].orbitRadius + (saturnMoons[2].xPosition ?? 0);
         const iapetusCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[2].orbitalPeriodDays);
@@ -586,7 +651,6 @@ export class DrawScene {
         iapetus.position.set(iapetusX, iapetusY, iapetusBaseZ);
 
         // ミマスの公転（約0.942日）
-        const mimas = this.saturnGroup.getObjectByName(SATURN_MOON_MESH_NAMES.MIMAS) as THREE.Mesh;
         const mimasOrbitRadius = saturnMoons[3].orbitRadius + (saturnMoons[3].xPosition ?? 0);
         const mimasCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[3].orbitalPeriodDays);
@@ -597,9 +661,6 @@ export class DrawScene {
         mimas.position.set(mimasX, mimasY, mimasBaseZ);
 
         // エンケラドゥスの公転（約1.37日）
-        const enceladus = this.saturnGroup.getObjectByName(
-          SATURN_MOON_MESH_NAMES.ENCELADUS,
-        ) as THREE.Mesh;
         const enceladusOrbitRadius = saturnMoons[4].orbitRadius + (saturnMoons[4].xPosition ?? 0);
         const enceladusCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / saturnMoons[4].orbitalPeriodDays);
@@ -613,9 +674,8 @@ export class DrawScene {
 
     /* 天王星の公転と自転（反時計回り） */
     {
-      const uranusPlanetSystem = this.uranusGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
+      const { uranusPlanetSystem, uranusPlanet, miranda, ariel, umbriel, titania, oberon } =
+        this._cachedMeshes;
 
       // APIから取得した現在位置に惑星を配置
       const uranusPosition = this.uranusGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -629,12 +689,9 @@ export class DrawScene {
       const nextDayIndex = (uranusCurrentIndex + 1) % uranusPathLength;
       const nextPosition = uranusPosition.pathPoints[nextDayIndex];
       const uranusLerpFactor = (earthDayProgress % uranusStepDays) / uranusStepDays;
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), uranusLerpFactor);
-      uranusPlanetSystem.position.copy(interpolatedPos);
+      this._interpolatedPos.copy(currentPosition).lerp(nextPosition, uranusLerpFactor);
+      uranusPlanetSystem.position.copy(this._interpolatedPos);
 
-      const uranusPlanet = this.uranusGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 天王星の自転: 1フレームあたりの回転量を計算
       const uranusRotation =
         (360 / (settings.lerpFrame * getRotationPeriod('URANUS'))) * settings.accelerationRotation;
@@ -646,9 +703,6 @@ export class DrawScene {
         const uranusTiltAngle = degToRad(URANUS_TILT);
 
         // Mirandaの公転（約1.41日）
-        const miranda = this.uranusGroup.getObjectByName(
-          URANUS_MOON_MESH_NAMES.MIRANDA,
-        ) as THREE.Mesh;
         const mirandaOrbitRadius = uranusMoons[0].orbitRadius + (uranusMoons[0].xPosition ?? 0);
         const mirandaCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[0].orbitalPeriodDays);
@@ -659,7 +713,6 @@ export class DrawScene {
         miranda.position.set(mirandaX, mirandaY, mirandaBaseZ);
 
         // Arielの公転（約2.52日）
-        const ariel = this.uranusGroup.getObjectByName(URANUS_MOON_MESH_NAMES.ARIEL) as THREE.Mesh;
         const arielOrbitRadius = uranusMoons[1].orbitRadius + (uranusMoons[1].xPosition ?? 0);
         const arielCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[1].orbitalPeriodDays);
@@ -670,9 +723,6 @@ export class DrawScene {
         ariel.position.set(arielX, arielY, arielBaseZ);
 
         // Umbrielの公転（約4.14日）
-        const umbriel = this.uranusGroup.getObjectByName(
-          URANUS_MOON_MESH_NAMES.UMBRIEL,
-        ) as THREE.Mesh;
         const umbrielOrbitRadius = uranusMoons[2].orbitRadius + (uranusMoons[2].xPosition ?? 0);
         const umbrielCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[2].orbitalPeriodDays);
@@ -683,9 +733,6 @@ export class DrawScene {
         umbriel.position.set(umbrielX, umbrielY, umbrielBaseZ);
 
         // Titaniaの公転（約8.71日）
-        const titania = this.uranusGroup.getObjectByName(
-          URANUS_MOON_MESH_NAMES.TITANIA,
-        ) as THREE.Mesh;
         const titaniaOrbitRadius = uranusMoons[3].orbitRadius + (uranusMoons[3].xPosition ?? 0);
         const titaniaCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[3].orbitalPeriodDays);
@@ -696,9 +743,6 @@ export class DrawScene {
         titania.position.set(titaniaX, titaniaY, titaniaBaseZ);
 
         // Oberonの公転（約13.46日）
-        const oberon = this.uranusGroup.getObjectByName(
-          URANUS_MOON_MESH_NAMES.OBERON,
-        ) as THREE.Mesh;
         const oberonOrbitRadius = uranusMoons[4].orbitRadius + (uranusMoons[4].xPosition ?? 0);
         const oberonCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / uranusMoons[4].orbitalPeriodDays);
@@ -712,9 +756,7 @@ export class DrawScene {
 
     /* 海王星の公転と自転（反時計回り） */
     {
-      const neptunePlanetSystem = this.neptuneGroup.getObjectByName(
-        Names.PLANET_SYSTEM_NAME,
-      ) as THREE.Group;
+      const { neptunePlanetSystem, neptunePlanet, triton, proteus, nereid } = this._cachedMeshes;
 
       // APIから取得した現在位置に惑星を配置
       const neptunePosition = this.neptuneGroup.userData.planetPositionsRes as PlanetPositionsRes;
@@ -729,12 +771,9 @@ export class DrawScene {
       const nextDayIndex = (neptuneCurrentIndex + 1) % neptunePathLength;
       const nextPosition = neptunePosition.pathPoints[nextDayIndex];
       const neptuneLerpFactor = (earthDayProgress % neptuneStepDays) / neptuneStepDays;
-      const interpolatedPos = new THREE.Vector3()
-        .fromArray(currentPosition.toArray())
-        .lerp(new THREE.Vector3().fromArray(nextPosition.toArray()), neptuneLerpFactor);
-      neptunePlanetSystem.position.copy(interpolatedPos);
+      this._interpolatedPos.copy(currentPosition).lerp(nextPosition, neptuneLerpFactor);
+      neptunePlanetSystem.position.copy(this._interpolatedPos);
 
-      const neptunePlanet = this.neptuneGroup.getObjectByName(Names.PLANET_NAME) as THREE.Mesh;
       // 海王星の自転: 1フレームあたりの回転量を計算
       const neptuneRotation =
         (360 / (settings.lerpFrame * getRotationPeriod('NEPTUNE'))) * settings.accelerationRotation;
@@ -747,9 +786,6 @@ export class DrawScene {
 
         // Tritonの公転（約5.88日）
         // トリトンは太陽系の主要衛星では珍しい逆行衛星
-        const triton = this.neptuneGroup.getObjectByName(
-          NEPTUNE_MOON_MESH_NAMES.TRITON,
-        ) as THREE.Mesh;
         const tritonOrbitRadius = neptuneMoons[0].orbitRadius + (neptuneMoons[0].xPosition ?? 0);
         const tritonDirection = neptuneMoons[0].retrograde ? -1 : 1;
         const tritonCurrentAngle =
@@ -764,9 +800,6 @@ export class DrawScene {
         triton.position.set(tritonX, tritonY, tritonBaseZ);
 
         // Proteusの公転（約1.12日）
-        const proteus = this.neptuneGroup.getObjectByName(
-          NEPTUNE_MOON_MESH_NAMES.PROTEUS,
-        ) as THREE.Mesh;
         const proteusOrbitRadius = neptuneMoons[1].orbitRadius + (neptuneMoons[1].xPosition ?? 0);
         const proteusCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[1].orbitalPeriodDays);
@@ -777,9 +810,6 @@ export class DrawScene {
         proteus.position.set(proteusX, proteusY, proteusBaseZ);
 
         // Nereidの公転（約360.14日）
-        const nereid = this.neptuneGroup.getObjectByName(
-          NEPTUNE_MOON_MESH_NAMES.NEREID,
-        ) as THREE.Mesh;
         const nereidOrbitRadius = neptuneMoons[2].orbitRadius + (neptuneMoons[2].xPosition ?? 0);
         const nereidCurrentAngle =
           this.frameCount * settings.accelerationOrbit * (1 / neptuneMoons[2].orbitalPeriodDays);
