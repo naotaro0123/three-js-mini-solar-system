@@ -49,6 +49,7 @@ yarn build:backend   # bun build
 
 ### 主要な規約
 
+- git commit messages must be written in English
 - コメントは主に日本語
 - 惑星位置はAPIデータのステップ間をパスポイント補間（`lerpFactor`）で滑らかにアニメーション
 - 外惑星は軌道が数十年に及ぶため、大きなステップサイズを使用（例: 海王星は180日）
