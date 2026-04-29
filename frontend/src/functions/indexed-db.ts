@@ -2,7 +2,7 @@ const DB_NAME = 'planet-position-cache-db';
 const STORE_NAME = 'planet_positions';
 const DB_VERSION = 1;
 
-export type CacheRecord<T> = T & {
+type CacheRecord<T> = T & {
   key: string;
 };
 

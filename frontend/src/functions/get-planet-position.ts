@@ -78,7 +78,7 @@ const savePlanetPositionCache = async (
 };
 
 // 公転日数
-export const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
+const getOrbitalPeriod = (commandKey: RequestQueryBody['COMMAND']) => {
   switch (commandKey) {
     case 'EARTH': // 地球(約1年)
       return 365;
