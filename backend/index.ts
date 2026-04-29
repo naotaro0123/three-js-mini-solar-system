@@ -10,6 +10,10 @@ import {
 
 const app = new Hono();
 
+app.use(cors({
+  origin: 'https://naotaro0123.github.io/three-js-mini-solar-system'
+}));
+
 const isCommandKey = (value: string): value is keyof typeof commandMap =>
   value in commandMap;
 
