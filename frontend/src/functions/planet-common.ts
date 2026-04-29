@@ -4,7 +4,7 @@ import type { RequestQueryBody } from '../../../common';
 import { addCurrentPositionMarker } from './debug';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { getStepDays } from './settings';
-import { degToRad } from './utils';
+import { degToRad, getAssetPath } from './utils';
 
 export const Names = {
   PLANET_NAME: 'Planet',
@@ -67,13 +67,13 @@ export const createPlanet = (
     material = texture;
   } else if (bump) {
     material = new THREE.MeshPhongMaterial({
-      map: loadTexture.load(texture),
-      bumpMap: loadTexture.load(bump),
+      map: loadTexture.load(getAssetPath(texture)),
+      bumpMap: loadTexture.load(getAssetPath(bump)),
       bumpScale: 0.7,
     });
   } else {
     material = new THREE.MeshPhongMaterial({
-      map: loadTexture.load(texture),
+      map: loadTexture.load(getAssetPath(texture)),
     });
   }
 
@@ -134,7 +134,7 @@ export const createPlanet = (
   if (ring) {
     const ringGeometry = new THREE.RingGeometry(ring.innerRadius, ring.outerRadius, 30);
     const ringMaterial = new THREE.MeshStandardMaterial({
-      map: loadTexture.load(ring.texture),
+      map: loadTexture.load(getAssetPath(ring.texture)),
       side: THREE.DoubleSide,
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
@@ -149,7 +149,7 @@ export const createPlanet = (
   if (atmosphere) {
     const atmosphereGeometry = new THREE.SphereGeometry(size + 0.1, 32, 20);
     const atmosphereMaterial = new THREE.MeshPhongMaterial({
-      map: loadTexture.load(atmosphere),
+      map: loadTexture.load(getAssetPath(atmosphere)),
       transparent: true,
       opacity: 0.4,
       depthTest: true,
@@ -169,13 +169,13 @@ export const createPlanet = (
     if (moon.texture === undefined) continue;
     if (moon.bump) {
       moonMaterial = new THREE.MeshStandardMaterial({
-        map: loadTexture.load(moon.texture),
-        bumpMap: loadTexture.load(moon.bump),
+        map: loadTexture.load(getAssetPath(moon.texture)),
+        bumpMap: loadTexture.load(getAssetPath(moon.bump)),
         bumpScale: 0.5,
       });
     } else {
       moonMaterial = new THREE.MeshStandardMaterial({
-        map: loadTexture.load(moon.texture),
+        map: loadTexture.load(getAssetPath(moon.texture)),
       });
     }
     const moonGeometry = new THREE.SphereGeometry(moon.size, 32, 20);

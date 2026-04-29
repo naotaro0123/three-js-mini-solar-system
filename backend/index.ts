@@ -9,10 +9,7 @@ import {
 } from "../common";
 
 const app = new Hono();
-
-app.use(cors({
-  origin: 'https://naotaro0123.github.io/three-js-mini-solar-system'
-}));
+const allowedOrigins = ["http://localhost:5173", "https://naotaro0123.github.io"] as const;
 
 const isCommandKey = (value: string): value is keyof typeof commandMap =>
   value in commandMap;
@@ -51,7 +48,7 @@ const isContentfulStatusCode = (
 app.use(
   "/api/*",
   cors({
-    origin: ["http://localhost:5173"], // 許可するオリジンを指定
+    origin: [...allowedOrigins],
   }),
 );
 

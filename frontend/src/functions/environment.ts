@@ -11,6 +11,7 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
+import { getAssetPath } from './utils';
 
 export const initEnvironment = (
   renderer: THREE.WebGLRenderer,
@@ -30,12 +31,12 @@ export const initEnvironment = (
   // 外側の銀河背景をキューブマップで設定
   const cubeTextureLoader = new THREE.CubeTextureLoader();
   scene.background = cubeTextureLoader.load([
-    '/images/3.jpg',
-    '/images/1.jpg',
-    '/images/2.jpg',
-    '/images/2.jpg',
-    '/images/4.jpg',
-    '/images/2.jpg',
+    getAssetPath('/images/3.jpg'),
+    getAssetPath('/images/1.jpg'),
+    getAssetPath('/images/2.jpg'),
+    getAssetPath('/images/2.jpg'),
+    getAssetPath('/images/4.jpg'),
+    getAssetPath('/images/2.jpg'),
   ]);
 
   const labelRenderer = new CSS2DRenderer();

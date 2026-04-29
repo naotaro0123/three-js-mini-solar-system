@@ -5,7 +5,7 @@ import { deleteFromIndexedDB, getFromIndexedDB, saveToIndexedDB } from './indexe
 import { AU_IN_UNITS, getStepSize } from './settings';
 import { sleep } from './utils';
 
-const API_HOST = import.meta.env.VITE_API_HOST;
+const API_HOST = import.meta.env.VITE_API_HOST.replace(/\/+$/, '');
 const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v2';
 
 const closeOrbitPath = (points: THREE.Vector3[]): THREE.Vector3[] => {

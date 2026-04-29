@@ -9,6 +9,7 @@ import {
   getOrbitColor,
   settings,
 } from './settings';
+import { getAssetPath } from './utils';
 
 export const EARTH_MOON_MESH_NAMES = {
   MOON: `${Names.PLANET_MOONS_NAME}_Moon`,
@@ -33,8 +34,8 @@ export const createEarthMesh = async (
   // Earth day/night effect shader material
   const earthMaterial = new THREE.ShaderMaterial({
     uniforms: {
-      dayTexture: { value: loadTexture.load('/images/earth_daymap.jpg') },
-      nightTexture: { value: loadTexture.load('/images/earth_nightmap.jpg') },
+      dayTexture: { value: loadTexture.load(getAssetPath('/images/earth_daymap.jpg')) },
+      nightTexture: { value: loadTexture.load(getAssetPath('/images/earth_nightmap.jpg')) },
       sunPosition: { value: sunPosition },
     },
     vertexShader: `

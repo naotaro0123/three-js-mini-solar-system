@@ -11,12 +11,13 @@ import {
   SUN_POINT_LIGHT_INTENSITY,
   SUN_SIZE,
 } from './settings';
+import { getAssetPath } from './utils';
 
 const SUN_NAME = 'Sun';
 
 const sunMaterial = new THREE.MeshStandardMaterial({
   emissive: SUN_EMISSIVE_COLOR,
-  emissiveMap: new THREE.TextureLoader().load('./images/sun.jpg'),
+  emissiveMap: new THREE.TextureLoader().load(getAssetPath('/images/sun.jpg')),
   emissiveIntensity: settings.sunIntensity,
 });
 
