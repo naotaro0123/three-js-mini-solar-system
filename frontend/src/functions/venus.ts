@@ -14,7 +14,7 @@ export const createVenusGroup = async (isDebug: boolean): Promise<THREE.Group> =
     '/images/venusmap.jpg',
     '/images/venusbump.jpg',
     null,
-    '/images/venus_atmosphere.png',
+    '/images/venus_atmosphere.jpg',
     [],
     planetPositionsRes,
     isDebug,

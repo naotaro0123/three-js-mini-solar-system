@@ -40,7 +40,7 @@ export const uranusMoons: PlanetMoon[] = [
   // Umbriel: 地球の約0.070倍。天王星の第3衛星
   {
     size: EARTH_SIZE * 0.07,
-    texture: '/images/Umbriel-0.webp',
+    texture: '/images/Uranus-0.webp',
     orbitRadius: 10,
     orbitSpeed: 0.0004 * settings.accelerationOrbit,
     orbitalPeriodDays: 4.14, // ウンブリエルの公転周期
@@ -49,7 +49,7 @@ export const uranusMoons: PlanetMoon[] = [
   // Titania: 地球の約0.110倍。天王星の第4衛星
   {
     size: EARTH_SIZE * 0.11,
-    texture: '/images/Titania-0.webp',
+    texture: '/images/Titaniamap.webp',
     orbitRadius: 10,
     orbitSpeed: 0.0003 * settings.accelerationOrbit,
     orbitalPeriodDays: 8.71, // チタニアの公転周期
@@ -58,7 +58,7 @@ export const uranusMoons: PlanetMoon[] = [
   // Oberon: 地球の約0.105倍。天王星の第5衛星
   {
     size: EARTH_SIZE * 0.105,
-    texture: '/images/Oberon-0.webp',
+    texture: '/images/Oberonmap1.webp',
     orbitRadius: 10,
     orbitSpeed: 0.0002 * settings.accelerationOrbit,
     orbitalPeriodDays: 13.46, // オベロンの公転周期
