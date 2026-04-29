@@ -103,16 +103,14 @@ export class DrawScene {
     this.earthGroup = await createEarthGroup(this.sunMesh.position, isDebug);
     this.dayIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
-    // 残り7惑星を並列初期化（sleep(50)が並行実行されるため起動時間を短縮）
-    const [mercury, venus, mars, jupiter, saturn, uranus, neptune] = await Promise.all([
-      createMercuryGroup(isDebug),
-      createVenusGroup(isDebug),
-      createMarsGroup(isDebug),
-      createJupiterGroup(isDebug),
-      createSaturnGroup(isDebug),
-      createUranusGroup(isDebug),
-      createNeptuneGroup(isDebug),
-    ]);
+    // Render / JPL API が同時リクエストに弱いため、残りの惑星は順次初期化する
+    const mercury = await createMercuryGroup(isDebug);
+    const venus = await createVenusGroup(isDebug);
+    const mars = await createMarsGroup(isDebug);
+    const jupiter = await createJupiterGroup(isDebug);
+    const saturn = await createSaturnGroup(isDebug);
+    const uranus = await createUranusGroup(isDebug);
+    const neptune = await createNeptuneGroup(isDebug);
     this.mercuryGroup = mercury;
     this.scene.add(mercury);
     this.venusGroup = venus;

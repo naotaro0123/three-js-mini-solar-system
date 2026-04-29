@@ -7,6 +7,8 @@ import { sleep } from './utils';
 
 const API_HOST = import.meta.env.VITE_API_HOST.replace(/\/+$/, '');
 const PLANET_POSITION_CACHE_PREFIX = 'planet-position-cache:v2';
+const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+const MAX_FETCH_RETRIES = 3;
 
 const closeOrbitPath = (points: THREE.Vector3[]): THREE.Vector3[] => {
   if (points.length === 0) return points;
@@ -23,6 +25,32 @@ const closeOrbitPath = (points: THREE.Vector3[]): THREE.Vector3[] => {
 export type PlanetPositionsRes = {
   todayRow: number;
   pathPoints: THREE.Vector3[];
+};
+
+const fetchPlanetPosition = async (url: string): Promise<Response> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= MAX_FETCH_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (RETRYABLE_STATUS_CODES.has(response.status) && attempt < MAX_FETCH_RETRIES) {
+          await sleep(300 * (attempt + 1));
+          continue;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < MAX_FETCH_RETRIES) {
+        await sleep(300 * (attempt + 1));
+        continue;
+      }
+    }
+  }
+
+  throw lastError ?? new Error('Planet position request failed');
 };
 
 type PlanetPositionCache = {
@@ -150,10 +178,7 @@ export const getPlanetPositions = async (
   const result: PlanetPositionsRes = { todayRow: 0, pathPoints: [] };
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await fetchPlanetPosition(url);
     const data = (await response.json()) as ResponseData;
 
     // データ解析
