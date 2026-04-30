@@ -1,10 +1,12 @@
 # three-js-mini-solar-system
 
+太陽系の3Dビジュアライゼーション
+
+開発ステータス: 進行中
+
 ![image](https://github.com/user-attachments/assets/04a31122-66bc-4f6d-ad34-a7832f7fed99)
 
 https://naotaro0123.github.io/three-js-mini-solar-system/
-
-Develop Status: InProgress
 
 # Build Setup
 
