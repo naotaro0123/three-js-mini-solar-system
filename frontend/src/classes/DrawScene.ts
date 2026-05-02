@@ -36,6 +36,8 @@ import { AsteroidBelt } from './AsteroidBelt';
 const isDebug = true;
 
 export class DrawScene {
+  private readonly loadingScreen = document.getElementById('loading-screen');
+  private readonly loadingStatus = document.getElementById('loading-status');
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
   camera!: THREE.PerspectiveCamera;
@@ -82,7 +84,11 @@ export class DrawScene {
     this.controls = controls;
     this.composer = composer;
     this.labelRenderer = labelRenderer;
-    void this.initPlanets();
+    this.updateLoadingState('太陽系データを読み込み中...');
+    void this.initPlanets().catch((error: unknown) => {
+      void error;
+      this.showLoadingError('読み込みに失敗しました。ページを再読み込みしてください。');
+    });
   }
 
   get userDataEarthPositionRes(): PlanetPositionsRes {
@@ -96,6 +102,7 @@ export class DrawScene {
   }
 
   async initPlanets(): Promise<void> {
+    this.updateLoadingState('太陽と地球を読み込み中...');
     // 太陽のメッシュを作成
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
@@ -104,12 +111,19 @@ export class DrawScene {
     this.dayIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
     // Render / JPL API が同時リクエストに弱いため、残りの惑星は順次初期化する
+    this.updateLoadingState('水星を読み込み中...');
     const mercury = await createMercuryGroup(isDebug);
+    this.updateLoadingState('金星を読み込み中...');
     const venus = await createVenusGroup(isDebug);
+    this.updateLoadingState('火星を読み込み中...');
     const mars = await createMarsGroup(isDebug);
+    this.updateLoadingState('木星を読み込み中...');
     const jupiter = await createJupiterGroup(isDebug);
+    this.updateLoadingState('土星を読み込み中...');
     const saturn = await createSaturnGroup(isDebug);
+    this.updateLoadingState('天王星を読み込み中...');
     const uranus = await createUranusGroup(isDebug);
+    this.updateLoadingState('海王星を読み込み中...');
     const neptune = await createNeptuneGroup(isDebug);
     this.mercuryGroup = mercury;
     this.scene.add(mercury);
@@ -126,6 +140,7 @@ export class DrawScene {
     this.neptuneGroup = neptune;
     this.scene.add(neptune);
     // 小惑星帯を作成
+    this.updateLoadingState('小惑星帯を生成中...');
     this.asteroidBelt = new AsteroidBelt();
     this.scene.add(this.asteroidBelt.getGroup());
 
@@ -154,7 +169,27 @@ export class DrawScene {
 
     // 惑星の初期化完了後にレンダリングを開始する
     this._initMeshCache();
+    this.updateLoadingState('描画を開始中...');
     this.render();
+    window.requestAnimationFrame(() => this.hideLoadingScreen());
+  }
+
+  private updateLoadingState(message: string): void {
+    if (this.loadingStatus) {
+      this.loadingStatus.textContent = message;
+    }
+  }
+
+  private hideLoadingScreen(): void {
+    if (!this.loadingScreen) return;
+    this.loadingScreen.classList.add('is-hidden');
+    window.setTimeout(() => this.loadingScreen?.remove(), 400);
+  }
+
+  private showLoadingError(message: string): void {
+    if (!this.loadingScreen) return;
+    this.loadingScreen.classList.add('is-error');
+    this.updateLoadingState(message);
   }
 
   private _initMeshCache(): void {
