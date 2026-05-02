@@ -54,6 +54,7 @@ yarn build:backend   # bun build
 - コミットタイトルは `<type>[optional scope]: <description>` の形式にする
 - `type` は小文字で始め、主に `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` を使う
 - 新機能は `feat`、バグ修正は `fix` を使う
+- スコープは必要なときだけ付け、通常のバグ修正は `fix: ...` をデフォルトにする
 - スコープが有効な場合は `feat(frontend): ...` や `fix(backend): ...` のように付ける
 - 破壊的変更を含む場合は `type(scope)!: ...` を使い、本文または脚注に `BREAKING CHANGE:` を必ず書く
 - 説明は英語で簡潔に書き、句点で終えない

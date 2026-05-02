@@ -170,6 +170,7 @@ export class DrawScene {
     // 惑星の初期化完了後にレンダリングを開始する
     this._initMeshCache();
     this.updateLoadingState('描画を開始中...');
+    this.renderer.setAnimationLoop(() => this.render());
     this.render();
     window.requestAnimationFrame(() => this.hideLoadingScreen());
   }
@@ -286,12 +287,10 @@ export class DrawScene {
   }
 
   render(): void {
-    this.renderer.render(this.scene, this.camera);
     this.controls.update();
     this.composer.render();
     this.labelRenderer.render(this.scene, this.camera);
 
-    this.renderer.setAnimationLoop(() => this.render());
     if (settings.isAnimating) {
       this.animate();
     }
