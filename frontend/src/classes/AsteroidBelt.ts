@@ -183,22 +183,15 @@ export class AsteroidBelt {
 
   private createRockMaterial(typeIndex: number): THREE.MeshStandardMaterial {
     const colors = [0x8b7355, 0x696969, 0x808080, 0x6b5d54, 0x4a4a4a];
-    const material = new THREE.MeshStandardMaterial({
+    return new THREE.MeshStandardMaterial({
       color: colors[typeIndex % colors.length],
       metalness: 0.3 + Math.random() * 0.2,
       roughness: 0.7 + Math.random() * 0.2,
-      emissive: 0x000000,
-      emissiveIntensity: 0,
-      wireframe: false,
     });
-    return material;
   }
 
   public animate(deltaTime: number = 0.016): void {
     this.instancedMeshes.forEach((mesh) => {
-      // ベルト面を水平のまま保つ
-      mesh.rotation.x = 0;
-      mesh.rotation.z = 0;
       mesh.rotation.y += deltaTime * 0.015;
     });
   }
