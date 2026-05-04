@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { getPlanetPositions } from './get-planet-position';
-import { createPlanet, Names, type PlanetMoon } from './planet-common';
+import { getPlanetPositions } from '../utils/get-planet-position';
+import { createPlanet, Names, type PlanetMoon } from '../utils/planet-common';
 import {
   EARTH_MOON_SIZE,
   EARTH_NAME,
@@ -8,8 +8,8 @@ import {
   EARTH_TILT,
   getOrbitColor,
   settings,
-} from './settings';
-import { getAssetPath } from './utils';
+} from '../utils/settings';
+import { getAssetPath } from '../utils/utils';
 
 export const EARTH_MOON_MESH_NAMES = {
   MOON: `${Names.PLANET_MOONS_NAME}_Moon`,

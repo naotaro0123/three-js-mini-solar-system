@@ -190,10 +190,10 @@ export const getPlanetPositions = async (
 
       // ここでデータを解析・利用
       // 例: 'x'、'y'、'z' 座標を抽出
-      const vectors = ephemerisData.split('\n').filter((line) => line.includes('X ='));
+      const vectors = ephemerisData.split('\n').filter((line: string) => line.includes('X ='));
       const pathPoints: { x: number; y: number; z: number; day: number }[] = [];
-      vectors.forEach((line, i) => {
-        const parts = line.split(/[X,Y,Z, =]/).filter((p) => p.trim());
+      vectors.forEach((line: string, i: number) => {
+        const parts = line.split(/[X,Y,Z, =]/).filter((p: string) => p.trim());
         const x = parseFloat(parts[0]);
         const y = parseFloat(parts[1]);
         const z = parseFloat(parts[2]);

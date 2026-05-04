@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { RequestQueryBody } from '../../../common';
-import { addCurrentPositionMarker } from '../functions/debug';
-import { getPlanetPositions } from '../functions/get-planet-position';
-import { handleResize } from '../functions/resize';
+import { addCurrentPositionMarker } from '../utils/debug';
+import { getPlanetPositions } from '../utils/get-planet-position';
+import { handleResize } from '../utils/resize';
 
 export class DebugOrbitLine {
   private width: number;

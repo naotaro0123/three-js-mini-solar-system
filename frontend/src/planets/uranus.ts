@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { getPlanetPositions } from './get-planet-position';
-import { createPlanet, Names, type PlanetMoon } from './planet-common';
+import { getPlanetPositions } from '../utils/get-planet-position';
+import { createPlanet, Names, type PlanetMoon } from '../utils/planet-common';
 import {
   EARTH_SIZE,
   getOrbitColor,
@@ -8,7 +8,7 @@ import {
   URANUS_NAME,
   URANUS_SIZE,
   URANUS_TILT,
-} from './settings';
+} from '../utils/settings';
 
 export const URANUS_MOON_MESH_NAMES = {
   MIRANDA: `${Names.PLANET_MOONS_NAME}_Miranda`,

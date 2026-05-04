@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { getPlanetPositions } from './get-planet-position';
-import { createPlanet, Names, type PlanetMoon } from './planet-common';
+import { getPlanetPositions } from '../utils/get-planet-position';
+import { createPlanet, Names, type PlanetMoon } from '../utils/planet-common';
 import {
   EARTH_SIZE,
   getOrbitColor,
@@ -8,7 +8,7 @@ import {
   NEPTUNE_SIZE,
   NEPTUNE_TILT,
   settings,
-} from './settings';
+} from '../utils/settings';
 
 export const NEPTUNE_MOON_MESH_NAMES = {
   TRITON: `${Names.PLANET_MOONS_NAME}_Triton`,

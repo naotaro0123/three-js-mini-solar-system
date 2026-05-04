@@ -2,24 +2,24 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../functions/earth';
-import { initEnvironment, initGUI } from '../functions/environment';
-import { type PlanetPositionsRes } from '../functions/get-planet-position';
-import { createJupiterGroup, JUPITER_MOON_MESH_NAMES } from '../functions/jupiter';
-import { createCurrentIndexLabel, formatCurrentIndexDate } from '../functions/label';
-import { createMarsGroup, MARS_MOON_MESH_NAMES } from '../functions/mars';
-import { createMercuryGroup } from '../functions/mercury';
-import { createNeptuneGroup, NEPTUNE_MOON_MESH_NAMES } from '../functions/neptune';
-import { Names } from '../functions/planet-common';
+import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
+import { initEnvironment, initGUI } from '../utils/environment';
+import { type PlanetPositionsRes } from '../utils/get-planet-position';
+import { createJupiterGroup, JUPITER_MOON_MESH_NAMES } from '../planets/jupiter';
+import { createCurrentIndexLabel, formatCurrentIndexDate } from '../utils/label';
+import { createMarsGroup, MARS_MOON_MESH_NAMES } from '../planets/mars';
+import { createMercuryGroup } from '../planets/mercury';
+import { createNeptuneGroup, NEPTUNE_MOON_MESH_NAMES } from '../planets/neptune';
+import { Names } from '../utils/planet-common';
 import {
   createPlanetInteractionController,
   type PlanetInteractionController,
-} from '../functions/rimLight';
-import { createSaturnGroup, SATURN_MOON_MESH_NAMES } from '../functions/saturn';
-import { settings, SUN_ROTATION_SPEED } from '../functions/settings';
-import { createSunMesh } from '../functions/sun';
-import { createUranusGroup, URANUS_MOON_MESH_NAMES } from '../functions/uranus';
-import { createVenusGroup } from '../functions/venus';
+} from '../utils/rimLight';
+import { createSaturnGroup, SATURN_MOON_MESH_NAMES } from '../planets/saturn';
+import { settings, SUN_ROTATION_SPEED } from '../utils/settings';
+import { createSunMesh } from '../utils/sun';
+import { createUranusGroup, URANUS_MOON_MESH_NAMES } from '../planets/uranus';
+import { createVenusGroup } from '../planets/venus';
 import {
   animateEarth,
   animateJupiter,
@@ -29,7 +29,7 @@ import {
   animateSaturn,
   animateUranus,
   animateVenus,
-} from '../functions/animate-planets';
+} from '../utils/animate-planets';
 import type { AnimateContext, CachedMeshes } from '../types/scene-types';
 import { AsteroidBelt } from './AsteroidBelt';
 

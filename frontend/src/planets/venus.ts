@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { getPlanetPositions } from './get-planet-position';
-import { createPlanet } from './planet-common';
-import { VENUS_NAME, VENUS_SIZE, VENUS_TILT, getOrbitColor } from './settings';
+import { getPlanetPositions } from '../utils/get-planet-position';
+import { createPlanet } from '../utils/planet-common';
+import { VENUS_NAME, VENUS_SIZE, VENUS_TILT, getOrbitColor } from '../utils/settings';
 
 export const createVenusGroup = async (isDebug: boolean): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('VENUS');

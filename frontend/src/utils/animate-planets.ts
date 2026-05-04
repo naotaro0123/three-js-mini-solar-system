@@ -1,9 +1,9 @@
-import { earthMoons } from './earth';
+import { earthMoons } from '../planets/earth';
 import { type PlanetPositionsRes, getRotationPeriod } from './get-planet-position';
-import { jupiterMoons } from './jupiter';
-import { marsMoons } from './mars';
-import { neptuneMoons } from './neptune';
-import { saturnMoons } from './saturn';
+import { jupiterMoons } from '../planets/jupiter';
+import { marsMoons } from '../planets/mars';
+import { neptuneMoons } from '../planets/neptune';
+import { saturnMoons } from '../planets/saturn';
 import {
   EARTH_ATMOSPHERE_ROTATION_OFFSET,
   EARTH_MOON_ORBITAL_PERIOD_DAYS,
@@ -15,7 +15,7 @@ import {
   getStepDays,
   settings,
 } from './settings';
-import { uranusMoons } from './uranus';
+import { uranusMoons } from '../planets/uranus';
 import { degToRad } from './utils';
 import type { AnimateContext, CachedMeshes } from '../types/scene-types';
 
