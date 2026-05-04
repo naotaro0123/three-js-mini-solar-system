@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { earthMoons } from '../planets/earth';
 import { type PlanetPositionsRes, getRotationPeriod } from './get-planet-position';
 import { jupiterMoons } from '../planets/jupiter';
@@ -17,7 +18,63 @@ import {
 } from './settings';
 import { uranusMoons } from '../planets/uranus';
 import { degToRad } from './utils';
-import type { AnimateContext, CachedMeshes } from '../types/scene-types';
+
+export interface AnimateContext {
+  dayIndex: number;
+  dayFraction: number;
+  frameCount: number;
+  /** 毎フレームアロケーション回避用の共有 Vector3 バッファ */
+  buf: THREE.Vector3;
+}
+
+export type CachedMeshes = {
+  // 地球
+  earthPlanetSystem: THREE.Group;
+  earthPlanet: THREE.Mesh;
+  earthAtmosphere: THREE.Mesh;
+  moon: THREE.Mesh;
+  // 水星
+  mercuryPlanetSystem: THREE.Group;
+  mercuryPlanet: THREE.Mesh;
+  // 金星
+  venusPlanetSystem: THREE.Group;
+  venusPlanet: THREE.Mesh;
+  venusAtmosphere: THREE.Mesh;
+  // 火星
+  marsPlanetSystem: THREE.Group;
+  marsPlanet: THREE.Mesh;
+  phobos: THREE.Mesh;
+  deimos: THREE.Mesh;
+  // 木星
+  jupiterPlanetSystem: THREE.Group;
+  jupiterPlanet: THREE.Mesh;
+  io: THREE.Mesh;
+  europa: THREE.Mesh;
+  ganymede: THREE.Mesh;
+  callisto: THREE.Mesh;
+  // 土星
+  saturnPlanetSystem: THREE.Group;
+  saturnPlanet: THREE.Mesh;
+  titan: THREE.Mesh;
+  rhea: THREE.Mesh;
+  iapetus: THREE.Mesh;
+  mimas: THREE.Mesh;
+  enceladus: THREE.Mesh;
+  // 天王星
+  uranusPlanetSystem: THREE.Group;
+  uranusPlanet: THREE.Mesh;
+  miranda: THREE.Mesh;
+  ariel: THREE.Mesh;
+  umbriel: THREE.Mesh;
+  titania: THREE.Mesh;
+  oberon: THREE.Mesh;
+  // 海王星
+  neptunePlanetSystem: THREE.Group;
+  neptunePlanet: THREE.Mesh;
+  triton: THREE.Mesh;
+  proteus: THREE.Mesh;
+  nereid: THREE.Mesh;
+};
 
 /** 地球と月のアニメーション */
 export function animateEarth(

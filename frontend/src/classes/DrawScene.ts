@@ -30,7 +30,7 @@ import {
   animateUranus,
   animateVenus,
 } from '../utils/animate-planets';
-import type { AnimateContext, CachedMeshes } from '../types/scene-types';
+import type { AnimateContext, CachedMeshes } from '../utils/animate-planets';
 import { AsteroidBelt } from './AsteroidBelt';
 
 const isDebug = true;
