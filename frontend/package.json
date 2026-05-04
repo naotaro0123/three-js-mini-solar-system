@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --open",
     "build": "tsc && vite build",
+    "test": "vitest run",
     "preview": "vite preview",
     "lint": "oxlint .",
     "format": "prettier --write .",
@@ -14,7 +15,8 @@
   "devDependencies": {
     "oxlint": "^1.61.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@types/three": "^0.184.0",
