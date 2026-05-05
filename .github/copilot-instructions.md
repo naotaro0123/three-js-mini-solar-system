@@ -49,24 +49,8 @@ yarn build:backend   # bun build
 
 ## 主要な規約
 
-- git commit messages must be written in English
-- GitHub Copilot がコミットを作成する場合は Conventional Commits を使う
-- コミットタイトルは `<type>[optional scope]: <description>` の形式にする
-- `type` は小文字で始め、主に `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert` を使う
-- 新機能は `feat`、バグ修正は `fix` を使う
-- スコープは必要なときだけ付け、通常のバグ修正は `fix: ...` をデフォルトにする
-- スコープが有効な場合は `feat(frontend): ...` や `fix(backend): ...` のように付ける
-- 破壊的変更を含む場合は `type(scope)!: ...` を使い、本文または脚注に `BREAKING CHANGE:` を必ず書く
-- 説明は英語で簡潔に書き、句点で終えない
-- 1つのコミットで複数の意図を混ぜず、必要ならコミットを分割する
 - コメントは主に日本語
 - 惑星位置はAPIデータのステップ間をパスポイント補間（`lerpFactor`）で滑らかにアニメーション
 - 外惑星は軌道が数十年に及ぶため、大きなステップサイズを使用（例: 海王星は180日）
 - 衛星メッシュは`PlanetMoon.mesh`プロパティに保持し、アニメーション更新に使用
 - `planet-common.ts`の`Names`定数がシーン走査や表示切り替えに使う標準メッシュ名を定義
-
-### Commit examples
-
-- `feat(frontend): add loading overlay during planet initialization`
-- `fix(backend): handle Horizons API retry failures`
-- `docs: update Copilot commit message rules`
