@@ -17,6 +17,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.12.15"
+    "hono": "^4.12.16"
   }
 }
