@@ -3,10 +3,14 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
-import { initEnvironment, initGUI, resetView } from '../utils/environment';
+import {
+  initEnvironment,
+  initGUI,
+  resetView,
+  syncCurrentIndexLabel,
+} from '../utils/environment';
 import { type PlanetPositionsRes } from '../utils/get-planet-position';
 import { createJupiterGroup, JUPITER_MOON_MESH_NAMES } from '../planets/jupiter';
-import { createCurrentIndexLabel, formatCurrentIndexDate } from '../utils/current-index-label';
 import { createMarsGroup, MARS_MOON_MESH_NAMES } from '../planets/mars';
 import { createMercuryGroup } from '../planets/mercury';
 import { createNeptuneGroup, NEPTUNE_MOON_MESH_NAMES } from '../planets/neptune';
@@ -58,7 +62,6 @@ export class DrawScene {
   asteroidBelt!: AsteroidBelt; // 小惑星帯
   dayFraction = 0; // 補間の進捗（0.0 から 1.0 まで）
   dayIndex = 0; // アニメーション開始からの経過日数
-  labelElement!: HTMLDivElement;
   timer = new THREE.Timer();
   frameCount = 0;
 
@@ -150,10 +153,6 @@ export class DrawScene {
 
     this.initDoubleClickZoom();
 
-    // 現在のインデックスを表示するラベルを作成
-    this.labelElement = createCurrentIndexLabel(this.dayIndex);
-    document.body.appendChild(this.labelElement);
-
     initGUI({
       sunMesh: this.sunMesh,
       camera: this.camera,
@@ -171,6 +170,7 @@ export class DrawScene {
         this.frameCount = value;
       },
       userDataEarthPositionRes: this.userDataEarthPositionRes,
+      currentIndex: this.dayIndex,
     });
 
     // 惑星の初期化完了後にレンダリングを開始する
@@ -361,8 +361,7 @@ export class DrawScene {
   animate(): void {
     this.frameCount++;
     this.sunMesh.rotateY(SUN_ROTATION_SPEED * settings.accelerationRotation);
-
-    this.labelElement.innerText = formatCurrentIndexDate(this.dayIndex);
+    syncCurrentIndexLabel(this.dayIndex);
 
     // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
     // 小数点の誤差を防ぐため、toFixedで丸める

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { degToRad } from './utils';
 import { settings } from './settings';
-import { syncSettingsMenu } from './environment';
+import { syncAnimationButtonDisabledState, syncSettingsMenu } from './environment';
 
 export type PlanetInteractionController = {
   handleDoubleClickPlanetZoom: (event: MouseEvent) => void;
@@ -104,6 +104,7 @@ export const createPlanetInteractionController = (params: {
     isPlanetZoomed = false;
     settings.isAnimating = wasAnimatingBeforeZoom;
     syncSettingsMenu();
+    syncAnimationButtonDisabledState(false);
     zoomCloseButton.hidden = true;
     return true;
   };
@@ -150,6 +151,7 @@ export const createPlanetInteractionController = (params: {
       settings.isAnimating = false;
       syncSettingsMenu();
       isPlanetZoomed = true;
+      syncAnimationButtonDisabledState(true);
     }
     showZoomCloseButton();
     zoomToPlanet(targetPlanet);

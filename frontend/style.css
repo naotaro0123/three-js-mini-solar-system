@@ -153,20 +153,61 @@ canvas {
 }
 
 .current-index-label {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(143, 184, 255, 0.4);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-left: auto;
+  width: 14ch;
+  padding: 8px 10px;
+  border: 1px solid rgba(143, 184, 255, 0.25);
+  border-radius: 10px;
   background: rgba(5, 10, 22, 0.88);
   color: #f5f7ff;
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(8px);
   pointer-events: none;
+}
+
+.current-index-label__caption {
+  color: #b9c7e6;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.current-index-label__value {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.current-index-label.is-animating {
+  border-color: rgba(139, 184, 255, 0.7);
+  background: linear-gradient(180deg, rgba(24, 44, 88, 0.98), rgba(10, 16, 36, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(177, 213, 255, 0.12) inset,
+    0 0 18px rgba(82, 132, 255, 0.28),
+    0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.current-index-label.is-animating .current-index-label__caption {
+  color: #d6e5ff;
+}
+
+.current-index-label.is-animating .current-index-label__value {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(162, 195, 255, 0.45);
 }
 
 .settings-menu {
@@ -185,8 +226,9 @@ canvas {
 
 .settings-menu__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -202,28 +244,32 @@ canvas {
   letter-spacing: 0.06em;
 }
 
-.settings-menu__subtitle {
-  margin: 4px 0 0;
-  color: #b9c7e6;
-  font-size: 11px;
-  letter-spacing: 0.03em;
-}
-
+.current-index-label,
 .settings-menu__collapse-button {
   flex: none;
-  padding: 6px 8px;
+  padding: 8px 10px;
   border: 1px solid rgba(143, 184, 255, 0.25);
-  border-radius: 8px;
-  background: rgba(18, 28, 52, 0.88);
+  border-radius: 10px;
+  background: rgba(5, 10, 22, 0.88);
   color: #f5f7ff;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.03em;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.settings-menu__collapse-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.5em;
   cursor: pointer;
+  text-align: center;
 }
 
 .settings-menu__collapse-button:hover {
-  background: rgba(26, 39, 72, 0.96);
+  background: rgba(18, 28, 52, 0.96);
 }
 
 .settings-menu__collapse-button:focus-visible {
@@ -300,18 +346,38 @@ canvas {
   cursor: pointer;
 }
 
-.settings-menu__button--toggle {
+.settings-menu__button--primary {
   width: 100%;
   margin-top: 2px;
+  border-color: rgba(139, 184, 255, 0.6);
+  background: linear-gradient(180deg, rgba(30, 57, 108, 0.98), rgba(19, 34, 67, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(139, 184, 255, 0.08) inset,
+    0 8px 20px rgba(28, 55, 105, 0.35);
 }
 
-.settings-menu__button--toggle.is-active {
+.settings-menu__button--primary.is-active {
   border-color: rgba(139, 184, 255, 0.6);
-  background: rgba(24, 46, 86, 0.96);
+  background: linear-gradient(180deg, rgba(46, 88, 165, 0.98), rgba(26, 49, 96, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(177, 213, 255, 0.18) inset,
+    0 10px 24px rgba(35, 67, 128, 0.45);
+}
+
+.settings-menu__button--primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow:
+    0 0 0 1px rgba(139, 184, 255, 0.05) inset,
+    0 6px 14px rgba(28, 55, 105, 0.2);
 }
 
 .settings-menu__button:hover {
   background: rgba(26, 39, 72, 0.96);
+}
+
+.settings-menu__button--primary:hover {
+  background: linear-gradient(180deg, rgba(39, 72, 134, 0.98), rgba(24, 45, 88, 0.98));
 }
 
 .settings-menu__button:focus-visible {
@@ -335,8 +401,4 @@ canvas {
 .settings-menu.is-collapsed .settings-menu__header {
   align-items: center;
   margin-bottom: 0;
-}
-
-.settings-menu.is-collapsed .settings-menu__subtitle {
-  display: none;
 }

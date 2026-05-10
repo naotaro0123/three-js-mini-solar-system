@@ -10,6 +10,10 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
+import {
+  createCurrentIndexLabel,
+  updateCurrentIndexLabel,
+} from './current-index-label';
 import { getAssetPath } from './utils';
 
 type SettingsMenuRefs = {
@@ -33,7 +37,10 @@ let settingsMenuPanel: HTMLElement | null = null;
 let settingsMenuSections: HTMLElement | null = null;
 let settingsMenuCollapseButton: HTMLButtonElement | null = null;
 let settingsMenuAnimationButton: HTMLButtonElement | null = null;
+let settingsMenuCurrentIndexLabel: HTMLDivElement | null = null;
 let isSettingsMenuCollapsed = false;
+let currentIndex = 0;
+let isAnimationButtonDisabled = false;
 
 const syncSettingsMenuCollapseState = (): void => {
   if (!settingsMenuPanel || !settingsMenuSections || !settingsMenuCollapseButton) return;
@@ -50,6 +57,29 @@ const syncAnimationButtonState = (): void => {
   settingsMenuAnimationButton.textContent = settings.isAnimating ? 'アニメーション停止' : 'アニメーション再生';
   settingsMenuAnimationButton.classList.toggle('is-active', settings.isAnimating);
   settingsMenuAnimationButton.setAttribute('aria-pressed', String(settings.isAnimating));
+  settingsMenuAnimationButton.title = isAnimationButtonDisabled
+    ? '惑星ズーム中は操作できません'
+    : settings.isAnimating
+      ? 'アニメーション停止'
+      : 'アニメーション再生';
+  settingsMenuCurrentIndexLabel?.classList.toggle('is-animating', settings.isAnimating);
+};
+
+export const syncCurrentIndexLabel = (index: number): void => {
+  currentIndex = index;
+  if (!settingsMenuCurrentIndexLabel) return;
+
+  updateCurrentIndexLabel(settingsMenuCurrentIndexLabel, index);
+};
+
+export const syncAnimationButtonDisabledState = (disabled: boolean): void => {
+  isAnimationButtonDisabled = disabled;
+  if (!settingsMenuAnimationButton) return;
+
+  settingsMenuAnimationButton.disabled = disabled;
+  settingsMenuAnimationButton.classList.toggle('is-disabled', disabled);
+  settingsMenuAnimationButton.setAttribute('aria-disabled', String(disabled));
+  syncAnimationButtonState();
 };
 
 export const syncSettingsMenu = (): void => {
@@ -75,6 +105,7 @@ export const syncSettingsMenu = (): void => {
   settingsMenuRefs.showOrbits.checked = settings.showOrbits;
   settingsMenuRefs.showLabels.checked = settings.showLabels;
   settingsMenuRefs.showPlanets.checked = settings.showPlanets;
+  syncCurrentIndexLabel(currentIndex);
   syncSettingsMenuCollapseState();
 };
 
@@ -248,6 +279,7 @@ export const initGUI = (params: {
   setDayFraction: (value: number) => void;
   setFrameCount: (value: number) => void;
   userDataEarthPositionRes: PlanetPositionsRes;
+  currentIndex: number;
 }): void => {
   const {
     sunMesh,
@@ -258,6 +290,7 @@ export const initGUI = (params: {
     setDayFraction,
     setFrameCount,
     userDataEarthPositionRes,
+    currentIndex: initialCurrentIndex,
   } = params;
 
   const panel = document.createElement('section');
@@ -274,11 +307,9 @@ export const initGUI = (params: {
   title.className = 'settings-menu__title';
   title.textContent = '表示設定';
 
-  const subtitle = document.createElement('p');
-  subtitle.className = 'settings-menu__subtitle';
-  subtitle.textContent = '右上のメニューでシーンを調整';
+  heading.append(title);
 
-  heading.append(title, subtitle);
+  const currentIndexLabel = createCurrentIndexLabel(initialCurrentIndex);
 
   const collapseButton = document.createElement('button');
   collapseButton.type = 'button';
@@ -288,7 +319,7 @@ export const initGUI = (params: {
     syncSettingsMenuCollapseState();
   });
 
-  header.append(heading, collapseButton);
+  header.append(heading, currentIndexLabel, collapseButton);
 
   const sections = document.createElement('div');
   sections.className = 'settings-menu__sections';
@@ -343,7 +374,7 @@ export const initGUI = (params: {
       syncAnimationButtonState();
     },
   });
-  isAnimatingButton.classList.add('settings-menu__button--toggle');
+  isAnimatingButton.classList.add('settings-menu__button--primary');
   isAnimatingButton.setAttribute('aria-pressed', String(settings.isAnimating));
 
   motionSection.append(
@@ -420,9 +451,11 @@ export const initGUI = (params: {
         settings.showLabels = DEFAULT_SETTINGS.showLabels;
         settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
         (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
-        setDayIndex(userDataEarthPositionRes.todayRow - 1);
+        const resetIndex = userDataEarthPositionRes.todayRow - 1;
+        setDayIndex(resetIndex);
         setDayFraction(0);
         setFrameCount(0);
+        syncCurrentIndexLabel(resetIndex);
         syncSettingsMenu();
       },
     }),
@@ -436,6 +469,9 @@ export const initGUI = (params: {
   settingsMenuSections = sections;
   settingsMenuCollapseButton = collapseButton;
   settingsMenuAnimationButton = isAnimatingButton;
+  settingsMenuCurrentIndexLabel = currentIndexLabel;
+  syncCurrentIndexLabel(initialCurrentIndex);
+  syncAnimationButtonDisabledState(false);
   settingsMenuRefs = {
     lerpFrame: lerpFrameControl.input,
     lerpFrameValue: lerpFrameControl.output,
