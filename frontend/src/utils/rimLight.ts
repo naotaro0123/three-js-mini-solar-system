@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { degToRad } from './utils';
+import { settings } from './settings';
 
 export type PlanetInteractionController = {
   handleDoubleClickPlanetZoom: (event: MouseEvent) => void;
   handlePlanetHover: (event: PointerEvent) => void;
   clearPlanetHover: () => void;
+  exitPlanetZoom: () => boolean;
 };
 
 export const createPlanetInteractionController = (params: {
@@ -13,12 +15,16 @@ export const createPlanetInteractionController = (params: {
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
   planets: THREE.Mesh[];
+  onResetView: () => void;
 }): PlanetInteractionController => {
-  const { renderer, camera, controls, planets } = params;
+  const { renderer, camera, controls, planets, onResetView } = params;
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   let hoveredPlanet: THREE.Mesh | null = null;
+  let isPlanetZoomed = false;
+  let wasAnimatingBeforeZoom = settings.isAnimating;
+  const zoomCloseButton = document.createElement('button');
 
   const rimLightMeshName = 'PlanetHoverRimLight';
   const rimLightMaterial = new THREE.ShaderMaterial({
@@ -56,6 +62,17 @@ export const createPlanetInteractionController = (params: {
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   };
 
+  zoomCloseButton.type = 'button';
+  zoomCloseButton.className = 'planet-zoom-close-button';
+  zoomCloseButton.textContent = '視点をリセット';
+  zoomCloseButton.title = '視点をリセット';
+  zoomCloseButton.setAttribute('aria-label', '視点をリセット');
+  zoomCloseButton.hidden = true;
+  zoomCloseButton.addEventListener('click', () => {
+    onResetView();
+  });
+  document.body.appendChild(zoomCloseButton);
+
   const setPlanetRimLight = (planet: THREE.Mesh, isEnabled: boolean): void => {
     const existingRimLight = planet.getObjectByName(rimLightMeshName);
 
@@ -77,6 +94,20 @@ export const createPlanetInteractionController = (params: {
     if (!hoveredPlanet) return;
     setPlanetRimLight(hoveredPlanet, false);
     hoveredPlanet = null;
+  };
+
+  const exitPlanetZoom = (): boolean => {
+    if (!isPlanetZoomed) return false;
+
+    clearPlanetHover();
+    isPlanetZoomed = false;
+    settings.isAnimating = wasAnimatingBeforeZoom;
+    zoomCloseButton.hidden = true;
+    return true;
+  };
+
+  const showZoomCloseButton = (): void => {
+    zoomCloseButton.hidden = false;
   };
 
   const zoomToPlanet = (planet: THREE.Object3D): void => {
@@ -112,6 +143,12 @@ export const createPlanetInteractionController = (params: {
     if (intersects.length === 0) return;
 
     const targetPlanet = intersects[0].object;
+    if (!isPlanetZoomed) {
+      wasAnimatingBeforeZoom = settings.isAnimating;
+      settings.isAnimating = false;
+      isPlanetZoomed = true;
+    }
+    showZoomCloseButton();
     zoomToPlanet(targetPlanet);
   };
 
@@ -138,5 +175,6 @@ export const createPlanetInteractionController = (params: {
     handleDoubleClickPlanetZoom,
     handlePlanetHover,
     clearPlanetHover,
+    exitPlanetZoom,
   };
 };

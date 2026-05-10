@@ -112,3 +112,42 @@ canvas {
   white-space: nowrap;
   user-select: none;
 }
+
+.planet-zoom-close-button {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 30;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 12px 22px;
+  border: 1px solid rgba(143, 184, 255, 0.6);
+  border-radius: 9999px;
+  background: rgba(8, 16, 34, 0.92);
+  color: #f5f7ff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  user-select: none;
+  box-shadow: 0 0 18px rgba(54, 93, 178, 0.36);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.planet-zoom-close-button:hover {
+  background: rgba(16, 30, 60, 0.96);
+}
+
+.planet-zoom-close-button:active {
+  transform: translateY(1px);
+}
+
+.planet-zoom-close-button:focus-visible {
+  outline: 2px solid #d6e5ff;
+  outline-offset: 3px;
+}
+
+.planet-zoom-close-button[hidden] {
+  display: none;
+}

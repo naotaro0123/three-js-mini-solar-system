@@ -62,6 +62,10 @@ export const initEnvironment = (
   return { camera, controls, composer, labelRenderer };
 };
 
+export const resetView = (controls: OrbitControls): void => {
+  controls.reset();
+};
+
 const initLighting = (scene: THREE.Scene): void => {
   const lightAmbient = new THREE.AmbientLight(0x222222, 10);
   scene.add(lightAmbient);
@@ -95,6 +99,7 @@ export const initGUI = (params: {
   sunMesh: THREE.Mesh;
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
+  onExitPlanetZoom: () => void;
   getCurrentIndex: () => number;
   setDayIndex: (value: number) => void;
   setDayFraction: (value: number) => void;
@@ -105,6 +110,7 @@ export const initGUI = (params: {
     sunMesh,
     camera,
     controls,
+    onExitPlanetZoom,
     setDayIndex,
     setDayFraction,
     setFrameCount,
@@ -127,6 +133,7 @@ export const initGUI = (params: {
   gui
     .add(settings, 'isAnimating')
     .name('アニメーション再生')
+    .listen()
     .onChange((value) => {
       settings.isAnimating = value;
     });
@@ -139,6 +146,7 @@ export const initGUI = (params: {
     .add(
       {
         topView: () => {
+          onExitPlanetZoom();
           camera.position.set(0, 190, 0.01);
           controls.target.set(0, 0, 0);
           controls.update();
@@ -152,6 +160,7 @@ export const initGUI = (params: {
     .add(
       {
         sideView: () => {
+          onExitPlanetZoom();
           camera.position.set(190, 0, 0.01);
           controls.target.set(0, 0, 0);
           controls.update();
@@ -160,7 +169,17 @@ export const initGUI = (params: {
       'sideView',
     )
     .name('サイドビュー');
-  gui.add({ resetView: () => controls.reset() }, 'resetView').name('視点リセット');
+  gui
+    .add(
+      {
+        resetView: () => {
+          onExitPlanetZoom();
+          resetView(controls);
+        },
+      },
+      'resetView',
+    )
+    .name('視点リセット');
   gui
     .add(
       {

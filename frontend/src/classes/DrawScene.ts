@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
-import { initEnvironment, initGUI } from '../utils/environment';
+import { initEnvironment, initGUI, resetView } from '../utils/environment';
 import { type PlanetPositionsRes } from '../utils/get-planet-position';
 import { createJupiterGroup, JUPITER_MOON_MESH_NAMES } from '../planets/jupiter';
 import { createCurrentIndexLabel, formatCurrentIndexDate } from '../utils/label';
@@ -72,6 +72,10 @@ export class DrawScene {
   private _prevShowOrbits = settings.showOrbits;
   private _prevShowLabels = settings.showLabels;
   private _prevShowPlanets = settings.showPlanets;
+  private resetPlanetZoomView = (): void => {
+    if (!this.planetInteractionController.exitPlanetZoom()) return;
+    resetView(this.controls);
+  };
 
   constructor() {
     const { camera, controls, composer, labelRenderer } = initEnvironment(
@@ -154,6 +158,9 @@ export class DrawScene {
       sunMesh: this.sunMesh,
       camera: this.camera,
       controls: this.controls,
+      onExitPlanetZoom: () => {
+        this.planetInteractionController.exitPlanetZoom();
+      },
       getCurrentIndex: () => this.dayIndex,
       setDayIndex: (value: number) => {
         this.dayIndex = value;
@@ -270,6 +277,7 @@ export class DrawScene {
       camera: this.camera,
       controls: this.controls,
       planets: this.zoomablePlanets,
+      onResetView: this.resetPlanetZoomView,
     });
 
     this.renderer.domElement.addEventListener(
