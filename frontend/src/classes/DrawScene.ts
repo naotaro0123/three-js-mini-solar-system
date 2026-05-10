@@ -6,7 +6,7 @@ import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../p
 import { initEnvironment, initGUI, resetView } from '../utils/environment';
 import { type PlanetPositionsRes } from '../utils/get-planet-position';
 import { createJupiterGroup, JUPITER_MOON_MESH_NAMES } from '../planets/jupiter';
-import { createCurrentIndexLabel, formatCurrentIndexDate } from '../utils/label';
+import { createCurrentIndexLabel, formatCurrentIndexDate } from '../utils/current-index-label';
 import { createMarsGroup, MARS_MOON_MESH_NAMES } from '../planets/mars';
 import { createMercuryGroup } from '../planets/mercury';
 import { createNeptuneGroup, NEPTUNE_MOON_MESH_NAMES } from '../planets/neptune';
@@ -161,7 +161,6 @@ export class DrawScene {
       onExitPlanetZoom: () => {
         this.planetInteractionController.exitPlanetZoom();
       },
-      getCurrentIndex: () => this.dayIndex,
       setDayIndex: (value: number) => {
         this.dayIndex = value;
       },
