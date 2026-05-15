@@ -13,13 +13,13 @@
     "deploy": "npm run build && gh-pages -d dist -m \"Updates --skip-ci\""
   },
   "devDependencies": {
-    "oxlint": "^1.61.0",
+    "oxlint": "^1.65.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vite": "^8.0.13",
+    "vitest": "^4.1.6"
   },
   "dependencies": {
-    "@types/three": "^0.184.0",
+    "@types/three": "^0.184.1",
     "date-fns": "^4.1.0",
     "gh-pages": "^6.3.0",
     "prettier": "^3.8.3",
