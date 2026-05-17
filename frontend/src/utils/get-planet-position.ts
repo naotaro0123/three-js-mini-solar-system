@@ -54,8 +54,11 @@ const fetchPlanetPosition = async (url: string): Promise<Response> => {
 };
 
 type PlanetPositionCache = {
-  todayRow: number;
   pathPoints: Array<{ x: number; y: number; z: number }>;
+};
+
+const getTodayRow = (): number => {
+  return getDayOfYear(new Date());
 };
 
 const getCacheKey = (
@@ -71,7 +74,7 @@ const loadPlanetPositionCache = async (cacheKey: string): Promise<PlanetPosition
   try {
     const record = await getFromIndexedDB<PlanetPositionCache>(cacheKey);
     if (!record) return null;
-    if (!Array.isArray(record.pathPoints) || typeof record.todayRow !== 'number') {
+    if (!Array.isArray(record.pathPoints)) {
       await deleteFromIndexedDB(cacheKey);
       return null;
     }
@@ -81,7 +84,7 @@ const loadPlanetPositionCache = async (cacheKey: string): Promise<PlanetPosition
     });
 
     return {
-      todayRow: record.todayRow,
+      todayRow: getTodayRow(),
       pathPoints,
     };
   } catch {
@@ -94,7 +97,6 @@ const savePlanetPositionCache = async (
   data: PlanetPositionsRes,
 ): Promise<void> => {
   const serializable: PlanetPositionCache = {
-    todayRow: data.todayRow,
     pathPoints: data.pathPoints.map((point) => ({
       x: point.x,
       y: point.y,
@@ -211,9 +213,7 @@ export const getPlanetPositions = async (
       });
       result.pathPoints = closeOrbitPath(transformedData.reverse()); // 日付順にした上で始点と終点をつなげる
 
-      const today = new Date();
-      const dayOfYearWithDfs = getDayOfYear(today);
-      result.todayRow = dayOfYearWithDfs;
+      result.todayRow = getTodayRow();
       await savePlanetPositionCache(cacheKey, result);
     } else {
       console.error('データの取得に失敗しました:', data);

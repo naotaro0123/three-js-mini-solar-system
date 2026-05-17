@@ -51,7 +51,7 @@ describe('get-planet-position', () => {
     const result = await getPlanetPositions('EARTH');
 
     expect(result).toEqual({
-      todayRow: 123,
+      todayRow: 124,
       pathPoints: [new THREE.Vector3(1, 2, 3)],
     });
     expect(mocks.getFromIndexedDB).toHaveBeenCalledWith(
@@ -59,6 +59,22 @@ describe('get-planet-position', () => {
     );
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(mocks.saveToIndexedDB).not.toHaveBeenCalled();
+  });
+
+  it('ignores stale todayRow stored in cache and uses the current date', async () => {
+    vi.setSystemTime(new Date('2026-05-17T12:00:00Z'));
+    mocks.getFromIndexedDB.mockResolvedValueOnce({
+      todayRow: 122,
+      pathPoints: [{ x: 7, y: 8, z: 9 }],
+    });
+
+    const { getPlanetPositions } = await import('../src/utils/get-planet-position');
+    const result = await getPlanetPositions('EARTH');
+
+    expect(result).toEqual({
+      todayRow: 137,
+      pathPoints: [new THREE.Vector3(7, 8, 9)],
+    });
   });
 
   it('parses API results, normalizes coordinates, and saves cache', async () => {
@@ -90,14 +106,13 @@ describe('get-planet-position', () => {
     expect(result.pathPoints[2]).toEqual(new THREE.Vector3(360, 540, 450));
     expect(mocks.saveToIndexedDB).toHaveBeenCalledWith(
       'planet-position-cache:v2:EARTH:2026-01-01:2027-01-01:1days',
-      expect.objectContaining({
-        todayRow: 124,
+      {
         pathPoints: [
           { x: 360, y: 540, z: 450 },
           { x: 90, y: 270, z: 180 },
           { x: 360, y: 540, z: 450 },
         ],
-      }),
+      },
     );
   });
 });
