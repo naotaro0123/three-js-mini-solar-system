@@ -42,7 +42,7 @@ export const AU_IN_UNITS = 90;
 
 // 水星のサイズと自転軸の傾き
 export const MERCURY_SIZE = 2.4;
-export const MERCURY_TILT = 40;
+export const MERCURY_TILT = 2.1;
 export const MERCURY_NAME = 'Mercury';
 const MERCURY_ORBIT_COLOR = 0x0099ff;
 
