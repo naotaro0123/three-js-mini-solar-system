@@ -13,6 +13,7 @@ import { settings } from './settings';
 import {
   createCurrentIndexLabel,
   updateCurrentIndexLabel,
+  updateCurrentIndexZoomLabel,
 } from './current-index-label';
 import { getAssetPath } from './utils';
 
@@ -38,16 +39,67 @@ let settingsMenuSections: HTMLElement | null = null;
 let settingsMenuCollapseButton: HTMLButtonElement | null = null;
 let settingsMenuAnimationButton: HTMLButtonElement | null = null;
 let settingsMenuCurrentIndexLabel: HTMLDivElement | null = null;
+let settingsMenuCamera: THREE.PerspectiveCamera | null = null;
+let settingsMenuControls: OrbitControls | null = null;
 let isSettingsMenuCollapsed = false;
 let currentIndex = 0;
 let isAnimationButtonDisabled = false;
+const zoomDistanceOffset = new THREE.Vector3();
+
+const formatZoomDistance = (value: number): string => value.toFixed(1);
+
+const getCurrentZoomDistance = (): number => {
+  if (!settingsMenuCamera || !settingsMenuControls) return 0;
+
+  return settingsMenuCamera.position.distanceTo(settingsMenuControls.target);
+};
+
+const syncZoomDistanceValue = (): void => {
+  const value = formatZoomDistance(getCurrentZoomDistance());
+  if (!settingsMenuCurrentIndexLabel) return;
+  updateCurrentIndexZoomLabel(settingsMenuCurrentIndexLabel, value);
+};
+
+const applyZoomDistanceLimits = (options?: { clampCamera?: boolean }): void => {
+  if (!settingsMenuControls) return;
+
+  settingsMenuControls.minDistance = settings.zoomMinDistance;
+  settingsMenuControls.maxDistance = settings.zoomMaxDistance;
+
+  if (!options?.clampCamera || !settingsMenuCamera) return;
+
+  zoomDistanceOffset.subVectors(settingsMenuCamera.position, settingsMenuControls.target);
+
+  if (zoomDistanceOffset.lengthSq() === 0) {
+    zoomDistanceOffset.set(0, 0, settings.zoomMinDistance);
+  }
+
+  const currentDistance = zoomDistanceOffset.length();
+  const clampedDistance = THREE.MathUtils.clamp(
+    currentDistance,
+    settings.zoomMinDistance,
+    settings.zoomMaxDistance,
+  );
+
+  if (Math.abs(clampedDistance - currentDistance) < Number.EPSILON) {
+    syncZoomDistanceValue();
+    return;
+  }
+
+  zoomDistanceOffset.setLength(clampedDistance);
+  settingsMenuCamera.position.copy(settingsMenuControls.target).add(zoomDistanceOffset);
+  settingsMenuControls.update();
+};
 
 const syncSettingsMenuCollapseState = (): void => {
   if (!settingsMenuPanel || !settingsMenuSections || !settingsMenuCollapseButton) return;
 
   settingsMenuPanel.classList.toggle('is-collapsed', isSettingsMenuCollapsed);
   settingsMenuSections.hidden = isSettingsMenuCollapsed;
-  settingsMenuCollapseButton.textContent = isSettingsMenuCollapsed ? '展開' : '折りたたむ';
+  settingsMenuCollapseButton.classList.toggle('is-collapsed', isSettingsMenuCollapsed);
+  settingsMenuCollapseButton.textContent = isSettingsMenuCollapsed
+    ? '設定を展開'
+    : '設定を折りたたむ';
   settingsMenuCollapseButton.setAttribute('aria-expanded', String(!isSettingsMenuCollapsed));
 };
 
@@ -100,6 +152,8 @@ export const syncSettingsMenu = (): void => {
   settingsMenuRefs.sunIntensity.value = String(settings.sunIntensity);
   settingsMenuRefs.sunIntensityValue.value = String(settings.sunIntensity);
   settingsMenuRefs.sunIntensityValue.textContent = String(settings.sunIntensity);
+  applyZoomDistanceLimits({ clampCamera: true });
+  syncZoomDistanceValue();
 
   syncAnimationButtonState();
   settingsMenuRefs.showOrbits.checked = settings.showOrbits;
@@ -188,6 +242,13 @@ const createActionButton = (params: { label: string; onClick: () => void }): HTM
   return button;
 };
 
+const createSectionSubtitle = (label: string): HTMLParagraphElement => {
+  const subtitle = document.createElement('p');
+  subtitle.className = 'settings-menu__subtitle';
+  subtitle.textContent = label;
+  return subtitle;
+};
+
 export const initEnvironment = (
   renderer: THREE.WebGLRenderer,
   scene: THREE.Scene,
@@ -230,6 +291,8 @@ export const initEnvironment = (
   window.addEventListener('resize', () => handleResize(camera, renderer, labelRenderer));
 
   const controls = new OrbitControls(camera, renderer.domElement);
+  controls.minDistance = settings.zoomMinDistance;
+  controls.maxDistance = settings.zoomMaxDistance;
 
   const composer = initComposer(renderer, scene, camera, width, height);
   initLighting(scene);
@@ -309,7 +372,10 @@ export const initGUI = (params: {
 
   heading.append(title);
 
-  const currentIndexLabel = createCurrentIndexLabel(initialCurrentIndex);
+  const currentIndexLabel = createCurrentIndexLabel(
+    initialCurrentIndex,
+    formatZoomDistance(camera.position.distanceTo(controls.target)),
+  );
 
   const collapseButton = document.createElement('button');
   collapseButton.type = 'button';
@@ -319,13 +385,14 @@ export const initGUI = (params: {
     syncSettingsMenuCollapseState();
   });
 
-  header.append(heading, currentIndexLabel, collapseButton);
+  header.append(heading, currentIndexLabel);
 
   const sections = document.createElement('div');
   sections.className = 'settings-menu__sections';
 
   const motionSection = document.createElement('section');
   motionSection.className = 'settings-menu__section';
+  const motionSubtitle = createSectionSubtitle('アニメーション');
   const lerpFrameControl = createRangeControl({
     label: '1日のフレーム数',
     min: 30,
@@ -378,6 +445,7 @@ export const initGUI = (params: {
   isAnimatingButton.setAttribute('aria-pressed', String(settings.isAnimating));
 
   motionSection.append(
+    motionSubtitle,
     lerpFrameControl.row,
     accelerationOrbitControl.row,
     accelerationRotationControl.row,
@@ -387,35 +455,45 @@ export const initGUI = (params: {
 
   const displaySection = document.createElement('section');
   displaySection.className = 'settings-menu__section';
+  const displaySubtitle = createSectionSubtitle('表示');
+  const displayToggleGroup = document.createElement('div');
+  displayToggleGroup.className = 'settings-menu__toggle-group';
   const showOrbitsControl = createToggleControl({
-    label: '公転軌道表示',
+    label: '公転軌道',
     checked: settings.showOrbits,
     onChange: (checked) => {
       settings.showOrbits = checked;
     },
   });
   const showLabelsControl = createToggleControl({
-    label: '惑星名ラベル表示',
+    label: '惑星名',
     checked: settings.showLabels,
     onChange: (checked) => {
       settings.showLabels = checked;
     },
   });
   const showPlanetsControl = createToggleControl({
-    label: '惑星表示',
+    label: '惑星',
     checked: settings.showPlanets,
     onChange: (checked) => {
       settings.showPlanets = checked;
     },
   });
 
-  displaySection.append(showOrbitsControl.row, showLabelsControl.row, showPlanetsControl.row);
+  displayToggleGroup.append(
+    showOrbitsControl.row,
+    showLabelsControl.row,
+    showPlanetsControl.row,
+  );
+  displaySection.append(displaySubtitle, displayToggleGroup);
 
   const viewSection = document.createElement('section');
   viewSection.className = 'settings-menu__section settings-menu__section--actions';
+  const viewSubtitle = createSectionSubtitle('視点');
   viewSection.append(
+    viewSubtitle,
     createActionButton({
-      label: 'トップビュー',
+      label: 'トップ',
       onClick: () => {
         onExitPlanetZoom();
         camera.position.set(0, 190, 0.01);
@@ -424,7 +502,7 @@ export const initGUI = (params: {
       },
     }),
     createActionButton({
-      label: 'サイドビュー',
+      label: 'サイド',
       onClick: () => {
         onExitPlanetZoom();
         camera.position.set(190, 0, 0.01);
@@ -433,7 +511,7 @@ export const initGUI = (params: {
       },
     }),
     createActionButton({
-      label: '視点リセット',
+      label: 'リセット',
       onClick: () => {
         onExitPlanetZoom();
         resetView(controls);
@@ -446,11 +524,15 @@ export const initGUI = (params: {
         settings.accelerationOrbit = DEFAULT_SETTINGS.accelerationOrbit;
         settings.accelerationRotation = DEFAULT_SETTINGS.accelerationRotation;
         settings.sunIntensity = DEFAULT_SETTINGS.sunIntensity;
+        settings.zoomMinDistance = DEFAULT_SETTINGS.zoomMinDistance;
+        settings.zoomMaxDistance = DEFAULT_SETTINGS.zoomMaxDistance;
         settings.isAnimating = DEFAULT_SETTINGS.isAnimating;
         settings.showOrbits = DEFAULT_SETTINGS.showOrbits;
         settings.showLabels = DEFAULT_SETTINGS.showLabels;
         settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
         (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
+        onExitPlanetZoom();
+        resetView(controls);
         const resetIndex = userDataEarthPositionRes.todayRow - 1;
         setDayIndex(resetIndex);
         setDayFraction(0);
@@ -461,8 +543,8 @@ export const initGUI = (params: {
     }),
   );
 
+  panel.append(header, sections, collapseButton);
   sections.append(motionSection, displaySection, viewSection);
-  panel.append(header, sections);
   document.body.appendChild(panel);
 
   settingsMenuPanel = panel;
@@ -470,6 +552,8 @@ export const initGUI = (params: {
   settingsMenuCollapseButton = collapseButton;
   settingsMenuAnimationButton = isAnimatingButton;
   settingsMenuCurrentIndexLabel = currentIndexLabel;
+  settingsMenuCamera = camera;
+  settingsMenuControls = controls;
   syncCurrentIndexLabel(initialCurrentIndex);
   syncAnimationButtonDisabledState(false);
   settingsMenuRefs = {
@@ -487,5 +571,6 @@ export const initGUI = (params: {
     showPlanets: showPlanetsControl.input,
   };
 
+  controls.addEventListener('change', syncZoomDistanceValue);
   syncSettingsMenu();
 };

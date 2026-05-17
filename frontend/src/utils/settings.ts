@@ -5,11 +5,17 @@ export const settings = {
   accelerationOrbit: 1, // 公転スピード
   accelerationRotation: 1, // 自転スピード
   sunIntensity: 2.1, // 太陽の明るさ
+  zoomMinDistance: 5, // ズームの最小距離
+  zoomMaxDistance: 4500, // ズームの最大距離
   isAnimating: false, // アニメーションの再生/停止
   showOrbits: true, // 公転軌道の表示/非表示
   showLabels: true, // 惑星名ラベルの表示/非表示
   showPlanets: true, // 惑星の表示/非表示
 };
+
+export const ZOOM_DISTANCE_LIMIT_MIN = 1;
+export const ZOOM_DISTANCE_LIMIT_MAX = 5000;
+export const ZOOM_DISTANCE_STEP = 1;
 
 // 地球のサイズと自転軸の傾き
 export const EARTH_SIZE = 6.4;
