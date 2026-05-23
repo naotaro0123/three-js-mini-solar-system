@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { degToRad } from './utils';
 import { settings } from './settings';
 import { syncAnimationButtonDisabledState, syncSettingsMenu } from './environment';
@@ -14,7 +14,7 @@ export type PlanetInteractionController = {
 export const createPlanetInteractionController = (params: {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
-  controls: OrbitControls;
+  controls: TrackballControls;
   planets: THREE.Mesh[];
   onResetView: () => void;
 }): PlanetInteractionController => {
