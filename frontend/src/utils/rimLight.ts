@@ -25,11 +25,20 @@ export const createPlanetInteractionController = (params: {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const tapStartPointer = new THREE.Vector2();
+  const zoomTargetCenter = new THREE.Vector3();
+  const zoomWorldScale = new THREE.Vector3();
+  const zoomViewDirection = new THREE.Vector3();
+  const animationStartPosition = new THREE.Vector3();
+  const animationEndPosition = new THREE.Vector3();
+  const animationStartTarget = new THREE.Vector3();
+  const animationEndTarget = new THREE.Vector3();
   let hoveredPlanet: THREE.Mesh | null = null;
   let isPlanetZoomed = false;
   let activePointerId: number | null = null;
+  let cameraAnimationFrameId: number | null = null;
   const zoomCloseButton = document.createElement('button');
   const TAP_MOVE_THRESHOLD = 10;
+  const CAMERA_ZOOM_DURATION_MS = 650;
 
   const rimLightMeshName = 'PlanetHoverRimLight';
   const rimLightMaterial = new THREE.ShaderMaterial({
@@ -101,9 +110,63 @@ export const createPlanetInteractionController = (params: {
     hoveredPlanet = null;
   };
 
+  const easeInOutCubic = (value: number): number => {
+    if (value < 0.5) return 4 * value * value * value;
+    return 1 - Math.pow(-2 * value + 2, 3) / 2;
+  };
+
+  const stopCameraAnimation = (): void => {
+    if (cameraAnimationFrameId !== null) {
+      cancelAnimationFrame(cameraAnimationFrameId);
+      cameraAnimationFrameId = null;
+    }
+    controls.enabled = true;
+  };
+
+  const animateCameraTo = (
+    nextPosition: THREE.Vector3,
+    nextTarget: THREE.Vector3,
+  ): void => {
+    stopCameraAnimation();
+    controls.enabled = false;
+    animationStartPosition.copy(camera.position);
+    animationEndPosition.copy(nextPosition);
+    animationStartTarget.copy(controls.target);
+    animationEndTarget.copy(nextTarget);
+    const startedAt = performance.now();
+
+    const step = (now: number): void => {
+      const progress = Math.min((now - startedAt) / CAMERA_ZOOM_DURATION_MS, 1);
+      const easedProgress = easeInOutCubic(progress);
+
+      camera.position.lerpVectors(
+        animationStartPosition,
+        animationEndPosition,
+        easedProgress,
+      );
+      controls.target.lerpVectors(
+        animationStartTarget,
+        animationEndTarget,
+        easedProgress,
+      );
+      controls.update();
+
+      if (progress < 1) {
+        cameraAnimationFrameId = requestAnimationFrame(step);
+        return;
+      }
+
+      cameraAnimationFrameId = null;
+      controls.enabled = true;
+    };
+
+    cameraAnimationFrameId = requestAnimationFrame(step);
+  };
+
   const exitPlanetZoom = (): boolean => {
     if (!isPlanetZoomed) return false;
 
+    stopCameraAnimation();
     clearPlanetHover();
     isPlanetZoomed = false;
     settings.isOrbitPausedByZoom = false;
@@ -118,28 +181,27 @@ export const createPlanetInteractionController = (params: {
   };
 
   const zoomToPlanet = (planet: THREE.Object3D): void => {
-    const center = new THREE.Vector3();
-    planet.getWorldPosition(center);
+    planet.getWorldPosition(zoomTargetCenter);
 
     const planetMesh = planet as THREE.Mesh;
     const sphereGeometry = planetMesh.geometry as THREE.SphereGeometry;
     sphereGeometry.computeBoundingSphere();
     const localRadius = sphereGeometry.boundingSphere?.radius ?? 1;
 
-    const worldScale = new THREE.Vector3();
-    planet.getWorldScale(worldScale);
-    const worldRadius = localRadius * Math.max(worldScale.x, worldScale.y, worldScale.z);
+    planet.getWorldScale(zoomWorldScale);
+    const worldRadius = localRadius * Math.max(zoomWorldScale.x, zoomWorldScale.y, zoomWorldScale.z);
 
     const distance = (worldRadius / Math.tan(degToRad(camera.fov) / 2)) * 1.35;
-    const viewDirection = new THREE.Vector3().subVectors(camera.position, controls.target);
-    if (viewDirection.lengthSq() === 0) {
-      viewDirection.set(0, 0, 1);
+    zoomViewDirection.subVectors(camera.position, controls.target);
+    if (zoomViewDirection.lengthSq() === 0) {
+      zoomViewDirection.set(0, 0, 1);
     }
-    viewDirection.normalize();
+    zoomViewDirection.normalize();
 
-    camera.position.copy(center).add(viewDirection.multiplyScalar(distance));
-    controls.target.copy(center);
-    controls.update();
+    animationEndPosition
+      .copy(zoomTargetCenter)
+      .add(zoomViewDirection.multiplyScalar(distance));
+    animateCameraTo(animationEndPosition, zoomTargetCenter);
   };
 
   const handlePlanetPointerDown = (event: PointerEvent): void => {

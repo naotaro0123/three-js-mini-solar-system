@@ -360,12 +360,11 @@ export class DrawScene {
   animate(): void {
     const isOrbitAnimating = !settings.isOrbitPausedByZoom;
 
+    this.frameCount++;
     syncCurrentIndexLabel(this.dayIndex);
     this.sunMesh.rotateY(SUN_ROTATION_SPEED * settings.accelerationRotation);
 
     if (isOrbitAnimating) {
-      this.frameCount++;
-
       // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
       // 小数点の誤差を防ぐため、toFixedで丸める
       this.dayFraction = Number(
