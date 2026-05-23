@@ -3,10 +3,10 @@ import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
+import { applyResetView } from '../utils/camera-view';
 import {
   initEnvironment,
   initGUI,
-  resetView,
   syncCurrentIndexLabel,
 } from '../utils/environment';
 import { type PlanetPositionsRes } from '../utils/get-planet-position';
@@ -77,7 +77,7 @@ export class DrawScene {
   private _prevShowPlanets = settings.showPlanets;
   private resetPlanetZoomView = (): void => {
     if (!this.planetInteractionController.exitPlanetZoom()) return;
-    resetView(this.controls);
+    applyResetView(this.camera, this.controls);
   };
 
   constructor() {

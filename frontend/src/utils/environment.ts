@@ -7,6 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { applyResetView, applySideView } from './camera-view';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
@@ -304,10 +305,6 @@ export const initEnvironment = (
   return { camera, controls, composer, labelRenderer };
 };
 
-export const resetView = (controls: TrackballControls): void => {
-  controls.reset();
-};
-
 const initLighting = (scene: THREE.Scene): void => {
   const lightAmbient = new THREE.AmbientLight(0x222222, 10);
   scene.add(lightAmbient);
@@ -509,16 +506,14 @@ export const initGUI = (params: {
       label: 'サイド',
       onClick: () => {
         onExitPlanetZoom();
-        camera.position.set(190, 0, 0.01);
-        controls.target.set(0, 0, 0);
-        controls.update();
+        applySideView(camera, controls);
       },
     }),
     createActionButton({
       label: 'リセット',
       onClick: () => {
         onExitPlanetZoom();
-        resetView(controls);
+        applyResetView(camera, controls);
       },
     }),
     createActionButton({
@@ -536,7 +531,7 @@ export const initGUI = (params: {
         settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
         (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
         onExitPlanetZoom();
-        resetView(controls);
+        applyResetView(camera, controls);
         const resetIndex = userDataEarthPositionRes.todayRow - 1;
         setDayIndex(resetIndex);
         setDayFraction(0);
