@@ -4,7 +4,7 @@
 
 開発ステータス: 進行中
 
-![image](https://github.com/user-attachments/assets/3a75f666-5582-406a-899f-2af72e297060)
+![image](https://github.com/user-attachments/assets/74ecf4a2-482a-4c85-985a-1ad8c119b50f)
 
 https://naotaro0123.github.io/three-js-mini-solar-system/
 
