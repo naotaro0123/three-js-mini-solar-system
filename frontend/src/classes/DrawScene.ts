@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
 import { applyResetView } from '../utils/camera-view';
@@ -45,7 +45,7 @@ export class DrawScene {
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
   camera!: THREE.PerspectiveCamera;
-  controls!: TrackballControls;
+  controls!: OrbitControls;
   composer!: EffectComposer;
   labelRenderer!: CSS2DRenderer;
   zoomablePlanets: THREE.Mesh[] = [];

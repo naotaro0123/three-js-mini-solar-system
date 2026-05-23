@@ -5,7 +5,7 @@ import {
   RenderPass,
   UnrealBloomPass,
 } from 'three/examples/jsm/Addons.js';
-import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { applyResetView, applySideView } from './camera-view';
 import type { PlanetPositionsRes } from './get-planet-position';
@@ -38,7 +38,7 @@ let settingsMenuCollapseButton: HTMLButtonElement | null = null;
 let settingsMenuAnimationButton: HTMLButtonElement | null = null;
 let settingsMenuCurrentIndexLabel: HTMLDivElement | null = null;
 let settingsMenuCamera: THREE.PerspectiveCamera | null = null;
-let settingsMenuControls: TrackballControls | null = null;
+let settingsMenuControls: OrbitControls | null = null;
 let isSettingsMenuCollapsed = false;
 let currentIndex = 0;
 let isAnimationButtonDisabled = false;
@@ -249,7 +249,7 @@ export const initEnvironment = (
   height: number,
 ): {
   camera: THREE.PerspectiveCamera;
-  controls: TrackballControls;
+  controls: OrbitControls;
   composer: EffectComposer;
   labelRenderer: CSS2DRenderer;
 } => {
@@ -283,13 +283,9 @@ export const initEnvironment = (
   handleResize(camera, renderer, labelRenderer);
   window.addEventListener('resize', () => handleResize(camera, renderer, labelRenderer));
 
-  const controls = new TrackballControls(camera, renderer.domElement);
+  const controls = new OrbitControls(camera, renderer.domElement);
   controls.minDistance = settings.zoomMinDistance;
   controls.maxDistance = settings.zoomMaxDistance;
-  controls.rotateSpeed = 5.0;
-  controls.zoomSpeed = 1.2;
-  controls.panSpeed = 0.8;
-  controls.keys = ['', '', ''];
 
   const composer = initComposer(renderer, scene, camera, width, height);
   initLighting(scene);
@@ -329,7 +325,7 @@ const initComposer = (
 export const initGUI = (params: {
   sunMesh: THREE.Mesh;
   camera: THREE.PerspectiveCamera;
-  controls: TrackballControls;
+  controls: OrbitControls;
   onExitPlanetZoom: () => void;
   setDayIndex: (value: number) => void;
   setDayFraction: (value: number) => void;
