@@ -7,7 +7,8 @@ export const settings = {
   sunIntensity: 2.1, // 太陽の明るさ
   zoomMinDistance: 5, // ズームの最小距離
   zoomMaxDistance: 4500, // ズームの最大距離
-  isAnimating: false, // アニメーションの再生/停止
+  isAnimating: true, // アニメーション全体の再生/停止
+  isOrbitPausedByZoom: false, // 惑星ズーム中のみ公転アニメーションを停止
   showOrbits: true, // 公転軌道の表示/非表示
   showLabels: true, // 惑星名ラベルの表示/非表示
   showPlanets: true, // 惑星の表示/非表示

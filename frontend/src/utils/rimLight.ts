@@ -24,7 +24,6 @@ export const createPlanetInteractionController = (params: {
   const pointer = new THREE.Vector2();
   let hoveredPlanet: THREE.Mesh | null = null;
   let isPlanetZoomed = false;
-  let wasAnimatingBeforeZoom = settings.isAnimating;
   const zoomCloseButton = document.createElement('button');
 
   const rimLightMeshName = 'PlanetHoverRimLight';
@@ -102,7 +101,7 @@ export const createPlanetInteractionController = (params: {
 
     clearPlanetHover();
     isPlanetZoomed = false;
-    settings.isAnimating = wasAnimatingBeforeZoom;
+    settings.isOrbitPausedByZoom = false;
     syncSettingsMenu();
     syncAnimationButtonDisabledState(false);
     zoomCloseButton.hidden = true;
@@ -147,8 +146,7 @@ export const createPlanetInteractionController = (params: {
 
     const targetPlanet = intersects[0].object;
     if (!isPlanetZoomed) {
-      wasAnimatingBeforeZoom = settings.isAnimating;
-      settings.isAnimating = false;
+      settings.isOrbitPausedByZoom = true;
       syncSettingsMenu();
       isPlanetZoomed = true;
       syncAnimationButtonDisabledState(true);

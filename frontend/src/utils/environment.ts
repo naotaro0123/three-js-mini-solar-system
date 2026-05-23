@@ -112,7 +112,10 @@ const syncAnimationButtonState = (): void => {
     : settings.isAnimating
       ? 'アニメーション停止'
       : 'アニメーション再生';
-  settingsMenuCurrentIndexLabel?.classList.toggle('is-animating', settings.isAnimating);
+  settingsMenuCurrentIndexLabel?.classList.toggle(
+    'is-animating',
+    settings.isAnimating && !settings.isOrbitPausedByZoom,
+  );
 };
 
 export const syncCurrentIndexLabel = (index: number): void => {
@@ -492,6 +495,7 @@ export const initGUI = (params: {
         settings.zoomMinDistance = DEFAULT_SETTINGS.zoomMinDistance;
         settings.zoomMaxDistance = DEFAULT_SETTINGS.zoomMaxDistance;
         settings.isAnimating = DEFAULT_SETTINGS.isAnimating;
+        settings.isOrbitPausedByZoom = DEFAULT_SETTINGS.isOrbitPausedByZoom;
         settings.showOrbits = DEFAULT_SETTINGS.showOrbits;
         settings.showLabels = DEFAULT_SETTINGS.showLabels;
         settings.showPlanets = DEFAULT_SETTINGS.showPlanets;

@@ -359,19 +359,24 @@ export class DrawScene {
   }
 
   animate(): void {
-    this.frameCount++;
-    this.sunMesh.rotateY(SUN_ROTATION_SPEED * settings.accelerationRotation);
-    syncCurrentIndexLabel(this.dayIndex);
+    const isOrbitAnimating = !settings.isOrbitPausedByZoom;
 
-    // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
-    // 小数点の誤差を防ぐため、toFixedで丸める
-    this.dayFraction = Number(
-      ((this.dayFraction + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
-    );
-    // 次の日に到達したらインデックスを更新し、進捗をリセット
-    if (this.dayFraction >= 1) {
-      this.dayIndex += 1;
-      this.dayFraction = 0;
+    syncCurrentIndexLabel(this.dayIndex);
+    this.sunMesh.rotateY(SUN_ROTATION_SPEED * settings.accelerationRotation);
+
+    if (isOrbitAnimating) {
+      this.frameCount++;
+
+      // グローバル時計の更新（dayFraction: 0→1 で1日分進む）
+      // 小数点の誤差を防ぐため、toFixedで丸める
+      this.dayFraction = Number(
+        ((this.dayFraction + 1 / settings.lerpFrame) * settings.accelerationOrbit).toFixed(3),
+      );
+      // 次の日に到達したらインデックスを更新し、進捗をリセット
+      if (this.dayFraction >= 1) {
+        this.dayIndex += 1;
+        this.dayFraction = 0;
+      }
     }
 
     const ctx: AnimateContext = {
@@ -390,7 +395,9 @@ export class DrawScene {
     animateUranus(ctx, this._cachedMeshes, this.uranusGroup.userData.planetPositionsRes as PlanetPositionsRes);
     animateNeptune(ctx, this._cachedMeshes, this.neptuneGroup.userData.planetPositionsRes as PlanetPositionsRes);
 
-    /* 小惑星帯のアニメーション */
-    this.asteroidBelt.animate(0.016);
+    if (isOrbitAnimating) {
+      /* 小惑星帯のアニメーション */
+      this.asteroidBelt.animate(0.016);
+    }
   }
 }
