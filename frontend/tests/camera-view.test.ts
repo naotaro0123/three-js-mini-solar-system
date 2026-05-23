@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { describe, expect, it, vi } from 'vitest';
-import { applyResetView, applySideView } from '../src/utils/camera-view';
+import {
+  applyResetView,
+  applySideView,
+  DEFAULT_CAMERA_POSITION,
+} from '../src/utils/camera-view';
 
 const createControls = () => {
   const update = vi.fn();
@@ -35,7 +39,7 @@ describe('camera-view', () => {
 
     applyResetView(camera, controls);
 
-    expect(camera.position.toArray()).toEqual([0, 20, 122]);
+    expect(camera.position.toArray()).toEqual([...DEFAULT_CAMERA_POSITION]);
     expect(camera.up.toArray()).toEqual([0, 1, 0]);
     expect(controls.target.toArray()).toEqual([0, 0, 0]);
     expect(controls.update).toHaveBeenCalledOnce();

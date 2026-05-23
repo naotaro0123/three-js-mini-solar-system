@@ -5,6 +5,8 @@ type CameraViewControls = {
   update: () => void;
 };
 
+export const DEFAULT_CAMERA_POSITION = [0, 24, 150] as const;
+
 const applyCameraView = (
   camera: THREE.PerspectiveCamera,
   controls: CameraViewControls,
@@ -27,5 +29,5 @@ export const applyResetView = (
   camera: THREE.PerspectiveCamera,
   controls: CameraViewControls,
 ): void => {
-  applyCameraView(camera, controls, [0, 20, 122]);
+  applyCameraView(camera, controls, DEFAULT_CAMERA_POSITION);
 };

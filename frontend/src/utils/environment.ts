@@ -7,7 +7,7 @@ import {
 } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { applyResetView, applySideView } from './camera-view';
+import { applyResetView, applySideView, DEFAULT_CAMERA_POSITION } from './camera-view';
 import type { PlanetPositionsRes } from './get-planet-position';
 import { handleResize } from './resize';
 import { settings } from './settings';
@@ -283,7 +283,7 @@ export const initEnvironment = (
   document.body.appendChild(labelRenderer.domElement);
 
   const camera = new THREE.PerspectiveCamera(50, width / height, 1, 5000);
-  camera.position.set(0, 20, 122);
+  camera.position.set(...DEFAULT_CAMERA_POSITION);
 
   handleResize(camera, renderer, labelRenderer);
   window.addEventListener('resize', () => handleResize(camera, renderer, labelRenderer));
