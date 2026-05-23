@@ -19,8 +19,6 @@ import {
 import { getAssetPath } from './utils';
 
 type SettingsMenuRefs = {
-  lerpFrame: HTMLInputElement;
-  lerpFrameValue: HTMLOutputElement;
   accelerationOrbit: HTMLInputElement;
   accelerationOrbitValue: HTMLOutputElement;
   accelerationRotation: HTMLInputElement;
@@ -30,7 +28,6 @@ type SettingsMenuRefs = {
   isAnimating: HTMLButtonElement;
   showOrbits: HTMLInputElement;
   showLabels: HTMLInputElement;
-  showPlanets: HTMLInputElement;
 };
 
 const DEFAULT_SETTINGS = { ...settings };
@@ -138,10 +135,6 @@ export const syncAnimationButtonDisabledState = (disabled: boolean): void => {
 export const syncSettingsMenu = (): void => {
   if (!settingsMenuRefs) return;
 
-  settingsMenuRefs.lerpFrame.value = String(settings.lerpFrame);
-  settingsMenuRefs.lerpFrameValue.value = String(settings.lerpFrame);
-  settingsMenuRefs.lerpFrameValue.textContent = String(settings.lerpFrame);
-
   settingsMenuRefs.accelerationOrbit.value = String(settings.accelerationOrbit);
   settingsMenuRefs.accelerationOrbitValue.value = String(settings.accelerationOrbit);
   settingsMenuRefs.accelerationOrbitValue.textContent = String(settings.accelerationOrbit);
@@ -159,7 +152,6 @@ export const syncSettingsMenu = (): void => {
   syncAnimationButtonState();
   settingsMenuRefs.showOrbits.checked = settings.showOrbits;
   settingsMenuRefs.showLabels.checked = settings.showLabels;
-  settingsMenuRefs.showPlanets.checked = settings.showPlanets;
   syncCurrentIndexLabel(currentIndex);
   syncSettingsMenuCollapseState();
 };
@@ -394,16 +386,6 @@ export const initGUI = (params: {
   const motionSection = document.createElement('section');
   motionSection.className = 'settings-menu__section';
   const motionSubtitle = createSectionSubtitle('アニメーション');
-  const lerpFrameControl = createRangeControl({
-    label: '1日のフレーム数',
-    min: 30,
-    max: 600,
-    step: 30,
-    value: settings.lerpFrame,
-    onChange: (value) => {
-      settings.lerpFrame = value;
-    },
-  });
   const accelerationOrbitControl = createRangeControl({
     label: '公転スピード',
     min: 0,
@@ -447,7 +429,6 @@ export const initGUI = (params: {
 
   motionSection.append(
     motionSubtitle,
-    lerpFrameControl.row,
     accelerationOrbitControl.row,
     accelerationRotationControl.row,
     sunIntensityControl.row,
@@ -473,19 +454,8 @@ export const initGUI = (params: {
       settings.showLabels = checked;
     },
   });
-  const showPlanetsControl = createToggleControl({
-    label: '惑星',
-    checked: settings.showPlanets,
-    onChange: (checked) => {
-      settings.showPlanets = checked;
-    },
-  });
 
-  displayToggleGroup.append(
-    showOrbitsControl.row,
-    showLabelsControl.row,
-    showPlanetsControl.row,
-  );
+  displayToggleGroup.append(showOrbitsControl.row, showLabelsControl.row);
   displaySection.append(displaySubtitle, displayToggleGroup);
 
   const viewSection = document.createElement('section');
@@ -556,8 +526,6 @@ export const initGUI = (params: {
   syncCurrentIndexLabel(initialCurrentIndex);
   syncAnimationButtonDisabledState(false);
   settingsMenuRefs = {
-    lerpFrame: lerpFrameControl.input,
-    lerpFrameValue: lerpFrameControl.output,
     accelerationOrbit: accelerationOrbitControl.input,
     accelerationOrbitValue: accelerationOrbitControl.output,
     accelerationRotation: accelerationRotationControl.input,
@@ -567,7 +535,6 @@ export const initGUI = (params: {
     isAnimating: isAnimatingButton,
     showOrbits: showOrbitsControl.input,
     showLabels: showLabelsControl.input,
-    showPlanets: showPlanetsControl.input,
   };
 
   controls.addEventListener('change', syncZoomDistanceValue);

@@ -453,10 +453,11 @@ canvas {
 }
 
 .settings-menu__section--actions {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
+.settings-menu__section--actions .settings-menu__subtitle,
 .settings-menu__section--actions .settings-menu__button:last-child {
   grid-column: 1 / -1;
 }
