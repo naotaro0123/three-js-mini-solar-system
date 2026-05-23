@@ -470,3 +470,15 @@ canvas {
   align-items: center;
   margin-bottom: 0;
 }
+
+@media (max-width: 767px) {
+  .settings-menu {
+    top: auto;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    width: auto;
+    max-height: 30vh;
+    overflow-y: auto;
+  }
+}

@@ -513,7 +513,7 @@ export const initGUI = (params: {
   );
 
   panel.append(header, sections, collapseButton);
-  sections.append(motionSection, displaySection, viewSection);
+  sections.append(motionSection, viewSection, displaySection);
   document.body.appendChild(panel);
 
   settingsMenuPanel = panel;
