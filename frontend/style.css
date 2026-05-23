@@ -236,6 +236,8 @@ canvas {
   top: max(8px, env(safe-area-inset-top));
   right: max(8px, env(safe-area-inset-right));
   z-index: 40;
+  display: grid;
+  gap: 10px;
   width: min(300px, calc(100vw - 16px));
   padding: 10px;
   border: 1px solid rgba(143, 184, 255, 0.25);
@@ -251,7 +253,6 @@ canvas {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .settings-menu__heading {
@@ -285,7 +286,6 @@ canvas {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-top: 10px;
   padding: 10px 12px;
   cursor: pointer;
   text-align: left;
@@ -323,6 +323,7 @@ canvas {
 .settings-menu__sections {
   display: grid;
   gap: 10px;
+  min-height: 0;
 }
 
 .settings-menu__sections[hidden] {
@@ -452,13 +453,16 @@ canvas {
   outline-offset: 2px;
 }
 
+.settings-menu__button--fullwidth {
+  width: 100%;
+}
+
 .settings-menu__section--actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
-.settings-menu__section--actions .settings-menu__subtitle,
-.settings-menu__section--actions .settings-menu__button:last-child {
+.settings-menu__section--actions .settings-menu__subtitle {
   grid-column: 1 / -1;
 }
 
@@ -472,13 +476,24 @@ canvas {
 }
 
 @media (max-width: 767px) {
+  .planet-zoom-close-button {
+    top: max(8px, env(safe-area-inset-top));
+    bottom: auto;
+  }
+
   .settings-menu {
     top: auto;
     right: max(8px, env(safe-area-inset-right));
     bottom: max(8px, env(safe-area-inset-bottom));
     left: max(8px, env(safe-area-inset-left));
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     width: auto;
     max-height: 30vh;
+    overflow: hidden;
+  }
+
+  .settings-menu__sections {
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }

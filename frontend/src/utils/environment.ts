@@ -36,11 +36,12 @@ let settingsMenuRefs: SettingsMenuRefs | null = null;
 let settingsMenuPanel: HTMLElement | null = null;
 let settingsMenuSections: HTMLElement | null = null;
 let settingsMenuCollapseButton: HTMLButtonElement | null = null;
+let settingsMenuResetButton: HTMLButtonElement | null = null;
 let settingsMenuAnimationButton: HTMLButtonElement | null = null;
 let settingsMenuCurrentIndexLabel: HTMLDivElement | null = null;
 let settingsMenuCamera: THREE.PerspectiveCamera | null = null;
 let settingsMenuControls: OrbitControls | null = null;
-let isSettingsMenuCollapsed = false;
+let isSettingsMenuCollapsed = true;
 let currentIndex = 0;
 let isAnimationButtonDisabled = false;
 const zoomDistanceOffset = new THREE.Vector3();
@@ -91,10 +92,11 @@ const applyZoomDistanceLimits = (options?: { clampCamera?: boolean }): void => {
 };
 
 const syncSettingsMenuCollapseState = (): void => {
-  if (!settingsMenuPanel || !settingsMenuSections || !settingsMenuCollapseButton) return;
+  if (!settingsMenuPanel || !settingsMenuSections || !settingsMenuCollapseButton || !settingsMenuResetButton) return;
 
   settingsMenuPanel.classList.toggle('is-collapsed', isSettingsMenuCollapsed);
   settingsMenuSections.hidden = isSettingsMenuCollapsed;
+  settingsMenuResetButton.hidden = isSettingsMenuCollapsed;
   settingsMenuCollapseButton.classList.toggle('is-collapsed', isSettingsMenuCollapsed);
   settingsMenuCollapseButton.textContent = isSettingsMenuCollapsed
     ? '設定を展開'
@@ -498,41 +500,44 @@ export const initGUI = (params: {
         applyResetView(camera, controls);
       },
     }),
-    createActionButton({
-      label: '設定を初期化',
-      onClick: () => {
-        settings.lerpFrame = DEFAULT_SETTINGS.lerpFrame;
-        settings.accelerationOrbit = DEFAULT_SETTINGS.accelerationOrbit;
-        settings.accelerationRotation = DEFAULT_SETTINGS.accelerationRotation;
-        settings.sunIntensity = DEFAULT_SETTINGS.sunIntensity;
-        settings.zoomMinDistance = DEFAULT_SETTINGS.zoomMinDistance;
-        settings.zoomMaxDistance = DEFAULT_SETTINGS.zoomMaxDistance;
-        settings.isAnimating = DEFAULT_SETTINGS.isAnimating;
-        settings.isOrbitPausedByZoom = DEFAULT_SETTINGS.isOrbitPausedByZoom;
-        settings.showOrbits = DEFAULT_SETTINGS.showOrbits;
-        settings.showLabels = DEFAULT_SETTINGS.showLabels;
-        settings.showCurrentPosition = DEFAULT_SETTINGS.showCurrentPosition;
-        settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
-        (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
-        onExitPlanetZoom();
-        applyResetView(camera, controls);
-        const resetIndex = userDataEarthPositionRes.todayRow - 1;
-        setDayIndex(resetIndex);
-        setDayFraction(0);
-        setFrameCount(0);
-        syncCurrentIndexLabel(resetIndex);
-        syncSettingsMenu();
-      },
-    }),
   );
 
-  panel.append(header, sections, collapseButton);
-  sections.append(motionSection, viewSection, displaySection);
+  const resetSettingsButton = createActionButton({
+    label: '設定を初期化',
+    onClick: () => {
+      settings.lerpFrame = DEFAULT_SETTINGS.lerpFrame;
+      settings.accelerationOrbit = DEFAULT_SETTINGS.accelerationOrbit;
+      settings.accelerationRotation = DEFAULT_SETTINGS.accelerationRotation;
+      settings.sunIntensity = DEFAULT_SETTINGS.sunIntensity;
+      settings.zoomMinDistance = DEFAULT_SETTINGS.zoomMinDistance;
+      settings.zoomMaxDistance = DEFAULT_SETTINGS.zoomMaxDistance;
+      settings.isAnimating = DEFAULT_SETTINGS.isAnimating;
+      settings.isOrbitPausedByZoom = DEFAULT_SETTINGS.isOrbitPausedByZoom;
+      settings.showOrbits = DEFAULT_SETTINGS.showOrbits;
+      settings.showLabels = DEFAULT_SETTINGS.showLabels;
+      settings.showCurrentPosition = DEFAULT_SETTINGS.showCurrentPosition;
+      settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
+      (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
+      onExitPlanetZoom();
+      applyResetView(camera, controls);
+      const resetIndex = userDataEarthPositionRes.todayRow - 1;
+      setDayIndex(resetIndex);
+      setDayFraction(0);
+      setFrameCount(0);
+      syncCurrentIndexLabel(resetIndex);
+      syncSettingsMenu();
+    },
+  });
+  resetSettingsButton.classList.add('settings-menu__button--fullwidth');
+
+  panel.append(header, viewSection, sections, resetSettingsButton, collapseButton);
+  sections.append(motionSection, displaySection);
   document.body.appendChild(panel);
 
   settingsMenuPanel = panel;
   settingsMenuSections = sections;
   settingsMenuCollapseButton = collapseButton;
+  settingsMenuResetButton = resetSettingsButton;
   settingsMenuAnimationButton = isAnimatingButton;
   settingsMenuCurrentIndexLabel = currentIndexLabel;
   settingsMenuCamera = camera;
