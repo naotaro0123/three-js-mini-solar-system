@@ -151,7 +151,7 @@ export class DrawScene {
     this.asteroidBelt = new AsteroidBelt();
     this.scene.add(this.asteroidBelt.getGroup());
 
-    this.initDoubleClickZoom();
+    this.initPlanetTapZoom();
 
     initGUI({
       sunMesh: this.sunMesh,
@@ -250,7 +250,7 @@ export class DrawScene {
     };
   }
 
-  initDoubleClickZoom(): void {
+  initPlanetTapZoom(): void {
     const earthPlanet = this.earthGroup.getObjectByName(Names.PLANET_NAME);
     const mercuryPlanet = this.mercuryGroup.getObjectByName(Names.PLANET_NAME);
     const venusPlanet = this.venusGroup.getObjectByName(Names.PLANET_NAME);
@@ -279,10 +279,9 @@ export class DrawScene {
       onResetView: this.resetPlanetZoomView,
     });
 
-    this.renderer.domElement.addEventListener(
-      'dblclick',
-      this.planetInteractionController.handleDoubleClickPlanetZoom,
-    );
+    this.renderer.domElement.addEventListener('pointerdown', this.planetInteractionController.handlePlanetPointerDown);
+    this.renderer.domElement.addEventListener('pointerup', this.planetInteractionController.handlePlanetPointerUp);
+    this.renderer.domElement.addEventListener('pointercancel', this.planetInteractionController.clearPlanetTapState);
     this.renderer.domElement.addEventListener(
       'pointermove',
       this.planetInteractionController.handlePlanetHover,

@@ -5,7 +5,9 @@ import { settings } from './settings';
 import { syncAnimationButtonDisabledState, syncSettingsMenu } from './environment';
 
 export type PlanetInteractionController = {
-  handleDoubleClickPlanetZoom: (event: MouseEvent) => void;
+  handlePlanetPointerDown: (event: PointerEvent) => void;
+  handlePlanetPointerUp: (event: PointerEvent) => void;
+  clearPlanetTapState: () => void;
   handlePlanetHover: (event: PointerEvent) => void;
   clearPlanetHover: () => void;
   exitPlanetZoom: () => boolean;
@@ -22,9 +24,12 @@ export const createPlanetInteractionController = (params: {
 
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
+  const tapStartPointer = new THREE.Vector2();
   let hoveredPlanet: THREE.Mesh | null = null;
   let isPlanetZoomed = false;
+  let activePointerId: number | null = null;
   const zoomCloseButton = document.createElement('button');
+  const TAP_MOVE_THRESHOLD = 10;
 
   const rimLightMeshName = 'PlanetHoverRimLight';
   const rimLightMaterial = new THREE.ShaderMaterial({
@@ -137,7 +142,27 @@ export const createPlanetInteractionController = (params: {
     controls.update();
   };
 
-  const handleDoubleClickPlanetZoom = (event: MouseEvent): void => {
+  const handlePlanetPointerDown = (event: PointerEvent): void => {
+    if (!event.isPrimary) return;
+
+    activePointerId = event.pointerId;
+    tapStartPointer.set(event.clientX, event.clientY);
+  };
+
+  const clearPlanetTapState = (): void => {
+    activePointerId = null;
+  };
+
+  const handlePlanetPointerUp = (event: PointerEvent): void => {
+    if (!event.isPrimary || activePointerId !== event.pointerId) return;
+
+    const moveDistance = tapStartPointer.distanceTo(
+      new THREE.Vector2(event.clientX, event.clientY),
+    );
+    clearPlanetTapState();
+
+    if (moveDistance > TAP_MOVE_THRESHOLD) return;
+
     setPointerFromEvent(event);
     raycaster.setFromCamera(pointer, camera);
 
@@ -175,7 +200,9 @@ export const createPlanetInteractionController = (params: {
   };
 
   return {
-    handleDoubleClickPlanetZoom,
+    handlePlanetPointerDown,
+    handlePlanetPointerUp,
+    clearPlanetTapState,
     handlePlanetHover,
     clearPlanetHover,
     exitPlanetZoom,
