@@ -3,7 +3,9 @@ import { getPlanetPositions } from '../utils/get-planet-position';
 import { createPlanet } from '../utils/planet-common';
 import { MERCURY_NAME, MERCURY_SIZE, MERCURY_TILT, getOrbitColor } from '../utils/settings';
 
-export const createMercuryGroup = async (isDebug: boolean): Promise<THREE.Group> => {
+export const createMercuryGroup = async (
+  shouldAddCurrentPositionMarker: boolean,
+): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('MERCURY');
   const mercuryGroup = createPlanet(
     'MERCURY',
@@ -17,7 +19,7 @@ export const createMercuryGroup = async (isDebug: boolean): Promise<THREE.Group>
     null,
     [],
     planetPositionsRes,
-    isDebug,
+    shouldAddCurrentPositionMarker,
   );
 
   return mercuryGroup;

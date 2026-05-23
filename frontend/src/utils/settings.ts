@@ -11,6 +11,7 @@ export const settings = {
   isOrbitPausedByZoom: false, // 惑星ズーム中のみ公転アニメーションを停止
   showOrbits: true, // 公転軌道の表示/非表示
   showLabels: true, // 惑星名ラベルの表示/非表示
+  showCurrentPosition: true, // 現在位置マーカーの表示/非表示
   showPlanets: true, // 惑星の表示/非表示
 };
 

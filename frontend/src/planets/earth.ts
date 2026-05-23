@@ -28,7 +28,7 @@ export const earthMoons: PlanetMoon[] = [
 
 export const createEarthMesh = async (
   sunPosition: THREE.Vector3,
-  isDebug: boolean,
+  shouldAddCurrentPositionMarker: boolean,
 ): Promise<THREE.Group> => {
   const loadTexture = new THREE.TextureLoader();
   // Earth day/night effect shader material
@@ -84,7 +84,7 @@ export const createEarthMesh = async (
     '/images/earth_atmosphere.jpg',
     earthMoons,
     planetPositionsRes,
-    isDebug,
+    shouldAddCurrentPositionMarker,
   );
   const planetSystem = earthGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   const moon = planetSystem.children.find((child) =>

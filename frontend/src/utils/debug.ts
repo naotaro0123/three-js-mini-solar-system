@@ -11,6 +11,10 @@ type AddCurrentPositionMarkerParams = {
   color?: number;
 };
 
+export const getCurrentPositionMarkerName = (
+  commandKey: RequestQueryBody['COMMAND'],
+): string => `${commandKey}-current-position`;
+
 export const addCurrentPositionMarker = ({
   parent,
   commandKey,
@@ -25,7 +29,7 @@ export const addCurrentPositionMarker = ({
     depthWrite: false,
   });
   const currentPoint = new THREE.Mesh(sphereGeometry, sphereMaterial);
-  currentPoint.name = `${commandKey}-current-position`;
+  currentPoint.name = getCurrentPositionMarkerName(commandKey);
   currentPoint.renderOrder = 999;
 
   const { pathPoints, todayRow } = planetPositionsRes;
@@ -44,4 +48,23 @@ export const addCurrentPositionMarker = ({
 
   parent.add(currentPoint);
   return currentPoint;
+};
+
+export const removeCurrentPositionMarker = (
+  parent: THREE.Object3D,
+  commandKey: RequestQueryBody['COMMAND'],
+): void => {
+  const currentPoint = parent.getObjectByName(getCurrentPositionMarkerName(commandKey));
+  if (!currentPoint) return;
+
+  parent.remove(currentPoint);
+
+  if (currentPoint instanceof THREE.Mesh) {
+    currentPoint.geometry.dispose();
+    if (Array.isArray(currentPoint.material)) {
+      currentPoint.material.forEach((material) => material.dispose());
+    } else {
+      currentPoint.material.dispose();
+    }
+  }
 };

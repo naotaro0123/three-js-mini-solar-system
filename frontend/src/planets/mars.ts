@@ -30,7 +30,9 @@ export const marsMoons: PlanetMoon[] = [
   },
 ];
 
-export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> => {
+export const createMarsGroup = async (
+  shouldAddCurrentPositionMarker: boolean,
+): Promise<THREE.Group> => {
   const planetPositionsRes = await getPlanetPositions('MARS');
   const marsGroup = createPlanet(
     'MARS',
@@ -45,7 +47,7 @@ export const createMarsGroup = async (isDebug: boolean): Promise<THREE.Group> =>
     // marsMoons,
     [],
     planetPositionsRes,
-    isDebug,
+    shouldAddCurrentPositionMarker,
   );
   const planetSystem = marsGroup.getObjectByName(Names.PLANET_SYSTEM_NAME) as THREE.Group;
   for (const [index, moon] of marsMoons.entries()) {

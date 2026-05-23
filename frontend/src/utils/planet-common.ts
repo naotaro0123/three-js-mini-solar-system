@@ -59,7 +59,7 @@ export const createPlanet = (
   atmosphere: string | null,
   moons: PlanetMoon[],
   planetPositionsRes: PlanetPositionsRes,
-  isDebug = false,
+  shouldAddCurrentPositionMarker = false,
 ): THREE.Group => {
   const loadTexture = new THREE.TextureLoader();
   let material: THREE.Material | THREE.Texture;
@@ -193,7 +193,7 @@ export const createPlanet = (
   const planet3d = new THREE.Group();
   planet3d.add(planetSystem);
   planet3d.name = planetName;
-  planet3d.userData = { planetPositionsRes };
+  planet3d.userData = { planetPositionsRes, commandKey };
 
   const orbitGeometry = new THREE.BufferGeometry().setFromPoints(planetPositionsRes.pathPoints);
   const orbitMaterial = new THREE.LineBasicMaterial({
@@ -205,7 +205,7 @@ export const createPlanet = (
   orbit.name = Names.PLANET_ORBIT_NAME;
   planet3d.add(orbit);
 
-  if (isDebug) {
+  if (shouldAddCurrentPositionMarker) {
     // 現在位置を表示
     addCurrentPositionMarker({
       parent: planet3d,

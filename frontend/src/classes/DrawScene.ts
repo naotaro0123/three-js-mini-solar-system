@@ -2,8 +2,14 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import type { RequestQueryBody } from '../../../common';
 import { createEarthMesh as createEarthGroup, EARTH_MOON_MESH_NAMES } from '../planets/earth';
 import { applyResetView } from '../utils/camera-view';
+import {
+  addCurrentPositionMarker,
+  getCurrentPositionMarkerName,
+  removeCurrentPositionMarker,
+} from '../utils/debug';
 import {
   initEnvironment,
   initGUI,
@@ -36,8 +42,6 @@ import {
 } from '../utils/animate-planets';
 import type { AnimateContext, CachedMeshes } from '../utils/animate-planets';
 import { AsteroidBelt } from './AsteroidBelt';
-
-const isDebug = true;
 
 export class DrawScene {
   private readonly loadingScreen = document.getElementById('loading-screen');
@@ -74,6 +78,7 @@ export class DrawScene {
   // updateLayerVisibility の毎フレーム走査を抑制するための前回値キャッシュ
   private _prevShowOrbits = settings.showOrbits;
   private _prevShowLabels = settings.showLabels;
+  private _prevShowCurrentPosition = settings.showCurrentPosition;
   private _prevShowPlanets = settings.showPlanets;
   private resetPlanetZoomView = (): void => {
     if (!this.planetInteractionController.exitPlanetZoom()) return;
@@ -114,24 +119,24 @@ export class DrawScene {
     this.sunMesh = createSunMesh();
     this.scene.add(this.sunMesh);
     // 地球と月のメッシュを作成（dayIndex取得のため先行）
-    this.earthGroup = await createEarthGroup(this.sunMesh.position, isDebug);
+    this.earthGroup = await createEarthGroup(this.sunMesh.position, settings.showCurrentPosition);
     this.dayIndex = this.userDataEarthPositionRes.todayRow - 1;
     this.scene.add(this.earthGroup);
     // Render / JPL API が同時リクエストに弱いため、残りの惑星は順次初期化する
     this.updateLoadingState('水星を読み込み中...');
-    const mercury = await createMercuryGroup(isDebug);
+    const mercury = await createMercuryGroup(settings.showCurrentPosition);
     this.updateLoadingState('金星を読み込み中...');
-    const venus = await createVenusGroup(isDebug);
+    const venus = await createVenusGroup(settings.showCurrentPosition);
     this.updateLoadingState('火星を読み込み中...');
-    const mars = await createMarsGroup(isDebug);
+    const mars = await createMarsGroup(settings.showCurrentPosition);
     this.updateLoadingState('木星を読み込み中...');
-    const jupiter = await createJupiterGroup(isDebug);
+    const jupiter = await createJupiterGroup(settings.showCurrentPosition);
     this.updateLoadingState('土星を読み込み中...');
-    const saturn = await createSaturnGroup(isDebug);
+    const saturn = await createSaturnGroup(settings.showCurrentPosition);
     this.updateLoadingState('天王星を読み込み中...');
-    const uranus = await createUranusGroup(isDebug);
+    const uranus = await createUranusGroup(settings.showCurrentPosition);
     this.updateLoadingState('海王星を読み込み中...');
-    const neptune = await createNeptuneGroup(isDebug);
+    const neptune = await createNeptuneGroup(settings.showCurrentPosition);
     this.mercuryGroup = mercury;
     this.scene.add(mercury);
     this.venusGroup = venus;
@@ -310,12 +315,14 @@ export class DrawScene {
     const changed =
       settings.showOrbits !== this._prevShowOrbits ||
       settings.showLabels !== this._prevShowLabels ||
+      settings.showCurrentPosition !== this._prevShowCurrentPosition ||
       settings.showPlanets !== this._prevShowPlanets;
 
     if (!changed) return;
 
     this._prevShowOrbits = settings.showOrbits;
     this._prevShowLabels = settings.showLabels;
+    this._prevShowCurrentPosition = settings.showCurrentPosition;
     this._prevShowPlanets = settings.showPlanets;
 
     // 各惑星グループについてレイヤー表示を制御
@@ -331,6 +338,7 @@ export class DrawScene {
     ];
 
     planetGroups.forEach((group) => {
+      this.#syncCurrentPositionMarker(group);
       const orbit = group.getObjectByName(Names.PLANET_ORBIT_NAME);
 
       // 軌道の表示/非表示
@@ -345,8 +353,7 @@ export class DrawScene {
           child.name === Names.PLANET_RING_NAME ||
           child.name === Names.PLANET_AXIS_NAME ||
           child.name === Names.PLANET_ATMO_SPHERE_NAME ||
-          child.name.startsWith(Names.PLANET_MOONS_NAME) ||
-          child.name.endsWith('-current-position')
+          child.name.startsWith(Names.PLANET_MOONS_NAME)
         ) {
           child.visible = settings.showPlanets;
         }
@@ -355,6 +362,28 @@ export class DrawScene {
         }
       });
     });
+  }
+
+  #syncCurrentPositionMarker(group: THREE.Group): void {
+    const commandKey = group.userData.commandKey as RequestQueryBody['COMMAND'] | undefined;
+    const planetPositionsRes = group.userData.planetPositionsRes as PlanetPositionsRes | undefined;
+    if (!commandKey || !planetPositionsRes) return;
+
+    const currentPositionMarker = group.getObjectByName(getCurrentPositionMarkerName(commandKey));
+    if (settings.showCurrentPosition) {
+      if (!currentPositionMarker) {
+        addCurrentPositionMarker({
+          parent: group,
+          commandKey,
+          planetPositionsRes,
+        });
+      }
+      return;
+    }
+
+    if (currentPositionMarker) {
+      removeCurrentPositionMarker(group, commandKey);
+    }
   }
 
   animate(): void {

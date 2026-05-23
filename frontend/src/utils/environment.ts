@@ -28,6 +28,7 @@ type SettingsMenuRefs = {
   isAnimating: HTMLButtonElement;
   showOrbits: HTMLInputElement;
   showLabels: HTMLInputElement;
+  showCurrentPosition: HTMLInputElement;
 };
 
 const DEFAULT_SETTINGS = { ...settings };
@@ -155,6 +156,7 @@ export const syncSettingsMenu = (): void => {
   syncAnimationButtonState();
   settingsMenuRefs.showOrbits.checked = settings.showOrbits;
   settingsMenuRefs.showLabels.checked = settings.showLabels;
+  settingsMenuRefs.showCurrentPosition.checked = settings.showCurrentPosition;
   syncCurrentIndexLabel(currentIndex);
   syncSettingsMenuCollapseState();
 };
@@ -453,8 +455,19 @@ export const initGUI = (params: {
       settings.showLabels = checked;
     },
   });
+  const showCurrentPositionControl = createToggleControl({
+    label: '現在位置',
+    checked: settings.showCurrentPosition,
+    onChange: (checked) => {
+      settings.showCurrentPosition = checked;
+    },
+  });
 
-  displayToggleGroup.append(showOrbitsControl.row, showLabelsControl.row);
+  displayToggleGroup.append(
+    showOrbitsControl.row,
+    showLabelsControl.row,
+    showCurrentPositionControl.row,
+  );
   displaySection.append(displaySubtitle, displayToggleGroup);
 
   const viewSection = document.createElement('section');
@@ -498,6 +511,7 @@ export const initGUI = (params: {
         settings.isOrbitPausedByZoom = DEFAULT_SETTINGS.isOrbitPausedByZoom;
         settings.showOrbits = DEFAULT_SETTINGS.showOrbits;
         settings.showLabels = DEFAULT_SETTINGS.showLabels;
+        settings.showCurrentPosition = DEFAULT_SETTINGS.showCurrentPosition;
         settings.showPlanets = DEFAULT_SETTINGS.showPlanets;
         (sunMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = settings.sunIntensity;
         onExitPlanetZoom();
@@ -535,6 +549,7 @@ export const initGUI = (params: {
     isAnimating: isAnimatingButton,
     showOrbits: showOrbitsControl.input,
     showLabels: showLabelsControl.input,
+    showCurrentPosition: showCurrentPositionControl.input,
   };
 
   controls.addEventListener('change', syncZoomDistanceValue);
