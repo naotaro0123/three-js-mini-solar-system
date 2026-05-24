@@ -1,7 +1,16 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { RequestQueryBody } from '../../../common';
 import { MOBILE_MAX_WIDTH } from './camera-view';
-import { syncAnimationButtonDisabledState, syncSettingsMenu } from './environment';
+import {
+  hidePlanetInfoPanel,
+  setPlanetInfoPanelAction,
+  showPlanetInfoPanel,
+  syncAnimationButtonDisabledState,
+  syncSettingsMenu,
+} from './environment';
+import { AU_IN_UNITS } from './settings';
+import { getPlanetInfoPanelData } from './planet-info';
 import { settings } from './settings';
 import { degToRad } from './utils';
 
@@ -25,6 +34,22 @@ export const getPlanetZoomDistanceMultiplier = (viewportWidth = getViewportWidth
   return viewportWidth <= MOBILE_MAX_WIDTH
     ? MOBILE_PLANET_ZOOM_DISTANCE_MULTIPLIER
     : DEFAULT_PLANET_ZOOM_DISTANCE_MULTIPLIER;
+};
+
+const getPlanetCommandKey = (
+  planet: THREE.Object3D,
+): RequestQueryBody['COMMAND'] | null => {
+  let current: THREE.Object3D | null = planet;
+
+  while (current) {
+    const commandKey = current.userData.commandKey;
+    if (typeof commandKey === 'string') {
+      return commandKey as RequestQueryBody['COMMAND'];
+    }
+    current = current.parent;
+  }
+
+  return null;
 };
 
 export const createPlanetInteractionController = (params: {
@@ -95,11 +120,10 @@ export const createPlanetInteractionController = (params: {
   zoomCloseButton.textContent = '視点をリセット';
   zoomCloseButton.title = '視点をリセット';
   zoomCloseButton.setAttribute('aria-label', '視点をリセット');
-  zoomCloseButton.hidden = true;
   zoomCloseButton.addEventListener('click', () => {
     onResetView();
   });
-  document.body.appendChild(zoomCloseButton);
+  setPlanetInfoPanelAction(zoomCloseButton);
 
   const setPlanetRimLight = (planet: THREE.Mesh, isEnabled: boolean): void => {
     const existingRimLight = planet.getObjectByName(rimLightMeshName);
@@ -186,16 +210,13 @@ export const createPlanetInteractionController = (params: {
     settings.isOrbitPausedByZoom = false;
     syncSettingsMenu();
     syncAnimationButtonDisabledState(false);
-    zoomCloseButton.hidden = true;
+    hidePlanetInfoPanel();
     return true;
-  };
-
-  const showZoomCloseButton = (): void => {
-    zoomCloseButton.hidden = false;
   };
 
   const zoomToPlanet = (planet: THREE.Object3D): void => {
     planet.getWorldPosition(zoomTargetCenter);
+    const commandKey = getPlanetCommandKey(planet);
 
     const planetMesh = planet as THREE.Mesh;
     const sphereGeometry = planetMesh.geometry as THREE.SphereGeometry;
@@ -218,6 +239,12 @@ export const createPlanetInteractionController = (params: {
       .copy(zoomTargetCenter)
       .add(zoomViewDirection.multiplyScalar(distance));
     animateCameraTo(animationEndPosition, zoomTargetCenter);
+
+    if (!commandKey) return;
+
+    showPlanetInfoPanel(
+      getPlanetInfoPanelData(commandKey, zoomTargetCenter.length() / AU_IN_UNITS),
+    );
   };
 
   const handlePlanetPointerDown = (event: PointerEvent): void => {
@@ -254,7 +281,6 @@ export const createPlanetInteractionController = (params: {
       isPlanetZoomed = true;
       syncAnimationButtonDisabledState(true);
     }
-    showZoomCloseButton();
     zoomToPlanet(targetPlanet);
   };
 

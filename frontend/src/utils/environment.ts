@@ -9,6 +9,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { applyResetView, applySideView, applyTopView, getDefaultCameraPosition } from './camera-view';
 import type { PlanetPositionsRes } from './get-planet-position';
+import type { PlanetInfoPanelData } from './planet-info';
 import { handleResize } from './resize';
 import { settings } from './settings';
 import {
@@ -41,6 +42,10 @@ let settingsMenuAnimationButton: HTMLButtonElement | null = null;
 let settingsMenuCurrentIndexLabel: HTMLDivElement | null = null;
 let settingsMenuCamera: THREE.PerspectiveCamera | null = null;
 let settingsMenuControls: OrbitControls | null = null;
+let planetInfoPanel: HTMLElement | null = null;
+let planetInfoPanelName: HTMLParagraphElement | null = null;
+let planetInfoPanelItems: HTMLDivElement | null = null;
+let planetInfoPanelActions: HTMLDivElement | null = null;
 let isSettingsMenuCollapsed = true;
 let currentIndex = 0;
 let isAnimationButtonDisabled = false;
@@ -249,6 +254,91 @@ const createSectionSubtitle = (label: string): HTMLParagraphElement => {
   return subtitle;
 };
 
+const ensurePlanetInfoPanel = (): {
+  panel: HTMLElement;
+  name: HTMLParagraphElement;
+  items: HTMLDivElement;
+  actions: HTMLDivElement;
+} => {
+  if (planetInfoPanel && planetInfoPanelName && planetInfoPanelItems && planetInfoPanelActions) {
+    return {
+      panel: planetInfoPanel,
+      name: planetInfoPanelName,
+      items: planetInfoPanelItems,
+      actions: planetInfoPanelActions,
+    };
+  }
+
+  const panel = document.createElement('section');
+  panel.className = 'planet-info-panel';
+  panel.hidden = true;
+  panel.setAttribute('aria-label', '惑星情報');
+
+  const header = document.createElement('header');
+  header.className = 'planet-info-panel__header';
+
+  const title = document.createElement('p');
+  title.className = 'planet-info-panel__title';
+  title.textContent = '惑星情報';
+
+  const name = document.createElement('p');
+  name.className = 'planet-info-panel__name';
+
+  header.append(title, name);
+
+  const items = document.createElement('div');
+  items.className = 'planet-info-panel__items';
+
+  const actions = document.createElement('div');
+  actions.className = 'planet-info-panel__actions';
+
+  panel.append(header, items, actions);
+  document.body.appendChild(panel);
+
+  planetInfoPanel = panel;
+  planetInfoPanelName = name;
+  planetInfoPanelItems = items;
+  planetInfoPanelActions = actions;
+
+  return { panel, name, items, actions };
+};
+
+export const showPlanetInfoPanel = (data: PlanetInfoPanelData): void => {
+  const { panel, name, items } = ensurePlanetInfoPanel();
+  name.textContent = data.name;
+
+  const rows = data.items.map((item) => {
+    const row = document.createElement('div');
+    row.className = 'planet-info-panel__row';
+
+    const label = document.createElement('span');
+    label.className = 'planet-info-panel__label';
+    label.textContent = item.label;
+
+    const value = document.createElement('span');
+    value.className = 'planet-info-panel__value';
+    value.textContent = item.value;
+
+    row.append(label, value);
+    return row;
+  });
+
+  items.replaceChildren(...rows);
+  panel.hidden = false;
+};
+
+export const hidePlanetInfoPanel = (): void => {
+  if (!planetInfoPanel || !planetInfoPanelItems) return;
+
+  planetInfoPanel.hidden = true;
+  planetInfoPanelItems.replaceChildren();
+};
+
+export const setPlanetInfoPanelAction = (button: HTMLButtonElement): void => {
+  const { actions } = ensurePlanetInfoPanel();
+  actions.replaceChildren(button);
+};
+
 export const initEnvironment = (
   renderer: THREE.WebGLRenderer,
   scene: THREE.Scene,
@@ -283,6 +373,7 @@ export const initEnvironment = (
   labelRenderer.domElement.style.pointerEvents = 'none';
   labelRenderer.domElement.style.zIndex = '10';
   document.body.appendChild(labelRenderer.domElement);
+  ensurePlanetInfoPanel();
 
   const camera = new THREE.PerspectiveCamera(50, width / height, 1, 5000);
   camera.position.set(...getDefaultCameraPosition(width));
