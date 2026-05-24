@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { degToRad } from './utils';
-import { settings } from './settings';
+import { MOBILE_MAX_WIDTH } from './camera-view';
 import { syncAnimationButtonDisabledState, syncSettingsMenu } from './environment';
+import { settings } from './settings';
+import { degToRad } from './utils';
 
 export type PlanetInteractionController = {
   handlePlanetPointerDown: (event: PointerEvent) => void;
@@ -11,6 +12,19 @@ export type PlanetInteractionController = {
   handlePlanetHover: (event: PointerEvent) => void;
   clearPlanetHover: () => void;
   exitPlanetZoom: () => boolean;
+};
+
+const DEFAULT_PLANET_ZOOM_DISTANCE_MULTIPLIER = 1.65;
+const MOBILE_PLANET_ZOOM_DISTANCE_MULTIPLIER = 2.85;
+
+const getViewportWidth = (): number => {
+  return typeof window === 'undefined' ? MOBILE_MAX_WIDTH + 1 : window.innerWidth;
+};
+
+export const getPlanetZoomDistanceMultiplier = (viewportWidth = getViewportWidth()): number => {
+  return viewportWidth <= MOBILE_MAX_WIDTH
+    ? MOBILE_PLANET_ZOOM_DISTANCE_MULTIPLIER
+    : DEFAULT_PLANET_ZOOM_DISTANCE_MULTIPLIER;
 };
 
 export const createPlanetInteractionController = (params: {
@@ -191,7 +205,9 @@ export const createPlanetInteractionController = (params: {
     planet.getWorldScale(zoomWorldScale);
     const worldRadius = localRadius * Math.max(zoomWorldScale.x, zoomWorldScale.y, zoomWorldScale.z);
 
-    const distance = (worldRadius / Math.tan(degToRad(camera.fov) / 2)) * 1.35;
+    const distance =
+      (worldRadius / Math.tan(degToRad(camera.fov) / 2)) *
+      getPlanetZoomDistanceMultiplier();
     zoomViewDirection.subVectors(camera.position, controls.target);
     if (zoomViewDirection.lengthSq() === 0) {
       zoomViewDirection.set(0, 0, 1);
