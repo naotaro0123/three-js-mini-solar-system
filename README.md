@@ -2,7 +2,7 @@
 
 太陽系の3Dビジュアライゼーション
 
-開発ステータス: 進行中
+開発ステータス: 一旦完了
 
 ![image](https://github.com/user-attachments/assets/74ecf4a2-482a-4c85-985a-1ad8c119b50f)
 
