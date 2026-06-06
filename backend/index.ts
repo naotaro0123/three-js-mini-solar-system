@@ -82,7 +82,6 @@ app.get(planetPositionEndpoint, async (c) => {
   const commandValue = commandMap[requestQuery.COMMAND];
   // 外部APIのURLを作成
   // Doc: https://ssd-api.jpl.nasa.gov/doc/horizons.html
-  // ref: https://gemini.google.com/app/8aa75ba3ab0dece5
   const externalApiUrl =
     "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&" +
     `COMMAND='${commandValue}'&` +
