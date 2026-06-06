@@ -8,15 +8,15 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { applyResetView, applySideView, applyTopView, getDefaultCameraPosition } from './camera-view';
-import type { PlanetPositionsRes } from './get-planet-position';
-import type { PlanetInfoPanelData } from './planet-info';
-import { handleResize } from './resize';
-import { settings } from './settings';
 import {
   createCurrentIndexLabel,
   updateCurrentIndexLabel,
   updateCurrentIndexZoomLabel,
 } from './current-index-label';
+import type { PlanetPositionsRes } from './get-planet-position';
+import type { PlanetInfoPanelData } from './planet-info';
+import { handleResize } from './resize';
+import { settings } from './settings';
 import { getAssetPath } from './utils';
 
 type SettingsMenuRefs = {
@@ -46,6 +46,7 @@ let planetInfoPanel: HTMLElement | null = null;
 let planetInfoPanelName: HTMLParagraphElement | null = null;
 let planetInfoPanelItems: HTMLDivElement | null = null;
 let planetInfoPanelActions: HTMLDivElement | null = null;
+let operationGuidePanel: HTMLElement | null = null;
 let isSettingsMenuCollapsed = true;
 let currentIndex = 0;
 let isAnimationButtonDisabled = false;
@@ -254,6 +255,25 @@ const createSectionSubtitle = (label: string): HTMLParagraphElement => {
   return subtitle;
 };
 
+const ensureOperationGuidePanel = (): HTMLElement => {
+  if (operationGuidePanel) return operationGuidePanel;
+
+  const panel = document.createElement('section');
+  panel.className = 'operation-guide';
+  panel.setAttribute('aria-label', '操作方法');
+
+  const text = document.createElement('p');
+  text.className = 'operation-guide__text';
+  text.textContent =
+    'ドラッグで回転 / ホイールでズーム / 右ドラッグで移動 / 惑星をクリックでズーム';
+
+  panel.append(text);
+  document.body.appendChild(panel);
+  operationGuidePanel = panel;
+
+  return panel;
+};
+
 const ensurePlanetInfoPanel = (): {
   panel: HTMLElement;
   name: HTMLParagraphElement;
@@ -373,6 +393,7 @@ export const initEnvironment = (
   labelRenderer.domElement.style.pointerEvents = 'none';
   labelRenderer.domElement.style.zIndex = '10';
   document.body.appendChild(labelRenderer.domElement);
+  ensureOperationGuidePanel();
   ensurePlanetInfoPanel();
 
   const camera = new THREE.PerspectiveCamera(50, width / height, 1, 5000);

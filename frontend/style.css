@@ -143,9 +143,38 @@ canvas {
   outline-offset: 3px;
 }
 
-.planet-info-panel {
+.operation-guide {
   position: fixed;
   top: max(8px, env(safe-area-inset-top));
+  left: max(8px, env(safe-area-inset-left));
+  z-index: 36;
+  max-width: calc(100vw - 32px);
+  padding: 8px 12px;
+  border: 1px solid rgba(143, 184, 255, 0.2);
+  border-radius: 9999px;
+  background: rgba(8, 14, 28, 0.72);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.operation-guide::-webkit-scrollbar {
+  display: none;
+}
+
+.operation-guide__text {
+  margin: 0;
+  color: #dce7ff;
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.planet-info-panel {
+  position: fixed;
+  top: calc(max(8px, env(safe-area-inset-top)) + 42px);
   left: max(8px, env(safe-area-inset-left));
   z-index: 35;
   display: grid;
@@ -305,14 +334,17 @@ canvas {
   right: max(8px, env(safe-area-inset-right));
   z-index: 40;
   display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
   gap: 10px;
   width: min(300px, calc(100vw - 16px));
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
   padding: 10px;
   border: 1px solid rgba(143, 184, 255, 0.25);
   border-radius: 8px;
   background: rgba(8, 14, 28, 0.72);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(14px);
+  overflow: hidden;
 }
 
 .settings-menu__header {
@@ -392,6 +424,8 @@ canvas {
   display: grid;
   gap: 10px;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .settings-menu__sections[hidden] {
@@ -544,8 +578,19 @@ canvas {
 }
 
 @media (max-width: 767px) {
+  .operation-guide {
+    right: max(8px, env(safe-area-inset-right));
+    max-width: none;
+    border-radius: 16px;
+    overflow-x: visible;
+  }
+
+  .operation-guide__text {
+    white-space: normal;
+  }
+
   .planet-info-panel {
-    top: max(8px, env(safe-area-inset-top));
+    top: calc(max(8px, env(safe-area-inset-top)) + 68px);
     right: max(8px, env(safe-area-inset-right));
     left: max(8px, env(safe-area-inset-left));
     gap: 8px;
@@ -593,14 +638,7 @@ canvas {
     right: max(8px, env(safe-area-inset-right));
     bottom: max(8px, env(safe-area-inset-bottom));
     left: max(8px, env(safe-area-inset-left));
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     width: auto;
     max-height: 40vh;
-    overflow: hidden;
-  }
-
-  .settings-menu__sections {
-    overflow-y: auto;
-    overscroll-behavior: contain;
   }
 }
